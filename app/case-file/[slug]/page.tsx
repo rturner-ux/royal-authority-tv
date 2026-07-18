@@ -231,7 +231,7 @@ export default async function CaseFileSlugPage({
                     </div>
 
                     {person.photo_url ? (
-                      <div className="relative mt-5 h-64 w-full overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03]">
+                      <div className="relative mt-5 aspect-[4/5] w-full overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03]">
                         <Image
                           src={person.photo_url}
                           alt={person.name}
