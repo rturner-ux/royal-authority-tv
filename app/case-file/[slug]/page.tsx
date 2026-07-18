@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import Navbar from "../../components/Navbar";
+import PersonQA from "../../components/PersonQA";
 import { getCaseBySlug } from "@/lib/cases";
 import { CATEGORY_LABELS, CLAIM_TYPE_LABELS, CLAIM_TYPE_CLASSES, PERSON_ROLE_LABELS, PERSON_ROLE_CLASSES } from "@/lib/labels";
 
@@ -231,13 +232,17 @@ export default async function CaseFileSlugPage({
                     </div>
 
                     {person.photo_url ? (
-                      <div className="relative mt-5 aspect-[4/5] w-full overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03]">
+                      <div
+                        className={`relative mt-5 w-full overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] ${
+                          person.photo_fit === "contain" ? "aspect-square p-8" : "aspect-[4/5]"
+                        }`}
+                      >
                         <Image
                           src={person.photo_url}
                           alt={person.name}
                           fill
                           unoptimized
-                          className="object-cover"
+                          className={person.photo_fit === "contain" ? "object-contain" : "object-cover"}
                         />
                       </div>
                     ) : (
@@ -265,14 +270,18 @@ export default async function CaseFileSlugPage({
                     </div>
                   </div>
 
-                  {person.summary && (
+                  {(person.summary || person.qa.length > 0) && (
                     <div className="rounded-[28px] border border-white/10 bg-black/30 p-6">
                       <div className="text-xs uppercase tracking-[0.26em] text-[#E8D19A]">
                         Investigative Relevance
                       </div>
-                      <p className="mt-5 text-sm leading-8 text-slate-300">
-                        {person.summary}
-                      </p>
+                      {person.summary && (
+                        <p className="mt-5 text-sm leading-8 text-slate-300">
+                          {person.summary}
+                        </p>
+                      )}
+
+                      <PersonQA qa={person.qa} />
                     </div>
                   )}
                 </div>

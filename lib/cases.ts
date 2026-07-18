@@ -1,6 +1,25 @@
 import 'server-only'
 import { supabase } from './supabase/server'
-import type { Incident, IncidentUpdate, IncidentPerson, IncidentTranscriptRow } from './types'
+import type { Incident, IncidentUpdate, IncidentPerson, IncidentTranscriptRow, InterviewQA } from './types'
+
+async function attachQA(db: ReturnType<typeof supabase>, people: IncidentPerson[]): Promise<IncidentPerson[]> {
+  if (people.length === 0) return people
+
+  const { data: qa } = await db
+    .from('interview_qa')
+    .select('*')
+    .in('person_id', people.map((p) => p.id))
+    .order('sequence', { ascending: true })
+
+  const byPerson = new Map<string, InterviewQA[]>()
+  for (const item of (qa ?? []) as InterviewQA[]) {
+    const list = byPerson.get(item.person_id) ?? []
+    list.push(item)
+    byPerson.set(item.person_id, list)
+  }
+
+  return people.map((person) => ({ ...person, qa: byPerson.get(person.id) ?? [] }))
+}
 
 export async function getFeaturedCases(): Promise<Incident[]> {
   const db = supabase()
@@ -65,7 +84,7 @@ export async function getCaseBySlug(slug: string): Promise<{
   return {
     incident: incident as Incident,
     updates: (updates ?? []) as IncidentUpdate[],
-    people: (people ?? []) as IncidentPerson[],
+    people: await attachQA(db, (people ?? []) as IncidentPerson[]),
     transcript: (transcript ?? []) as IncidentTranscriptRow[],
   }
 }

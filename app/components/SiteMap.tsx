@@ -4,8 +4,9 @@ import { useEffect, useState } from "react";
 import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
 import L from "leaflet";
 import Link from "next/link";
-import type { Incident } from "@/lib/types";
+import type { Incident, IncidentCategory } from "@/lib/types";
 import { CATEGORY_LABELS, CATEGORY_COLORS } from "@/lib/labels";
+import MapLegend from "./MapLegend";
 
 const DFW_CENTER: [number, number] = [32.85, -97.05];
 
@@ -60,6 +61,7 @@ function markerIcon(incident: Incident): L.DivIcon {
 
 export default function SiteMap() {
   const [incidents, setIncidents] = useState<Incident[]>([]);
+  const [hidden, setHidden] = useState<Set<IncidentCategory>>(new Set());
 
   useEffect(() => {
     fetch("/api/incidents", { cache: "no-store" })
@@ -68,6 +70,17 @@ export default function SiteMap() {
         if (d.success) setIncidents(d.incidents);
       });
   }, []);
+
+  const toggleCategory = (category: IncidentCategory) => {
+    setHidden((prev) => {
+      const next = new Set(prev);
+      if (next.has(category)) next.delete(category);
+      else next.add(category);
+      return next;
+    });
+  };
+
+  const visibleIncidents = incidents.filter((i) => !hidden.has(i.category));
 
   return (
     <div style={{ position: "relative", width: "100%", height: "100%" }}>
@@ -83,8 +96,9 @@ export default function SiteMap() {
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
           url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
         />
-        <ViewAllCasesButton incidents={incidents} />
-        {incidents.map((incident) => (
+        <ViewAllCasesButton incidents={visibleIncidents} />
+        <MapLegend hidden={hidden} onToggle={toggleCategory} />
+        {visibleIncidents.map((incident) => (
           <Marker key={incident.id} position={[incident.lat, incident.lng]} icon={markerIcon(incident)}>
             <Popup>
               <div style={{ minWidth: 200, fontSize: 13, color: "#0f172a" }}>

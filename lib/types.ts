@@ -6,6 +6,7 @@ export type IncidentCategory =
   | 'camo_alert'
   | 'missing_person'
   | 'drowning_report'
+  | 'death_investigation'
 
 export type IncidentStatus = 'active' | 'resolved' | 'cleared'
 export type ClaimType = 'confirmed_fact' | 'official_statement' | 'family_claim' | 'disputed_allegation' | 'unconfirmed_report'
@@ -60,6 +61,18 @@ export type IncidentPerson = {
   status: string | null
   summary: string | null
   photo_url: string | null
+  photo_fit: 'cover' | 'contain'
+  sequence: number
+  qa: InterviewQA[]
+}
+
+export type InterviewQA = {
+  id: string
+  person_id: string
+  question: string
+  answer: string
+  source_name: string
+  source_url: string | null
   sequence: number
 }
 
