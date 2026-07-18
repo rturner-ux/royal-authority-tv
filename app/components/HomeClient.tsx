@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { type ReactNode, useEffect, useRef, useState } from "react";
 import { motion, useInView } from "framer-motion";
@@ -164,7 +165,17 @@ export default function HomeClient({ cases, stats }: { cases: Incident[]; stats:
     <main className="relative min-h-screen overflow-hidden bg-[#020617] text-white">
       {/* Hero */}
       <section className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-[#020617] via-[#020617] to-black" />
+        <div className="absolute inset-0">
+          <Image
+            src="/hero-wallpaper.webp"
+            alt=""
+            fill
+            priority
+            className="object-cover opacity-[0.55]"
+          />
+        </div>
+        <div className="absolute inset-0 bg-gradient-to-br from-[#020617]/95 via-[#020617]/90 to-black/95" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#020617] via-transparent to-[#020617]/40" />
         <div className="absolute top-0 left-0 h-[500px] w-[500px] rounded-full bg-red-600/10 blur-[140px]" />
         <div className="absolute bottom-0 right-0 h-[500px] w-[500px] rounded-full bg-[#C9A24A]/10 blur-[140px]" />
         <div
