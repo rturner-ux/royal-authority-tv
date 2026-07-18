@@ -6,6 +6,7 @@ import { motion, useInView } from "framer-motion";
 import type { Incident } from "@/lib/types";
 import { CATEGORY_LABELS, CATEGORY_COLORS } from "@/lib/labels";
 import Navbar from "./Navbar";
+import FilmGrain from "./FilmGrain";
 
 const EASE = [0.16, 1, 0.3, 1] as [number, number, number, number];
 
@@ -174,16 +175,55 @@ export default function HomeClient({ cases, stats }: { cases: Incident[]; stats:
             backgroundSize: "64px 64px",
           }}
         />
+        <FilmGrain opacity={0.045} />
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-x-0 top-0 h-40"
+          style={{
+            background: "linear-gradient(to bottom, rgba(201,162,74,0.08), transparent)",
+            animation: "ra-scanline 7s linear infinite",
+            mixBlendMode: "screen",
+          }}
+        />
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 shadow-[inset_0_0_180px_60px_rgba(0,0,0,0.75)]"
+        />
 
         <div className="relative z-10 mx-auto max-w-6xl px-6 pt-6 lg:px-16">
           <Navbar rightButtonLabel="Case Files" rightButtonHref="/case-file" />
         </div>
 
         <div className="relative z-10 mx-auto max-w-6xl px-6 pb-20 pt-6 lg:px-16 lg:pb-28">
+          <div className="hidden select-none md:block">
+            <motion.div
+              initial={{ opacity: 0, rotate: -10, scale: 0.9 }}
+              animate={{ opacity: 1, rotate: -6, scale: 1 }}
+              transition={{ duration: 0.8, delay: 0.6, ease: EASE }}
+              className="absolute right-6 top-2 rounded-sm border-2 border-red-600/60 px-4 py-2 lg:right-16"
+            >
+              <div className="font-mono text-[10px] uppercase leading-tight tracking-[0.3em] text-red-500/80">
+                Case File
+                <br />
+                Active
+              </div>
+            </motion.div>
+          </div>
+
           <div className="mb-6 flex items-center gap-3">
-            <motion.span variants={lineDraw} initial="hidden" animate="show" custom={0.2} className="block h-px w-8 bg-[#C9A24A]" />
-            <motion.span initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.6, delay: 0.4 }} className="text-xs font-black uppercase tracking-[0.3em] text-[#E8D19A]">
-              Verified-Source Investigative Reporting
+            <motion.span
+              initial={{ opacity: 0.4 }}
+              animate={{ opacity: [0.4, 1, 0.4] }}
+              transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}
+              className="block h-2 w-2 flex-shrink-0 rounded-full bg-red-600"
+            />
+            <motion.span
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.6, delay: 0.4 }}
+              className="font-mono text-xs uppercase tracking-[0.3em] text-[#E8D19A]"
+            >
+              Active Investigative Coverage
             </motion.span>
           </div>
 
@@ -192,12 +232,20 @@ export default function HomeClient({ cases, stats }: { cases: Incident[]; stats:
               initial={{ opacity: 0, y: 50 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 1, delay: 0.15, ease: EASE }}
-              className="max-w-3xl text-5xl font-black leading-[1.05] tracking-tight md:text-7xl"
+              className="max-w-3xl font-serif text-6xl font-medium leading-[1.05] tracking-tight md:text-8xl"
             >
-              ROYAL AUTHORITY
-              <span className="block text-red-500">TV</span>
+              Royal Authority
+              <span className="block italic text-red-500">TV</span>
             </motion.h1>
           </div>
+
+          <motion.div
+            variants={lineDraw}
+            initial="hidden"
+            animate="show"
+            custom={0.5}
+            className="mt-6 h-px w-full max-w-md bg-gradient-to-r from-[#C9A24A] to-transparent"
+          />
 
           <motion.p
             initial={{ opacity: 0, y: 20 }}
@@ -209,6 +257,19 @@ export default function HomeClient({ cases, stats }: { cases: Incident[]; stats:
             Sourced facts, labeled by confidence, tracked in real time, no speculation dressed up
             as reporting.
           </motion.p>
+
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.8, delay: 0.6 }}
+            className="mt-5 flex flex-wrap items-center gap-x-4 gap-y-1 font-mono text-[11px] uppercase tracking-[0.2em] text-white/35"
+          >
+            <span>Status: Monitoring</span>
+            <span className="text-white/15">/</span>
+            <span>Sources: Verified</span>
+            <span className="text-white/15">/</span>
+            <span>Speculation: None</span>
+          </motion.div>
 
           <motion.div
             variants={staggerContainer(0.1, 0.65)}
@@ -239,9 +300,12 @@ export default function HomeClient({ cases, stats }: { cases: Incident[]; stats:
             animate="show"
             className="mt-16 grid grid-cols-1 gap-4 sm:grid-cols-3"
           >
-            {statRow.map((s) => (
+            {statRow.map((s, i) => (
               <motion.div key={s.label} variants={staggerItem} className="rounded-2xl border border-white/10 bg-white/[0.04] p-6 backdrop-blur-sm">
-                <div className="text-4xl font-black text-[#E8D19A]">
+                <div className="font-mono text-[10px] uppercase tracking-[0.25em] text-white/25">
+                  Ref-{String(i + 1).padStart(2, "0")}
+                </div>
+                <div className="mt-1 text-4xl font-black text-[#E8D19A]">
                   <CountUp target={s.value} />
                   <span className="text-red-500">+</span>
                 </div>
@@ -260,12 +324,13 @@ export default function HomeClient({ cases, stats }: { cases: Incident[]; stats:
             initial="hidden"
             whileInView="show"
             viewport={{ once: true }}
-            className="flex flex-wrap items-center justify-center gap-x-10 gap-y-4 text-xs font-black uppercase tracking-[0.2em] text-white/40 md:text-sm"
+            className="flex flex-wrap items-center justify-center gap-x-8 gap-y-4 font-mono text-xs uppercase tracking-[0.15em] text-white/40 md:text-sm"
           >
             {standards.map((s) => (
-              <motion.span key={s} variants={staggerItem} className="flex items-center gap-2">
-                <span className="h-1 w-1 rounded-full bg-[#C9A24A]" />
+              <motion.span key={s} variants={staggerItem} className="flex items-center gap-1.5">
+                <span className="text-[#C9A24A]/60">[</span>
                 {s}
+                <span className="text-[#C9A24A]/60">]</span>
               </motion.span>
             ))}
           </motion.div>
@@ -338,6 +403,9 @@ export default function HomeClient({ cases, stats }: { cases: Incident[]; stats:
                       style={{ backgroundColor: CATEGORY_COLORS[c.category] }}
                     >
                       {CATEGORY_LABELS[c.category]}
+                    </span>
+                    <span className="absolute right-3 top-3 rounded bg-black/60 px-2 py-1 font-mono text-[10px] tracking-[0.1em] text-white/60 backdrop-blur-sm">
+                      №{c.id.slice(0, 6).toUpperCase()}
                     </span>
                   </div>
                   <div className="flex flex-1 flex-col p-5">
