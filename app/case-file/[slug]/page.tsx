@@ -58,20 +58,18 @@ export default async function CaseFileSlugPage({
 
         {/* HERO */}
         <section className="mb-12 grid items-center gap-8 md:grid-cols-2">
-          <div className="relative flex items-center justify-center">
-            <div className="absolute inset-0 rounded-2xl bg-red-500/10 blur-3xl" />
+          <div className="relative h-[420px] w-full overflow-hidden rounded-2xl border border-white/10 md:h-[500px]">
             {incident.image_url ? (
               <Image
                 src={incident.image_url}
                 alt={incident.title}
-                width={600}
-                height={700}
+                fill
                 unoptimized
-                className="relative max-h-[500px] w-auto object-contain rounded-2xl"
+                className="object-cover"
                 priority
               />
             ) : (
-              <div className="relative flex h-[400px] w-full max-w-[420px] items-center justify-center rounded-2xl border border-white/10 bg-white/[0.02] text-6xl text-white/10">
+              <div className="flex h-full w-full items-center justify-center bg-white/[0.02] text-6xl text-white/10">
                 ?
               </div>
             )}
@@ -232,20 +230,19 @@ export default async function CaseFileSlugPage({
                       Profile
                     </div>
 
-                    <div className="relative mt-5 flex min-h-[220px] items-center justify-center overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+                    <div className="relative mt-5 h-64 w-full overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03]">
                       {person.photo_url ? (
                         <Image
                           src={person.photo_url}
                           alt={person.name}
-                          width={220}
-                          height={280}
+                          fill
                           unoptimized
-                          className="object-contain rounded-xl"
+                          className="object-cover"
                         />
                       ) : (
-                        <span className="text-4xl text-white/10">
+                        <div className="flex h-full items-center justify-center text-4xl text-white/10">
                           {person.name.charAt(0)}
-                        </span>
+                        </div>
                       )}
                     </div>
 

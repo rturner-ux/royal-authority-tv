@@ -33,19 +33,17 @@ export default async function CaseFilePage() {
               href={`/case-file/${c.slug}`}
               className="group overflow-hidden rounded-2xl border border-white/10 bg-zinc-900/80 transition hover:scale-[1.02] hover:border-[#C9A24A]/30"
             >
-              <div className="relative flex h-[280px] items-center justify-center overflow-hidden border-b border-white/10 bg-gradient-to-b from-white/[0.02] to-white/[0.01] p-6">
-                <div className="absolute inset-0 rounded-t-2xl bg-white/5 blur-2xl" />
+              <div className="relative h-[280px] overflow-hidden border-b border-white/10 bg-gradient-to-b from-white/[0.02] to-white/[0.01]">
                 {c.image_url ? (
                   <Image
                     src={c.image_url}
                     alt={c.title}
-                    width={340}
-                    height={420}
+                    fill
                     unoptimized
-                    className="relative max-h-full w-auto object-contain transition duration-300 group-hover:scale-[1.02]"
+                    className="object-cover transition duration-300 group-hover:scale-105"
                   />
                 ) : (
-                  <span className="relative text-6xl text-white/10">?</span>
+                  <div className="flex h-full items-center justify-center text-6xl text-white/10">?</div>
                 )}
               </div>
 
