@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import Navbar from "../../components/Navbar";
 import PersonQA from "../../components/PersonQA";
+import ShareButton from "../../components/ShareButton";
 import { getCaseBySlug } from "@/lib/cases";
 import { CATEGORY_LABELS, CLAIM_TYPE_LABELS, CLAIM_TYPE_CLASSES, PERSON_ROLE_LABELS, PERSON_ROLE_CLASSES } from "@/lib/labels";
 
@@ -116,6 +117,8 @@ export default async function CaseFileSlugPage({
               >
                 Open Discussion
               </Link>
+
+              <ShareButton />
             </div>
           </div>
         </section>
