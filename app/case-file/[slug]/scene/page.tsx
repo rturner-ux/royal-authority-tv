@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import Navbar from "../../../components/Navbar";
 import CaseMapClient from "../../../components/CaseMapClient";
 import AshleeSceneReconstruction from "../../../components/AshleeSceneReconstruction";
+import NolanWellsGpsRouteClient from "../../../components/NolanWellsGpsRouteClient";
 import { getCaseBySlug } from "@/lib/cases";
 
 export default async function SceneAnalysisPage({
@@ -39,6 +40,8 @@ export default async function SceneAnalysisPage({
 
         {slug === "ashlee-robinson" ? (
           <AshleeSceneReconstruction />
+        ) : slug === "nolan-wells" ? (
+          <NolanWellsGpsRouteClient />
         ) : (
           <section className="mb-10 overflow-hidden rounded-[32px] border border-white/10 bg-black/30 backdrop-blur-sm">
             <div className="p-6 pb-0 text-xs uppercase tracking-[0.26em] text-[#E8D19A]">
