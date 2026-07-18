@@ -10,6 +10,16 @@ export const CATEGORY_LABELS: Record<IncidentCategory, string> = {
   drowning_report: 'Drowning Report',
 }
 
+export const CATEGORY_COLORS: Record<IncidentCategory, string> = {
+  amber_alert: '#F59E0B',
+  silver_alert: '#9CA3AF',
+  blue_alert: '#2563EB',
+  endangered_missing_person: '#F97316',
+  camo_alert: '#16A34A',
+  missing_person: '#7C3AED',
+  drowning_report: '#0D9488',
+}
+
 export const CLAIM_TYPE_LABELS: Record<ClaimType, string> = {
   confirmed_fact: 'Confirmed',
   official_statement: 'Official Statement',

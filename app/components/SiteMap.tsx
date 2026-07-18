@@ -5,7 +5,7 @@ import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
 import L from "leaflet";
 import Link from "next/link";
 import type { Incident } from "@/lib/types";
-import { CATEGORY_LABELS } from "@/lib/labels";
+import { CATEGORY_LABELS, CATEGORY_COLORS } from "@/lib/labels";
 
 const DFW_CENTER: [number, number] = [32.85, -97.05];
 
@@ -39,16 +39,6 @@ function ViewAllCasesButton({ incidents }: { incidents: Incident[] }) {
     </button>
   );
 }
-
-const CATEGORY_COLORS: Record<string, string> = {
-  amber_alert: "#F59E0B",
-  silver_alert: "#9CA3AF",
-  blue_alert: "#2563EB",
-  endangered_missing_person: "#F97316",
-  camo_alert: "#16A34A",
-  missing_person: "#7C3AED",
-  drowning_report: "#0D9488",
-};
 
 function markerIcon(incident: Incident): L.DivIcon {
   const color = CATEGORY_COLORS[incident.category] || "#94a3b8";

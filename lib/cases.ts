@@ -16,6 +16,25 @@ export async function getFeaturedCases(): Promise<Incident[]> {
   return (data ?? []) as Incident[]
 }
 
+export async function getSiteStats(): Promise<{
+  totalCases: number
+  featuredCases: number
+  transcriptRows: number
+}> {
+  const db = supabase()
+  const [totalCases, featuredCases, transcriptRows] = await Promise.all([
+    db.from('incidents').select('*', { count: 'exact', head: true }).eq('is_hidden', false),
+    db.from('incidents').select('*', { count: 'exact', head: true }).eq('is_hidden', false).eq('is_featured', true),
+    db.from('incident_transcripts').select('*', { count: 'exact', head: true }),
+  ])
+
+  return {
+    totalCases: totalCases.count ?? 0,
+    featuredCases: featuredCases.count ?? 0,
+    transcriptRows: transcriptRows.count ?? 0,
+  }
+}
+
 export async function getCaseBySlug(slug: string): Promise<{
   incident: Incident
   updates: IncidentUpdate[]
