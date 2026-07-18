@@ -1,8 +1,12 @@
 import Link from "next/link";
 import Image from "next/image";
 import Navbar from "../components/Navbar";
+import { getFeaturedCases } from "@/lib/cases";
+import { CATEGORY_LABELS } from "@/lib/labels";
 
-export default function CaseFilePage() {
+export default async function CaseFilePage() {
+  const cases = await getFeaturedCases();
+
   return (
     <main className="relative min-h-screen bg-[#05070b] text-white overflow-hidden">
       <div className="absolute inset-0 bg-gradient-to-br from-[#05070b] via-[#08111d] to-black" />
@@ -23,63 +27,56 @@ export default function CaseFilePage() {
         </div>
 
         <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-          <Link
-            href="/case-file/ashlee"
-            className="group overflow-hidden rounded-2xl border border-white/10 bg-zinc-900/80 transition hover:scale-[1.02] hover:border-[#C9A24A]/30"
-          >
-            <div className="relative flex h-[340px] items-center justify-center overflow-hidden border-b border-white/10 bg-gradient-to-b from-white/[0.02] to-white/[0.01] p-6">
-              <div className="absolute inset-0 rounded-t-2xl bg-white/5 blur-2xl" />
-
-              <Image
-                src="/ashlee-case-v5.png"
-                alt="Ashlee Case"
-                width={420}
-                height={520}
-                className="relative max-h-full w-auto object-contain transition duration-300 group-hover:scale-[1.02]"
-                priority
-              />
-            </div>
-
-            <div className="space-y-3 p-5">
-              <span className="text-xs tracking-[0.2em] text-red-400">
-                FEATURED CASE
-              </span>
-
-              <h3 className="text-xl font-bold text-white">
-                Ashlee Robinson Case
-              </h3>
-
-              <p className="text-sm leading-6 text-gray-400">
-                Zanzibar incident under investigation. Official statement,
-                timeline review, and transcript access.
-              </p>
-
-              <div className="pt-2">
-                <span className="text-sm font-semibold text-[#C9A24A] transition group-hover:text-white">
-                  Open Case →
-                </span>
+          {cases.map((c) => (
+            <Link
+              key={c.id}
+              href={`/case-file/${c.slug}`}
+              className="group overflow-hidden rounded-2xl border border-white/10 bg-zinc-900/80 transition hover:scale-[1.02] hover:border-[#C9A24A]/30"
+            >
+              <div className="relative flex h-[280px] items-center justify-center overflow-hidden border-b border-white/10 bg-gradient-to-b from-white/[0.02] to-white/[0.01] p-6">
+                <div className="absolute inset-0 rounded-t-2xl bg-white/5 blur-2xl" />
+                {c.image_url ? (
+                  <Image
+                    src={c.image_url}
+                    alt={c.title}
+                    width={340}
+                    height={420}
+                    unoptimized
+                    className="relative max-h-full w-auto object-contain transition duration-300 group-hover:scale-[1.02]"
+                  />
+                ) : (
+                  <span className="relative text-6xl text-white/10">?</span>
+                )}
               </div>
-            </div>
-          </Link>
 
-          <div className="flex min-h-[470px] items-center justify-center rounded-2xl border border-dashed border-white/10 bg-zinc-800/30 text-center text-gray-500">
+              <div className="space-y-3 p-5">
+                <span className="text-xs tracking-[0.2em] text-red-400">
+                  FEATURED CASE
+                </span>
+
+                <h3 className="text-xl font-bold text-white">{c.title}</h3>
+
+                <p className="text-sm leading-6 text-gray-400">
+                  {CATEGORY_LABELS[c.category]}
+                  {c.location_label ? ` · ${c.location_label}` : ""}
+                </p>
+
+                <div className="pt-2">
+                  <span className="text-sm font-semibold text-[#C9A24A] transition group-hover:text-white">
+                    Open Case →
+                  </span>
+                </div>
+              </div>
+            </Link>
+          ))}
+
+          <div className="flex min-h-[420px] items-center justify-center rounded-2xl border border-dashed border-white/10 bg-zinc-800/30 text-center text-gray-500">
             <div className="px-6">
               <div className="text-sm uppercase tracking-[0.25em] text-gray-500">
                 Coming Soon
               </div>
               <div className="mt-3 text-lg font-semibold text-gray-400">
                 More cases will appear here
-              </div>
-            </div>
-          </div>
-
-          <div className="flex min-h-[470px] items-center justify-center rounded-2xl border border-dashed border-white/10 bg-zinc-800/30 text-center text-gray-500">
-            <div className="px-6">
-              <div className="text-sm uppercase tracking-[0.25em] text-gray-500">
-                Archive Expansion
-              </div>
-              <div className="mt-3 text-lg font-semibold text-gray-400">
-                Additional investigations coming soon
               </div>
             </div>
           </div>

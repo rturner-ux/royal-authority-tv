@@ -1,22 +1,20 @@
 "use client";
 
+import { use, useState } from "react";
 import Link from "next/link";
 import Navbar from "../../../components/Navbar";
-import { useState } from "react";
 
-export default function AshleeMemberRoomPage() {
-  const [form, setForm] = useState({
-    name: "",
-    email: "",
-    topic: "",
-    message: "",
-  });
+export default function MemberRoomPage({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}) {
+  const { slug } = use(params);
 
+  const [form, setForm] = useState({ name: "", email: "", topic: "", message: "" });
   const [submitted, setSubmitted] = useState(false);
 
-  function handleChange(
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) {
+  function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) {
     setForm({ ...form, [e.target.name]: e.target.value });
   }
 
@@ -32,17 +30,14 @@ export default function AshleeMemberRoomPage() {
       <div className="absolute right-0 top-40 h-[450px] w-[450px] rounded-full bg-[#C9A24A]/10 blur-[140px]" />
 
       <div className="relative z-10 mx-auto max-w-7xl px-6 py-6 lg:px-10">
-        <Navbar
-          rightButtonLabel="Back to Case"
-          rightButtonHref="/case-file/ashlee"
-        />
+        <Navbar rightButtonLabel="Back to Case" rightButtonHref={`/case-file/${slug}`} />
 
         <div className="mb-10">
           <div className="text-xs uppercase tracking-[0.34em] text-[#E8D19A]">
             Subscriber Access
           </div>
           <h1 className="mt-3 font-serif text-4xl text-white md:text-5xl">
-            Ashlee Case Member Room
+            Case Member Room
           </h1>
           <p className="mt-4 max-w-3xl text-sm leading-8 text-slate-300 md:text-base">
             Private space for subscribers to submit questions, request deeper
@@ -57,13 +52,8 @@ export default function AshleeMemberRoomPage() {
             </div>
 
             <div className="mt-5 space-y-4 text-sm leading-8 text-slate-300">
-              <p>
-                This room is designed for premium subscribers who want more than
-                the public case page.
-              </p>
-              <p>
-                Use this space to submit:
-              </p>
+              <p>This room is designed for premium subscribers who want more than the public case page.</p>
+              <p>Use this space to submit:</p>
 
               <div className="grid gap-3">
                 <div className="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3">
@@ -82,10 +72,10 @@ export default function AshleeMemberRoomPage() {
 
               <div className="pt-3">
                 <Link
-                  href="/transcript/ashlee"
+                  href={`/case-file/${slug}`}
                   className="inline-flex rounded-2xl border border-white/15 bg-white/5 px-4 py-2 text-sm font-semibold text-white transition hover:bg-white/10"
                 >
-                  Open Ashlee Transcript
+                  Back to Case File
                 </Link>
               </div>
             </div>
@@ -155,59 +145,16 @@ export default function AshleeMemberRoomPage() {
                   >
                     Submit Request
                   </button>
-
-                  <button
-                    type="button"
-                    className="rounded-2xl border border-white/15 bg-white/5 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/10"
-                  >
-                    Save for Later
-                  </button>
                 </div>
               </form>
             ) : (
               <div className="rounded-2xl border border-green-500/20 bg-green-500/10 p-5">
-                <div className="text-sm font-semibold text-green-300">
-                  Request submitted
-                </div>
+                <div className="text-sm font-semibold text-green-300">Request submitted</div>
                 <p className="mt-2 text-sm leading-7 text-slate-300">
-                  Your subscriber question has been recorded for review. This is
-                  the perfect place to connect your future database and admin
-                  dashboard.
+                  Your subscriber question has been recorded for review.
                 </p>
               </div>
             )}
-          </div>
-        </section>
-
-        <section className="mt-10 grid gap-6 md:grid-cols-3">
-          <div className="rounded-[28px] border border-white/10 bg-black/30 p-5 backdrop-blur-sm">
-            <div className="text-xs uppercase tracking-[0.22em] text-red-400">
-              Private Notes
-            </div>
-            <p className="mt-3 text-sm leading-7 text-slate-300">
-              Space for subscriber-only commentary, deeper observations, and
-              behind-the-scenes analysis.
-            </p>
-          </div>
-
-          <div className="rounded-[28px] border border-white/10 bg-black/30 p-5 backdrop-blur-sm">
-            <div className="text-xs uppercase tracking-[0.22em] text-red-400">
-              Case Requests
-            </div>
-            <p className="mt-3 text-sm leading-7 text-slate-300">
-              Collect audience questions and decide which ones become public
-              breakdowns or live discussions.
-            </p>
-          </div>
-
-          <div className="rounded-[28px] border border-white/10 bg-black/30 p-5 backdrop-blur-sm">
-            <div className="text-xs uppercase tracking-[0.22em] text-red-400">
-              Premium Access
-            </div>
-            <p className="mt-3 text-sm leading-7 text-slate-300">
-              This page is ideal for future gated content once subscription
-              logic is connected.
-            </p>
           </div>
         </section>
       </div>

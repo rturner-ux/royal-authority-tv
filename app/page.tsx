@@ -56,6 +56,13 @@ export default function Home() {
                 >
                   Read Transcript
                 </Link>
+
+                <Link
+                  href="/map"
+                  className="rounded-xl border border-[#C9A24A]/40 px-6 py-3 font-semibold text-[#E8D19A] transition hover:bg-[#C9A24A]/10"
+                >
+                  Live Map
+                </Link>
               </div>
             </div>
           </section>
