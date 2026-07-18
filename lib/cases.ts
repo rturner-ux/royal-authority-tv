@@ -1,24 +1,35 @@
 import 'server-only'
 import { supabase } from './supabase/server'
-import type { Incident, IncidentUpdate, IncidentPerson, IncidentTranscriptRow, InterviewQA } from './types'
+import type { Incident, IncidentUpdate, IncidentPerson, IncidentTranscriptRow, InterviewQA, PersonConnectedCase } from './types'
 
-async function attachQA(db: ReturnType<typeof supabase>, people: IncidentPerson[]): Promise<IncidentPerson[]> {
+async function attachQAAndCases(db: ReturnType<typeof supabase>, people: IncidentPerson[]): Promise<IncidentPerson[]> {
   if (people.length === 0) return people
 
-  const { data: qa } = await db
-    .from('interview_qa')
-    .select('*')
-    .in('person_id', people.map((p) => p.id))
-    .order('sequence', { ascending: true })
+  const personIds = people.map((p) => p.id)
+  const [{ data: qa }, { data: connectedCases }] = await Promise.all([
+    db.from('interview_qa').select('*').in('person_id', personIds).order('sequence', { ascending: true }),
+    db.from('person_connected_cases').select('*').in('person_id', personIds).order('sequence', { ascending: true }),
+  ])
 
-  const byPerson = new Map<string, InterviewQA[]>()
+  const qaByPerson = new Map<string, InterviewQA[]>()
   for (const item of (qa ?? []) as InterviewQA[]) {
-    const list = byPerson.get(item.person_id) ?? []
+    const list = qaByPerson.get(item.person_id) ?? []
     list.push(item)
-    byPerson.set(item.person_id, list)
+    qaByPerson.set(item.person_id, list)
   }
 
-  return people.map((person) => ({ ...person, qa: byPerson.get(person.id) ?? [] }))
+  const casesByPerson = new Map<string, PersonConnectedCase[]>()
+  for (const item of (connectedCases ?? []) as PersonConnectedCase[]) {
+    const list = casesByPerson.get(item.person_id) ?? []
+    list.push(item)
+    casesByPerson.set(item.person_id, list)
+  }
+
+  return people.map((person) => ({
+    ...person,
+    qa: qaByPerson.get(person.id) ?? [],
+    connectedCases: casesByPerson.get(person.id) ?? [],
+  }))
 }
 
 export async function getFeaturedCases(): Promise<Incident[]> {
@@ -84,7 +95,7 @@ export async function getCaseBySlug(slug: string): Promise<{
   return {
     incident: incident as Incident,
     updates: (updates ?? []) as IncidentUpdate[],
-    people: await attachQA(db, (people ?? []) as IncidentPerson[]),
+    people: await attachQAAndCases(db, (people ?? []) as IncidentPerson[]),
     transcript: (transcript ?? []) as IncidentTranscriptRow[],
   }
 }

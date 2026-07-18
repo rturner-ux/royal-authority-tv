@@ -37,6 +37,7 @@ export type Incident = {
   image_url: string | null
   scene_description: string | null
   scene_image_url: string | null
+  location_history: string | null
   published_at: string
   created_at: string
   updated_at: string
@@ -50,6 +51,8 @@ export type IncidentUpdate = {
   claim_type: ClaimType
   event_date: string | null
   created_at: string
+  contradicts_update_id: string | null
+  correction_note: string | null
 }
 
 export type IncidentPerson = {
@@ -60,10 +63,22 @@ export type IncidentPerson = {
   age: number | null
   status: string | null
   summary: string | null
+  bio: string | null
   photo_url: string | null
   photo_fit: 'cover' | 'contain'
   sequence: number
   qa: InterviewQA[]
+  connectedCases: PersonConnectedCase[]
+}
+
+export type PersonConnectedCase = {
+  id: string
+  person_id: string
+  case_title: string
+  case_summary: string
+  case_year: number | null
+  source_url: string | null
+  sequence: number
 }
 
 export type InterviewQA = {

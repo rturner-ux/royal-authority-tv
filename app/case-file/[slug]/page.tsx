@@ -3,7 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import Navbar from "../../components/Navbar";
-import PersonQA from "../../components/PersonQA";
+import PersonProfileTabs from "../../components/PersonProfileTabs";
 import ShareButton from "../../components/ShareButton";
 import { getCaseBySlug } from "@/lib/cases";
 import { CATEGORY_LABELS, CLAIM_TYPE_LABELS, CLAIM_TYPE_CLASSES, PERSON_ROLE_LABELS, PERSON_ROLE_CLASSES } from "@/lib/labels";
@@ -201,6 +201,19 @@ export default async function CaseFileSlugPage({
           </section>
         )}
 
+        {/* LOCATION HISTORY */}
+        {incident.location_history && (
+          <section className="mt-10 rounded-[32px] border border-white/10 bg-black/30 p-6 backdrop-blur-sm">
+            <div className="text-xs uppercase tracking-[0.26em] text-[#E8D19A]">
+              Location History
+            </div>
+
+            <p className="mt-4 max-w-3xl whitespace-pre-line text-sm leading-8 text-slate-300">
+              {incident.location_history}
+            </p>
+          </section>
+        )}
+
         {/* PEOPLE */}
         {people.length > 0 && (
           <section className="mt-10 space-y-6">
@@ -273,20 +286,7 @@ export default async function CaseFileSlugPage({
                     </div>
                   </div>
 
-                  {(person.summary || person.qa.length > 0) && (
-                    <div className="rounded-[28px] border border-white/10 bg-black/30 p-6">
-                      <div className="text-xs uppercase tracking-[0.26em] text-[#E8D19A]">
-                        Investigative Relevance
-                      </div>
-                      {person.summary && (
-                        <p className="mt-5 text-sm leading-8 text-slate-300">
-                          {person.summary}
-                        </p>
-                      )}
-
-                      <PersonQA qa={person.qa} />
-                    </div>
-                  )}
+                  <PersonProfileTabs person={person} />
                 </div>
               </div>
             ))}
@@ -301,35 +301,54 @@ export default async function CaseFileSlugPage({
             </div>
 
             <div className="mt-6 space-y-5">
-              {updates.map((u) => (
-                <div key={u.id} className="border-l border-[#C9A24A]/30 pl-4">
-                  <div className="mb-1 flex items-center gap-2">
-                    <span
-                      className={`rounded-full border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide ${CLAIM_TYPE_CLASSES[u.claim_type]}`}
-                    >
-                      {CLAIM_TYPE_LABELS[u.claim_type]}
-                    </span>
-                    <span className="text-xs text-slate-500">
-                      {u.event_date
-                        ? new Date(u.event_date + "T12:00:00").toLocaleDateString("en-US", { dateStyle: "medium" })
-                        : new Date(u.created_at).toLocaleDateString("en-US", { dateStyle: "medium" })}
-                    </span>
+              {updates.map((u) => {
+                const contradicted = u.contradicts_update_id
+                  ? updates.find((x) => x.id === u.contradicts_update_id)
+                  : null;
+                return (
+                  <div
+                    key={u.id}
+                    className={`pl-4 ${contradicted ? "border-l-2 border-amber-500/50" : "border-l border-[#C9A24A]/30"}`}
+                  >
+                    {contradicted && (
+                      <div className="mb-2 inline-flex items-center gap-1.5 rounded-full border border-amber-500/40 bg-amber-500/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-amber-300">
+                        ⚠ Statement Corrected
+                      </div>
+                    )}
+                    <div className="mb-1 flex items-center gap-2">
+                      <span
+                        className={`rounded-full border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide ${CLAIM_TYPE_CLASSES[u.claim_type]}`}
+                      >
+                        {CLAIM_TYPE_LABELS[u.claim_type]}
+                      </span>
+                      <span className="text-xs text-slate-500">
+                        {u.event_date
+                          ? new Date(u.event_date + "T12:00:00").toLocaleDateString("en-US", { dateStyle: "medium" })
+                          : new Date(u.created_at).toLocaleDateString("en-US", { dateStyle: "medium" })}
+                      </span>
+                    </div>
+                    <div className="text-sm leading-7 text-slate-400">
+                      {u.body}
+                    </div>
+                    {contradicted && (
+                      <div className="mt-2 rounded-xl border border-amber-500/20 bg-amber-500/5 p-3 text-xs leading-6 text-amber-200/80">
+                        <span className="font-semibold text-amber-300">Originally stated:</span> {contradicted.body}
+                        {u.correction_note && <div className="mt-1.5 text-amber-200/70">{u.correction_note}</div>}
+                      </div>
+                    )}
+                    {u.source_url && (
+                      <a
+                        href={u.source_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="mt-1 inline-block text-xs text-[#67e8f9]"
+                      >
+                        Source
+                      </a>
+                    )}
                   </div>
-                  <div className="text-sm leading-7 text-slate-400">
-                    {u.body}
-                  </div>
-                  {u.source_url && (
-                    <a
-                      href={u.source_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="mt-1 inline-block text-xs text-[#67e8f9]"
-                    >
-                      Source
-                    </a>
-                  )}
-                </div>
-              ))}
+                );
+              })}
               {updates.length === 0 && (
                 <p className="text-sm text-slate-500">No case facts logged yet.</p>
               )}
