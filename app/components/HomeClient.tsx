@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { type ReactNode, useEffect, useRef, useState } from "react";
-import { motion, useInView } from "framer-motion";
+import { AnimatePresence, motion, useInView } from "framer-motion";
 import type { Incident } from "@/lib/types";
 import { CATEGORY_LABELS, CATEGORY_COLORS } from "@/lib/labels";
 import Navbar from "./Navbar";
@@ -15,14 +15,6 @@ const fadeUp = {
   hidden: { opacity: 0, y: 32 },
   show: (delay = 0) => ({ opacity: 1, y: 0, transition: { duration: 0.9, delay, ease: EASE } }),
 };
-const fadeLeft = {
-  hidden: { opacity: 0, x: -28 },
-  show: (delay = 0) => ({ opacity: 1, x: 0, transition: { duration: 0.9, delay, ease: EASE } }),
-};
-const fadeRight = {
-  hidden: { opacity: 0, x: 28 },
-  show: (delay = 0) => ({ opacity: 1, x: 0, transition: { duration: 0.9, delay, ease: EASE } }),
-};
 const staggerContainer = (stagger = 0.09, delayChildren = 0) => ({
   hidden: {},
   show: { transition: { staggerChildren: stagger, delayChildren } },
@@ -30,10 +22,6 @@ const staggerContainer = (stagger = 0.09, delayChildren = 0) => ({
 const staggerItem = {
   hidden: { opacity: 0, y: 20 },
   show: { opacity: 1, y: 0, transition: { duration: 0.7, ease: EASE } },
-};
-const lineDraw = {
-  hidden: { scaleX: 0, originX: 0 },
-  show: (delay = 0) => ({ scaleX: 1, transition: { duration: 0.6, delay, ease: EASE } }),
 };
 
 function CountUp({ target }: { target: number }) {
@@ -59,28 +47,17 @@ function CountUp({ target }: { target: number }) {
   return <span ref={ref}>{display.toLocaleString()}</span>;
 }
 
-function Reveal({
-  children,
-  className,
-  delay = 0,
-  direction = "up",
-}: {
-  children: ReactNode;
-  className?: string;
-  delay?: number;
-  direction?: "up" | "left" | "right";
-}) {
+function Reveal({ children, className, delay = 0 }: { children: ReactNode; className?: string; delay?: number }) {
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: "-60px" });
-  const variant = direction === "left" ? fadeLeft : direction === "right" ? fadeRight : fadeUp;
   return (
-    <motion.div ref={ref} variants={variant} initial="hidden" animate={inView ? "show" : "hidden"} custom={delay} className={className}>
+    <motion.div ref={ref} variants={fadeUp} initial="hidden" animate={inView ? "show" : "hidden"} custom={delay} className={className}>
       {children}
     </motion.div>
   );
 }
 
-type PathIcon = "files" | "transcript" | "map";
+type PathIcon = "files" | "transcript" | "map" | "shield";
 
 function PathIconGlyph({ icon }: { icon: PathIcon }) {
   const paths: Record<PathIcon, ReactNode> = {
@@ -106,6 +83,12 @@ function PathIconGlyph({ icon }: { icon: PathIcon }) {
         <path d="M15 7v12" />
       </>
     ),
+    shield: (
+      <>
+        <path d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6z" />
+        <path d="m9 12 2 2 4-4" />
+      </>
+    ),
   };
 
   return (
@@ -117,40 +100,144 @@ function PathIconGlyph({ icon }: { icon: PathIcon }) {
   );
 }
 
-const paths = [
+const reasons = [
   {
-    icon: "files" as PathIcon,
-    label: "Case Files",
-    title: "Investigative Case Files",
-    text: "Every case is broken down into a timeline of sourced facts, each labeled by claim type, confirmed fact, official statement, family claim, or disputed allegation, so you always know how solid the ground is.",
-    href: "/case-file",
-    cta: "Browse Case Files",
+    icon: "shield" as PathIcon,
+    title: "Verified Sourcing",
+    text: "Every fact is labeled by claim type, confirmed fact, official statement, family claim, or disputed allegation, so you always know how solid the ground is.",
   },
   {
-    icon: "transcript" as PathIcon,
-    label: "Transcripts",
-    title: "Full Source Transcripts",
-    text: "Original-language transcripts of press conferences and official statements, translated side-by-side, archived in full rather than cut down to a soundbite.",
-    href: "/transcript",
-    cta: "Read Transcripts",
+    icon: "files" as PathIcon,
+    title: "Investigative Case Files",
+    text: "Full timelines, sourced facts, and profiles of everyone involved in each case, built for real investigative depth.",
   },
   {
     icon: "map" as PathIcon,
-    label: "Live Map",
     title: "Real-Time Case Map",
-    text: "Every active case plotted geographically and updated as new alerts and reports come in, from official state alert systems to verified news sources.",
-    href: "/map",
-    cta: "Open Live Map",
+    text: "Every active case plotted geographically and updated as new alerts and reports come in.",
+  },
+  {
+    icon: "transcript" as PathIcon,
+    title: "Full Source Transcripts",
+    text: "Original-language transcripts of press conferences and official statements, archived in full.",
   },
 ];
 
-const standards = [
-  "Verified Sourcing",
-  "Claim-Type Labeling",
-  "Multi-Language Transcripts",
-  "Real-Time Case Map",
-  "No Speculation",
+const faqs = [
+  {
+    q: "What is Royal Authority TV?",
+    a: "A documentary-style investigative outlet covering missing-persons cases and high-profile investigations, built around verified sourcing rather than speculation.",
+  },
+  {
+    q: "How do you verify what's on the site?",
+    a: "Every fact in a case's Case Log is labeled by claim type, confirmed fact, official statement, family claim, disputed allegation, or unconfirmed report, and linked to its original source.",
+  },
+  {
+    q: "Is the live map free to use?",
+    a: "Yes. The live map and every case file are free to browse right now.",
+  },
+  {
+    q: "How often is the map updated?",
+    a: "Cases are reviewed and updated as new verified information becomes available, from official alerts and statements to confirmed news reporting.",
+  },
+  {
+    q: "What do the claim-type labels mean?",
+    a: "Confirmed Fact is independently verified. Official Statement comes from police, government, or an official spokesperson. Family Claim is what a family has said publicly. Disputed Allegation is contested by at least one party. Unconfirmed Report hasn't been independently verified yet.",
+  },
+  {
+    q: "Can I share a case?",
+    a: "Yes, every case file has a Share button that generates a branded preview card for social media and messaging apps.",
+  },
 ];
+
+function FaqItem({ q, a, index }: { q: string; a: string; index: number }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef(null);
+  const inView = useInView(ref, { once: true, margin: "-40px" });
+  return (
+    <motion.div
+      ref={ref}
+      variants={staggerItem}
+      initial="hidden"
+      animate={inView ? "show" : "hidden"}
+      transition={{ delay: index * 0.05 }}
+      className="overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03]"
+    >
+      <button
+        type="button"
+        onClick={() => setOpen((o) => !o)}
+        aria-expanded={open}
+        className="flex w-full items-center justify-between gap-4 px-6 py-5 text-left transition hover:bg-white/[0.03]"
+      >
+        <h3 className="text-base font-black text-white md:text-lg">{q}</h3>
+        <motion.span animate={{ rotate: open ? 45 : 0 }} transition={{ duration: 0.25, ease: EASE }} className="flex-shrink-0 text-2xl text-[#E8D19A]">
+          +
+        </motion.span>
+      </button>
+      <AnimatePresence initial={false}>
+        {open && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.3, ease: EASE }}
+            className="overflow-hidden"
+          >
+            <p className="px-6 pb-6 leading-relaxed text-white/60">{a}</p>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.div>
+  );
+}
+
+function TrendingCarousel({ cases }: { cases: Incident[] }) {
+  const scrollerRef = useRef<HTMLDivElement>(null);
+
+  return (
+    <div className="relative">
+      <div ref={scrollerRef} className="flex gap-6 overflow-x-auto pb-4 pl-1 pt-6 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        {cases.map((c, i) => (
+          <Link
+            key={c.id}
+            href={`/case-file/${c.slug}`}
+            className="group relative flex flex-shrink-0 items-end"
+            style={{ width: 220 }}
+          >
+            <span
+              className="pointer-events-none select-none font-serif text-[7rem] font-bold leading-none text-white/10 transition group-hover:text-white/15"
+              style={{ marginRight: -28 }}
+            >
+              {i + 1}
+            </span>
+            <div className="relative h-[150px] w-[150px] flex-shrink-0 overflow-hidden rounded-xl border border-white/10 bg-black/40 shadow-xl transition group-hover:scale-105 group-hover:border-[#C9A24A]/50">
+              {c.image_url ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={c.image_url} alt={c.title} className="h-full w-full object-cover" />
+              ) : (
+                <div className="flex h-full items-center justify-center text-2xl text-white/20">?</div>
+              )}
+              <span
+                className="absolute left-2 top-2 rounded-full px-2 py-0.5 text-[9px] font-black uppercase tracking-[0.1em] text-black"
+                style={{ backgroundColor: CATEGORY_COLORS[c.category] }}
+              >
+                {CATEGORY_LABELS[c.category]}
+              </span>
+            </div>
+          </Link>
+        ))}
+      </div>
+      <button
+        type="button"
+        aria-label="Scroll trending cases"
+        onClick={() => scrollerRef.current?.scrollBy({ left: 320, behavior: "smooth" })}
+        className="absolute right-0 top-1/2 hidden h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full border border-white/15 bg-black/70 text-white backdrop-blur-sm transition hover:bg-black/90 md:flex"
+      >
+        →
+      </button>
+    </div>
+  );
+}
 
 type Stats = { totalCases: number; featuredCases: number; transcriptRows: number };
 
@@ -166,26 +253,9 @@ export default function HomeClient({ cases, stats }: { cases: Incident[]; stats:
       {/* Hero */}
       <section className="relative overflow-hidden">
         <div className="absolute inset-0">
-          <Image
-            src="/hero-wallpaper.webp"
-            alt=""
-            fill
-            priority
-            className="object-cover opacity-[0.55]"
-          />
+          <Image src="/hero-wallpaper.webp" alt="" fill priority className="object-cover opacity-[0.85]" />
         </div>
-        <div className="absolute inset-0 bg-gradient-to-br from-[#020617]/95 via-[#020617]/90 to-black/95" />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#020617] via-transparent to-[#020617]/40" />
-        <div className="absolute top-0 left-0 h-[500px] w-[500px] rounded-full bg-red-600/10 blur-[140px]" />
-        <div className="absolute bottom-0 right-0 h-[500px] w-[500px] rounded-full bg-[#C9A24A]/10 blur-[140px]" />
-        <div
-          className="pointer-events-none absolute inset-0 opacity-[0.05]"
-          style={{
-            backgroundImage:
-              "linear-gradient(rgba(255,255,255,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.5) 1px, transparent 1px)",
-            backgroundSize: "64px 64px",
-          }}
-        />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/75 via-black/55 to-[#020617]" />
         <FilmGrain opacity={0.045} />
         <div
           aria-hidden="true"
@@ -196,124 +266,85 @@ export default function HomeClient({ cases, stats }: { cases: Incident[]; stats:
             mixBlendMode: "screen",
           }}
         />
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-0 shadow-[inset_0_0_180px_60px_rgba(0,0,0,0.75)]"
-        />
 
         <div className="relative z-10 mx-auto max-w-6xl px-6 pt-6 lg:px-16">
           <Navbar rightButtonLabel="Case Files" rightButtonHref="/case-file" />
         </div>
 
-        <div className="relative z-10 mx-auto max-w-6xl px-6 pb-20 pt-6 lg:px-16 lg:pb-28">
-          <div className="hidden select-none md:block">
-            <motion.div
-              initial={{ opacity: 0, rotate: -10, scale: 0.9 }}
-              animate={{ opacity: 1, rotate: -6, scale: 1 }}
-              transition={{ duration: 0.8, delay: 0.6, ease: EASE }}
-              className="absolute right-6 top-2 rounded-sm border-2 border-red-600/60 px-4 py-2 lg:right-16"
-            >
-              <div className="font-mono text-[10px] uppercase leading-tight tracking-[0.3em] text-red-500/80">
-                Case File
-                <br />
-                Active
-              </div>
-            </motion.div>
-          </div>
-
-          <div className="mb-6 flex items-center gap-3">
-            <motion.span
-              initial={{ opacity: 0.4 }}
-              animate={{ opacity: [0.4, 1, 0.4] }}
-              transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}
-              className="block h-2 w-2 flex-shrink-0 rounded-full bg-red-600"
-            />
-            <motion.span
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.6, delay: 0.4 }}
-              className="font-mono text-xs uppercase tracking-[0.3em] text-[#E8D19A]"
-            >
-              Active Investigative Coverage
-            </motion.span>
-          </div>
-
-          <div className="overflow-hidden">
-            <motion.h1
-              initial={{ opacity: 0, y: 50 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 1, delay: 0.15, ease: EASE }}
-              className="max-w-3xl font-serif text-6xl font-medium leading-[1.05] tracking-tight md:text-8xl"
-            >
-              Royal Authority
-              <span className="block italic text-red-500">TV</span>
-            </motion.h1>
-          </div>
-
+        <div className="relative z-10 mx-auto flex max-w-3xl flex-col items-center px-6 pb-28 pt-16 text-center lg:pb-36 lg:pt-24">
           <motion.div
-            variants={lineDraw}
-            initial="hidden"
-            animate="show"
-            custom={0.5}
-            className="mt-6 h-px w-full max-w-md bg-gradient-to-r from-[#C9A24A] to-transparent"
-          />
+            initial={{ opacity: 0, rotate: -6, scale: 0.9 }}
+            animate={{ opacity: 1, rotate: -4, scale: 1 }}
+            transition={{ duration: 0.7, delay: 0.5, ease: EASE }}
+            className="mb-8 select-none rounded-sm border-2 border-red-600/60 px-4 py-1.5"
+          >
+            <div className="font-mono text-[10px] uppercase leading-tight tracking-[0.3em] text-red-500/90">
+              Case File — Active
+            </div>
+          </motion.div>
+
+          <motion.h1
+            initial={{ opacity: 0, y: 40 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 1, delay: 0.15, ease: EASE }}
+            className="font-serif text-5xl font-medium leading-[1.05] tracking-tight md:text-7xl"
+          >
+            Investigate every case.
+            <span className="block italic text-red-500">Anytime.</span>
+          </motion.h1>
 
           <motion.p
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.9, delay: 0.45, ease: EASE }}
-            className="mt-6 max-w-2xl text-lg leading-relaxed text-white/75 md:text-xl"
+            transition={{ duration: 0.9, delay: 0.4, ease: EASE }}
+            className="mt-6 max-w-xl text-lg leading-relaxed text-white/80 md:text-xl"
           >
             Documentary-grade coverage of missing-persons cases and high-profile investigations.
-            Sourced facts, labeled by confidence, tracked in real time, no speculation dressed up
-            as reporting.
+            Sourced facts, labeled by confidence, tracked in real time.
+          </motion.p>
+
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.8, delay: 0.55 }}
+            className="mt-4 text-sm text-white/60"
+          >
+            Free to browse. No paywall on the map or the case files.
           </motion.p>
 
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.8, delay: 0.6 }}
-            className="mt-5 flex flex-wrap items-center gap-x-4 gap-y-1 font-mono text-[11px] uppercase tracking-[0.2em] text-white/35"
-          >
-            <span>Status: Monitoring</span>
-            <span className="text-white/15">/</span>
-            <span>Sources: Verified</span>
-            <span className="text-white/15">/</span>
-            <span>Speculation: None</span>
-          </motion.div>
-
-          <motion.div
-            variants={staggerContainer(0.1, 0.65)}
+            variants={staggerContainer(0.1, 0.7)}
             initial="hidden"
             animate="show"
-            className="mt-10 flex flex-wrap items-center gap-4"
+            className="mt-9 flex flex-wrap items-center justify-center gap-4"
           >
             <motion.div variants={staggerItem}>
-              <Link href="/case-file" className="inline-block rounded-xl bg-red-600 px-7 py-4 text-sm font-black uppercase tracking-[0.1em] text-white shadow-lg shadow-red-600/30 transition hover:bg-red-700">
-                View Case Files
+              <Link
+                href="/case-file"
+                className="inline-flex items-center gap-2 rounded-md bg-red-600 px-8 py-4 text-base font-bold text-white shadow-lg shadow-red-600/30 transition hover:bg-red-700"
+              >
+                Browse Case Files <span>→</span>
               </Link>
             </motion.div>
             <motion.div variants={staggerItem}>
-              <Link href="/map" className="inline-block rounded-xl border border-[#C9A24A]/40 px-7 py-4 text-sm font-black uppercase tracking-[0.1em] text-[#E8D19A] transition hover:bg-[#C9A24A]/10">
-                Live Map
-              </Link>
-            </motion.div>
-            <motion.div variants={staggerItem}>
-              <Link href="/transcript" className="inline-block rounded-xl border border-white/15 px-7 py-4 text-sm font-black uppercase tracking-[0.1em] text-white/80 transition hover:bg-white/10">
-                Read Transcripts
+              <Link
+                href="/map"
+                className="inline-flex items-center gap-2 rounded-md border border-white/25 bg-black/30 px-8 py-4 text-base font-bold text-white backdrop-blur-sm transition hover:bg-white/10"
+              >
+                Open Live Map
               </Link>
             </motion.div>
           </motion.div>
 
           <motion.div
-            variants={staggerContainer(0.1, 0.85)}
+            variants={staggerContainer(0.1, 0.9)}
             initial="hidden"
             animate="show"
             className="mt-16 grid grid-cols-1 gap-4 sm:grid-cols-3"
           >
             {statRow.map((s, i) => (
-              <motion.div key={s.label} variants={staggerItem} className="rounded-2xl border border-white/10 bg-white/[0.04] p-6 backdrop-blur-sm">
-                <div className="font-mono text-[10px] uppercase tracking-[0.25em] text-white/25">
+              <motion.div key={s.label} variants={staggerItem} className="rounded-2xl border border-white/10 bg-black/30 p-6 backdrop-blur-sm">
+                <div className="font-mono text-[10px] uppercase tracking-[0.25em] text-white/30">
                   Ref-{String(i + 1).padStart(2, "0")}
                 </div>
                 <div className="mt-1 text-4xl font-black text-[#E8D19A]">
@@ -325,68 +356,56 @@ export default function HomeClient({ cases, stats }: { cases: Incident[]; stats:
             ))}
           </motion.div>
         </div>
+
+        {/* Curved divider */}
+        <svg
+          aria-hidden="true"
+          className="pointer-events-none absolute -bottom-1 left-0 w-full text-[#020617]"
+          viewBox="0 0 1200 60"
+          preserveAspectRatio="none"
+        >
+          <path d="M0,60 C300,0 900,0 1200,60 L1200,60 L0,60 Z" fill="currentColor" />
+          <path d="M0,58 C300,0 900,0 1200,58" fill="none" stroke="url(#ra-divider-gradient)" strokeWidth="2" />
+          <defs>
+            <linearGradient id="ra-divider-gradient" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%" stopColor="#dc2626" />
+              <stop offset="100%" stopColor="#C9A24A" />
+            </linearGradient>
+          </defs>
+        </svg>
       </section>
 
-      {/* Standards bar */}
-      <section className="relative border-y border-white/10 bg-white/[0.02] px-6 py-10 lg:px-16">
-        <Reveal className="text-center">
-          <motion.div
-            variants={staggerContainer(0.1, 0.1)}
-            initial="hidden"
-            whileInView="show"
-            viewport={{ once: true }}
-            className="flex flex-wrap items-center justify-center gap-x-8 gap-y-4 font-mono text-xs uppercase tracking-[0.15em] text-white/40 md:text-sm"
-          >
-            {standards.map((s) => (
-              <motion.span key={s} variants={staggerItem} className="flex items-center gap-1.5">
-                <span className="text-[#C9A24A]/60">[</span>
-                {s}
-                <span className="text-[#C9A24A]/60">]</span>
-              </motion.span>
-            ))}
-          </motion.div>
+      {/* Promo bar */}
+      <section className="px-6 pt-10 lg:px-16">
+        <Reveal className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-4 rounded-2xl border border-[#C9A24A]/20 bg-gradient-to-r from-[#1a1030] to-[#0b1220] px-6 py-5">
+          <div className="flex items-center gap-4">
+            <span className="grid h-10 w-10 flex-shrink-0 place-items-center rounded-full bg-red-600/20 text-lg">🔴</span>
+            <div>
+              <div className="font-bold text-white">Live map now tracking active cases</div>
+              <div className="text-sm text-white/50">Category filters, real-time pins, zero cost to browse.</div>
+            </div>
+          </div>
+          <Link href="/map" className="flex-shrink-0 rounded-md border border-white/20 bg-white/10 px-5 py-2.5 text-sm font-bold text-white transition hover:bg-white/20">
+            View Map
+          </Link>
         </Reveal>
       </section>
 
-      {/* How we cover a case */}
-      <section className="px-6 py-24 lg:px-16">
+      {/* Trending Cases */}
+      <section className="px-6 py-16 lg:px-16">
         <div className="mx-auto max-w-6xl">
-          <Reveal className="mb-14 max-w-2xl">
-            <div className="text-sm font-black uppercase tracking-[0.3em] text-[#E8D19A]">How We Cover A Case</div>
-            <h2 className="mt-4 text-4xl font-black leading-tight md:text-5xl">
-              Three ways into every investigation.
-            </h2>
+          <Reveal>
+            <h2 className="text-2xl font-black md:text-3xl">Trending Cases</h2>
           </Reveal>
-
-          <div className="grid gap-5 md:grid-cols-3">
-            {paths.map((p, i) => (
-              <Reveal key={p.href} delay={i * 0.1}>
-                <motion.div whileHover={{ y: -6 }} transition={{ duration: 0.3, ease: EASE }} className="flex h-full flex-col rounded-2xl border border-white/10 bg-white/[0.03] p-6">
-                  <PathIconGlyph icon={p.icon} />
-                  <div className="mt-5 text-xs font-black uppercase tracking-[0.2em] text-[#E8D19A]">{p.label}</div>
-                  <h3 className="mt-2 text-xl font-black">{p.title}</h3>
-                  <p className="mt-3 text-sm leading-6 text-white/60">{p.text}</p>
-                  <Link href={p.href} className="mt-auto pt-6 inline-flex items-center gap-1 text-xs font-black uppercase tracking-[0.18em] text-[#E8D19A] transition hover:text-white">
-                    {p.cta} <span>→</span>
-                  </Link>
-                </motion.div>
-              </Reveal>
-            ))}
-          </div>
+          <TrendingCarousel cases={cases} />
         </div>
       </section>
 
-      {/* Featured cases */}
-      <section className="border-t border-white/10 bg-white/[0.015] px-6 py-24 lg:px-16">
+      {/* Why Royal Authority TV */}
+      <section className="px-6 py-16 lg:px-16">
         <div className="mx-auto max-w-6xl">
-          <Reveal className="mb-14 flex flex-wrap items-end justify-between gap-4">
-            <div>
-              <div className="text-sm font-black uppercase tracking-[0.3em] text-[#E8D19A]">Featured Investigations</div>
-              <h2 className="mt-4 text-4xl font-black leading-tight md:text-5xl">Active case coverage.</h2>
-            </div>
-            <Link href="/case-file" className="text-sm font-black uppercase tracking-[0.15em] text-red-400 transition hover:text-red-500">
-              View All →
-            </Link>
+          <Reveal className="mb-10">
+            <h2 className="text-2xl font-black md:text-3xl">Why Royal Authority TV</h2>
           </Reveal>
 
           <motion.div
@@ -394,62 +413,77 @@ export default function HomeClient({ cases, stats }: { cases: Incident[]; stats:
             initial="hidden"
             whileInView="show"
             viewport={{ once: true, margin: "-60px" }}
-            className="grid gap-5 md:grid-cols-2 xl:grid-cols-3"
+            className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4"
           >
-            {cases.map((c) => (
-              <motion.div key={c.id} variants={staggerItem}>
-                <Link
-                  href={`/case-file/${c.slug}`}
-                  className="group flex h-full flex-col overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] transition hover:-translate-y-1 hover:border-[#C9A24A]/40"
-                >
-                  <div className="relative h-40 w-full overflow-hidden bg-black/40">
-                    {c.image_url ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img src={c.image_url} alt={c.title} className="h-full w-full object-cover transition duration-500 group-hover:scale-105" />
-                    ) : (
-                      <div className="flex h-full items-center justify-center text-3xl text-white/20">?</div>
-                    )}
-                    <span
-                      className="absolute left-3 top-3 rounded-full px-3 py-1 text-[10px] font-black uppercase tracking-[0.15em] text-black"
-                      style={{ backgroundColor: CATEGORY_COLORS[c.category] }}
-                    >
-                      {CATEGORY_LABELS[c.category]}
-                    </span>
-                    <span className="absolute right-3 top-3 rounded bg-black/60 px-2 py-1 font-mono text-[10px] tracking-[0.1em] text-white/60 backdrop-blur-sm">
-                      №{c.id.slice(0, 6).toUpperCase()}
-                    </span>
-                  </div>
-                  <div className="flex flex-1 flex-col p-5">
-                    <h3 className="text-lg font-black leading-snug transition group-hover:text-[#E8D19A]">{c.title}</h3>
-                    {c.location_label && <div className="mt-2 text-xs text-white/50">{c.location_label}</div>}
-                    <span className="mt-auto pt-5 inline-flex items-center gap-1 text-xs font-black uppercase tracking-[0.15em] text-[#E8D19A]">
-                      Open Case File <span>→</span>
-                    </span>
-                  </div>
-                </Link>
+            {reasons.map((r) => (
+              <motion.div key={r.title} variants={staggerItem} className="flex flex-col rounded-2xl border border-white/10 bg-white/[0.03] p-6">
+                <PathIconGlyph icon={r.icon} />
+                <h3 className="mt-5 text-lg font-black">{r.title}</h3>
+                <p className="mt-2 text-sm leading-6 text-white/60">{r.text}</p>
               </motion.div>
             ))}
           </motion.div>
         </div>
       </section>
 
+      {/* FAQ */}
+      <section className="px-6 py-16 lg:px-16">
+        <div className="mx-auto max-w-4xl">
+          <Reveal className="mb-10">
+            <h2 className="text-2xl font-black md:text-3xl">Frequently Asked Questions</h2>
+          </Reveal>
+          <div className="space-y-3">
+            {faqs.map((f, i) => (
+              <FaqItem key={f.q} q={f.q} a={f.a} index={i} />
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* Closing CTA */}
-      <section className="border-t border-white/10 px-6 py-24 lg:px-16">
-        <Reveal className="mx-auto flex max-w-4xl flex-col items-center gap-6 rounded-3xl border border-[#C9A24A]/20 bg-gradient-to-br from-white/[0.04] to-transparent p-12 text-center">
-          <h2 className="text-3xl font-black leading-tight md:text-4xl">See every verified case, tracked in real time.</h2>
-          <p className="max-w-xl text-white/60">
-            No paywall on the map, no speculation in the case files, just sourced reporting you can check for yourself.
-          </p>
+      <section className="px-6 py-20 lg:px-16">
+        <Reveal className="mx-auto flex max-w-2xl flex-col items-center gap-6 text-center">
+          <h2 className="font-serif text-3xl font-medium leading-tight md:text-4xl">
+            Ready to investigate? <span className="italic text-red-500">Start now.</span>
+          </h2>
           <div className="flex flex-wrap items-center justify-center gap-4">
-            <Link href="/case-file" className="rounded-xl bg-red-600 px-7 py-4 text-sm font-black uppercase tracking-[0.1em] text-white shadow-lg shadow-red-600/30 transition hover:bg-red-700">
-              Browse Case Files
-            </Link>
-            <Link href="/map" className="rounded-xl border border-[#C9A24A]/40 px-7 py-4 text-sm font-black uppercase tracking-[0.1em] text-[#E8D19A] transition hover:bg-[#C9A24A]/10">
-              Open Live Map
+            <Link
+              href="/case-file"
+              className="inline-flex items-center gap-2 rounded-md bg-red-600 px-8 py-4 text-base font-bold text-white shadow-lg shadow-red-600/30 transition hover:bg-red-700"
+            >
+              Browse Case Files <span>→</span>
             </Link>
           </div>
         </Reveal>
       </section>
+
+      {/* Footer */}
+      <footer className="border-t border-white/10 px-6 py-12 lg:px-16">
+        <div className="mx-auto grid max-w-6xl gap-8 text-sm text-white/50 sm:grid-cols-3">
+          <div>
+            <div className="mb-3 text-xs font-black uppercase tracking-[0.2em] text-white/30">Coverage</div>
+            <div className="space-y-2">
+              <Link href="/case-file" className="block transition hover:text-white">Case Files</Link>
+              <Link href="/transcript" className="block transition hover:text-white">Transcripts</Link>
+              <Link href="/map" className="block transition hover:text-white">Live Map</Link>
+            </div>
+          </div>
+          <div>
+            <div className="mb-3 text-xs font-black uppercase tracking-[0.2em] text-white/30">About</div>
+            <div className="space-y-2">
+              <span className="block">Royal Authority TV</span>
+              <span className="block">Verified-source investigative reporting</span>
+            </div>
+          </div>
+          <div>
+            <div className="mb-3 text-xs font-black uppercase tracking-[0.2em] text-white/30">Standard</div>
+            <div className="space-y-2">
+              <span className="block">Claim-type labeling on every fact</span>
+              <span className="block">No speculation dressed up as reporting</span>
+            </div>
+          </div>
+        </div>
+      </footer>
     </main>
   );
 }
