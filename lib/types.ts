@@ -9,7 +9,15 @@ export type IncidentCategory =
 
 export type IncidentStatus = 'active' | 'resolved' | 'cleared'
 export type ClaimType = 'confirmed_fact' | 'official_statement' | 'family_claim' | 'disputed_allegation' | 'unconfirmed_report'
-export type PersonRole = 'victim' | 'suspect' | 'witness' | 'person_of_interest'
+export type PersonRole =
+  | 'victim'
+  | 'suspect'
+  | 'witness'
+  | 'person_of_interest'
+  | 'family_member'
+  | 'official'
+  | 'advocate'
+  | 'public_supporter'
 
 export type Incident = {
   id: string

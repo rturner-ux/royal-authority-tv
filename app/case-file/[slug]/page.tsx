@@ -205,8 +205,8 @@ export default async function CaseFileSlugPage({
                 key={person.id}
                 className="rounded-[32px] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.04),rgba(255,255,255,0.02))] p-7 backdrop-blur-sm"
               >
-                <div className="mb-6 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-                  <div>
+                <div className="mb-6 flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+                  <div className="min-w-0">
                     <div className="text-xs uppercase tracking-[0.3em] text-red-400">
                       Investigative Focus
                     </div>
@@ -217,7 +217,7 @@ export default async function CaseFileSlugPage({
 
                   {person.status && (
                     <div
-                      className={`rounded-full border px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] ${PERSON_ROLE_CLASSES[person.role]}`}
+                      className={`max-w-full whitespace-normal break-words rounded-2xl border px-4 py-2 text-left text-xs font-semibold uppercase tracking-[0.15em] md:max-w-[380px] ${PERSON_ROLE_CLASSES[person.role]}`}
                     >
                       {person.status}
                     </div>
@@ -230,8 +230,8 @@ export default async function CaseFileSlugPage({
                       Profile
                     </div>
 
-                    <div className="relative mt-5 h-64 w-full overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03]">
-                      {person.photo_url ? (
+                    {person.photo_url ? (
+                      <div className="relative mt-5 h-64 w-full overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03]">
                         <Image
                           src={person.photo_url}
                           alt={person.name}
@@ -239,12 +239,17 @@ export default async function CaseFileSlugPage({
                           unoptimized
                           className="object-cover"
                         />
-                      ) : (
-                        <div className="flex h-full items-center justify-center text-4xl text-white/10">
+                      </div>
+                    ) : (
+                      <div className="mt-5 flex flex-col items-center gap-3 rounded-2xl border border-dashed border-white/10 bg-white/[0.02] py-10">
+                        <div className="grid h-14 w-14 place-items-center rounded-full border border-white/10 bg-white/[0.04] text-lg font-bold text-white/40">
                           {person.name.charAt(0)}
                         </div>
-                      )}
-                    </div>
+                        <span className="text-xs uppercase tracking-[0.15em] text-white/30">
+                          No Public Photo Available
+                        </span>
+                      </div>
+                    )}
 
                     <div className="mt-5 grid gap-3">
                       <div className="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-slate-300">

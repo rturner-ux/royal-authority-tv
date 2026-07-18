@@ -41,6 +41,10 @@ export const PERSON_ROLE_LABELS: Record<PersonRole, string> = {
   suspect: 'Suspect',
   witness: 'Witness',
   person_of_interest: 'Person of Interest',
+  family_member: 'Family Member',
+  official: 'Official',
+  advocate: 'Family Advocate',
+  public_supporter: 'Public Supporter',
 }
 
 export const PERSON_ROLE_CLASSES: Record<PersonRole, string> = {
@@ -48,4 +52,8 @@ export const PERSON_ROLE_CLASSES: Record<PersonRole, string> = {
   suspect: 'border-red-500/30 bg-red-500/10 text-red-300',
   witness: 'border-blue-400/30 bg-blue-400/10 text-blue-300',
   person_of_interest: 'border-orange-400/30 bg-orange-400/10 text-orange-300',
+  family_member: 'border-pink-400/30 bg-pink-400/10 text-pink-300',
+  official: 'border-emerald-400/30 bg-emerald-400/10 text-emerald-300',
+  advocate: 'border-purple-400/30 bg-purple-400/10 text-purple-300',
+  public_supporter: 'border-[#C9A24A]/30 bg-[#C9A24A]/10 text-[#E8D19A]',
 }
