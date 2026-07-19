@@ -19,7 +19,7 @@ type SquarePayments = {
   verifyBuyer: (
     token: string,
     details: { intent: "STORE" | "CHARGE"; amount?: string; currencyCode?: string }
-  ) => Promise<{ token?: string } | null>;
+  ) => Promise<{ token?: string; userChallenged?: boolean } | null>;
 };
 
 declare global {
@@ -114,6 +114,9 @@ export default function SubscribePage() {
         const verification = await paymentsRef.current.verifyBuyer(result.token, {
           intent: "STORE",
         });
+        // TEMPORARY: log the raw result while diagnosing a live card-data
+        // error. Revert once root-caused.
+        console.log("verifyBuyer result:", verification);
         verificationToken = verification?.token;
       } catch (err) {
         console.error("verifyBuyer failed:", err);
