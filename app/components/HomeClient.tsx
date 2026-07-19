@@ -281,9 +281,10 @@ type AccountProps = { accountLabel?: string; accountHref?: string };
 export default function HomeClient({
   cases,
   stats,
+  isLive,
   accountLabel,
   accountHref,
-}: { cases: Incident[]; stats: Stats } & AccountProps) {
+}: { cases: Incident[]; stats: Stats; isLive?: boolean } & AccountProps) {
   const statRow = [
     { value: stats.totalCases, label: "Cases Tracked" },
     { value: stats.transcriptRows, label: "Verified Transcript Entries" },
@@ -471,14 +472,31 @@ export default function HomeClient({
       {/* Meet Royal Authority */}
       <section className="px-6 py-16 lg:px-16">
         <Reveal className="mx-auto flex max-w-5xl flex-col items-center gap-8 rounded-[32px] border border-white/10 bg-white/[0.03] p-8 sm:flex-row sm:p-10">
-          <div className="relative h-40 w-40 flex-shrink-0 overflow-hidden rounded-full border-2 border-[#C9A24A]/40 sm:h-48 sm:w-48">
-            <Image
-              src="/royal-authority-host.webp"
-              alt="Royal Authority"
-              fill
-              className="object-cover"
+          <a
+            href="https://www.tiktok.com/@royalauthoritytv"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="group relative h-40 w-40 flex-shrink-0 sm:h-48 sm:w-48"
+          >
+            <div
+              className={`absolute inset-0 rounded-full border-[3px] transition group-hover:scale-105 ${
+                isLive ? "border-[#FE2C55]" : "border-[#C9A24A]/40"
+              }`}
             />
-          </div>
+            <div className="absolute inset-[6px] overflow-hidden rounded-full border-2 border-black/40">
+              <Image
+                src="/royal-authority-host.webp"
+                alt="Royal Authority on TikTok"
+                fill
+                className="object-cover"
+              />
+            </div>
+            {isLive && (
+              <span className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/3 rounded-full bg-[#FE2C55] px-3 py-1 text-xs font-black uppercase tracking-[0.1em] text-white shadow-lg">
+                Live
+              </span>
+            )}
+          </a>
           <div className="text-center sm:text-left">
             <div className="text-xs font-black uppercase tracking-[0.2em] text-[#E8D19A]">
               Meet Royal Authority
