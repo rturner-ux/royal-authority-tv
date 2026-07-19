@@ -138,7 +138,7 @@ export default function SubscribePage() {
               disabled={!ready || submitting}
               className="mt-4 w-full rounded-2xl bg-[#C9A24A] px-5 py-3 text-sm font-semibold text-black transition hover:opacity-90 disabled:opacity-50"
             >
-              {submitting ? "Processing…" : "Subscribe — $4.99/mo"}
+              {submitting ? "Processing…" : "Subscribe for $4.99/mo"}
             </button>
           </div>
         </div>

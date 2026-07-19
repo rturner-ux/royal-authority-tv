@@ -31,7 +31,7 @@ export default function PersonQA({ qa }: { qa: InterviewQA[] }) {
                 <div className="border-t border-white/10 px-4 py-4 text-sm leading-7 text-slate-300">
                   &ldquo;{item.answer}&rdquo;
                   <div className="mt-3 text-xs text-slate-500">
-                    —{" "}
+                    Source:{" "}
                     {item.source_url ? (
                       <a
                         href={item.source_url}

@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import type { IncidentCategory } from "@/lib/types";
 import { CATEGORY_COLORS, CATEGORY_LABELS } from "@/lib/labels";
 
@@ -10,18 +11,34 @@ export default function MapLegend({
   hidden: Set<IncidentCategory>;
   onToggle: (category: IncidentCategory) => void;
 }) {
+  const [expanded, setExpanded] = useState(false);
   const categories = Object.keys(CATEGORY_COLORS) as IncidentCategory[];
+
+  if (!expanded) {
+    return (
+      <button
+        onClick={() => setExpanded(true)}
+        style={{ position: "absolute", top: 10, left: 10, zIndex: 1000 }}
+        className="flex items-center gap-2 rounded-xl border border-white/10 bg-[#0f172a]/95 px-3 py-2 text-xs font-black uppercase tracking-[0.15em] text-[#E8D19A] backdrop-blur-sm"
+      >
+        Filter Cases ▸
+      </button>
+    );
+  }
 
   return (
     <div
       style={{ position: "absolute", top: 10, left: 10, zIndex: 1000 }}
-      className="min-w-[200px] rounded-xl border border-white/10 bg-[#0f172a]/95 p-4 text-xs text-slate-200 backdrop-blur-sm"
+      className="max-w-[calc(100vw-2.5rem)] min-w-[200px] rounded-xl border border-white/10 bg-[#0f172a]/95 p-4 text-xs text-slate-200 backdrop-blur-sm"
     >
-      <div className="mb-3 text-xs font-black uppercase tracking-[0.15em] text-[#E8D19A]">
-        Filter Cases
-      </div>
+      <button
+        onClick={() => setExpanded(false)}
+        className="mb-3 flex w-full items-center justify-between text-xs font-black uppercase tracking-[0.15em] text-[#E8D19A]"
+      >
+        Filter Cases <span>▾</span>
+      </button>
 
-      <div className="space-y-2">
+      <div className="max-h-[50vh] space-y-2 overflow-y-auto">
         {categories.map((c) => (
           <label key={c} className="flex cursor-pointer items-center gap-2">
             <input

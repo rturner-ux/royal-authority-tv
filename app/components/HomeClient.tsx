@@ -321,7 +321,7 @@ export default function HomeClient({
             className="mb-8 select-none rounded-sm border-2 border-red-600/60 px-4 py-1.5"
           >
             <div className="font-mono text-[10px] uppercase leading-tight tracking-[0.3em] text-red-500/90">
-              Case File — Active
+              Case File: Active
             </div>
           </motion.div>
 
@@ -486,9 +486,9 @@ export default function HomeClient({
             <p className="mt-3 text-sm leading-7 text-white/70 md:text-base">
               Royal Authority tracks missing-persons cases, suspicious deaths, and
               investigations that deserve more scrutiny than a single news cycle
-              gives them &mdash; verified sources, claim-type labeling on every
-              fact, and coverage that stays with a case long after the headlines
-              move on.
+              gives them. Verified sources, claim-type labeling on every fact,
+              and coverage that stays with a case long after the headlines move
+              on.
             </p>
           </div>
         </Reveal>

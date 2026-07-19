@@ -18,7 +18,7 @@ export async function generateMetadata({
   const result = await getCaseBySlug(slug);
   if (!result) return { title: "Royal Authority TV" };
   return {
-    title: `${result.incident.title} — Royal Authority TV`,
+    title: `${result.incident.title} | Royal Authority TV`,
     description: result.incident.description || undefined,
   };
 }
@@ -80,7 +80,7 @@ export default async function CaseFileSlugPage({
                 href="/subscribe"
                 className="mt-6 inline-flex rounded-2xl bg-[#C9A24A] px-5 py-3 text-sm font-semibold text-black transition hover:opacity-90"
               >
-                Subscribe — $4.99/mo
+                Subscribe for $4.99/mo
               </Link>
             </div>
           </div>

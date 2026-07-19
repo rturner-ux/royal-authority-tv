@@ -117,7 +117,7 @@ export default async function MemberRoomPage({
                 href="/subscribe"
                 className="mt-5 inline-flex rounded-2xl bg-[#C9A24A] px-5 py-3 text-sm font-semibold text-black transition hover:opacity-90"
               >
-                Subscribe — $4.99/mo
+                Subscribe for $4.99/mo
               </Link>
             </div>
           )}
