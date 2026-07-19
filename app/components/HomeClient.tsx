@@ -8,6 +8,7 @@ import type { Incident } from "@/lib/types";
 import { CATEGORY_LABELS, CATEGORY_COLORS } from "@/lib/labels";
 import Navbar from "./Navbar";
 import FilmGrain from "./FilmGrain";
+import CaseRow from "./CaseRow";
 
 const EASE = [0.16, 1, 0.3, 1] as [number, number, number, number];
 
@@ -280,23 +281,41 @@ type AccountProps = { accountLabel?: string; accountHref?: string };
 
 export default function HomeClient({
   cases,
+  featuredCases,
   stats,
   isLive,
   accountLabel,
   accountHref,
-}: { cases: Incident[]; stats: Stats; isLive?: boolean } & AccountProps) {
+}: {
+  cases: Incident[];
+  featuredCases: Incident[];
+  stats: Stats;
+  isLive?: boolean;
+} & AccountProps) {
   const statRow = [
     { value: stats.totalCases, label: "Cases Tracked" },
     { value: stats.transcriptRows, label: "Verified Transcript Entries" },
     { value: stats.featuredCases, label: "Featured Investigations" },
   ];
 
+  const heroCase = cases[0] || featuredCases[0];
+
+  const genreRows = Array.from(new Set(featuredCases.map((c) => c.category))).map((category) => ({
+    category,
+    cases: featuredCases.filter((c) => c.category === category),
+  }));
+
   return (
     <main className="relative min-h-screen overflow-hidden bg-[#020617] text-white">
       {/* Hero */}
       <section className="relative overflow-hidden">
         <div className="absolute inset-0">
-          <Image src="/hero-wallpaper.webp" alt="" fill priority className="object-cover opacity-[0.85]" />
+          {heroCase?.image_url ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={heroCase.image_url} alt="" className="h-full w-full object-cover opacity-[0.85]" />
+          ) : (
+            <Image src="/hero-wallpaper.webp" alt="" fill priority className="object-cover opacity-[0.85]" />
+          )}
         </div>
         <div className="absolute inset-0 bg-gradient-to-b from-black/75 via-black/55 to-[#020617]" />
         <FilmGrain opacity={0.045} />
@@ -322,7 +341,7 @@ export default function HomeClient({
             className="mb-8 select-none rounded-sm border-2 border-red-600/60 px-4 py-1.5"
           >
             <div className="font-mono text-[10px] uppercase leading-tight tracking-[0.3em] text-red-500/90">
-              Case File: Active
+              {heroCase ? CATEGORY_LABELS[heroCase.category] : "Case File: Active"}
             </div>
           </motion.div>
 
@@ -330,10 +349,9 @@ export default function HomeClient({
             initial={{ opacity: 0, y: 40 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1, delay: 0.15, ease: EASE }}
-            className="font-serif text-5xl font-medium leading-[1.05] tracking-tight md:text-7xl"
+            className="font-serif text-4xl font-medium leading-[1.1] tracking-tight md:text-6xl"
           >
-            Investigate every case.
-            <span className="block italic text-red-500">Anytime.</span>
+            {heroCase ? heroCase.title : "Investigate every case."}
           </motion.h1>
 
           <motion.p
@@ -342,8 +360,9 @@ export default function HomeClient({
             transition={{ duration: 0.9, delay: 0.4, ease: EASE }}
             className="mt-6 max-w-xl text-lg leading-relaxed text-white/80 md:text-xl"
           >
-            Documentary-grade coverage of missing-persons cases and high-profile investigations.
-            Sourced facts, labeled by confidence, tracked in real time.
+            {heroCase?.description
+              ? heroCase.description.slice(0, 220) + (heroCase.description.length > 220 ? "…" : "")
+              : "Documentary-grade coverage of missing-persons cases and high-profile investigations. Sourced facts, labeled by confidence, tracked in real time."}
           </motion.p>
 
           <motion.p
@@ -363,18 +382,18 @@ export default function HomeClient({
           >
             <motion.div variants={staggerItem}>
               <Link
-                href="/case-file"
+                href={heroCase ? `/case-file/${heroCase.slug}` : "/case-file"}
                 className="inline-flex items-center gap-2 rounded-md bg-red-600 px-8 py-4 text-base font-bold text-white shadow-lg shadow-red-600/30 transition hover:bg-red-700"
               >
-                Browse Case Files <span>→</span>
+                {heroCase ? "Open Case File" : "Browse Case Files"} <span>→</span>
               </Link>
             </motion.div>
             <motion.div variants={staggerItem}>
               <Link
-                href="/map"
+                href={heroCase ? `/case-file/${heroCase.slug}` : "/map"}
                 className="inline-flex items-center gap-2 rounded-md border border-white/25 bg-black/30 px-8 py-4 text-base font-bold text-white backdrop-blur-sm transition hover:bg-white/10"
               >
-                Open Live Map
+                {heroCase ? "More Info" : "Open Live Map"}
               </Link>
             </motion.div>
           </motion.div>
@@ -438,11 +457,22 @@ export default function HomeClient({
       <section className="px-6 py-16 lg:px-16">
         <div className="mx-auto max-w-6xl">
           <Reveal>
-            <h2 className="text-2xl font-black md:text-3xl">Trending Cases</h2>
+            <h2 className="text-2xl font-black md:text-3xl">Top 10 Trending Cases</h2>
           </Reveal>
           <TrendingCarousel cases={cases} />
         </div>
       </section>
+
+      {/* Genre-style rows, one per category */}
+      {genreRows.map(({ category, cases: rowCases }) => (
+        <section key={category} className="px-6 py-8 lg:px-16">
+          <div className="mx-auto max-w-6xl">
+            <Reveal>
+              <CaseRow title={CATEGORY_LABELS[category]} cases={rowCases} />
+            </Reveal>
+          </div>
+        </section>
+      ))}
 
       {/* Why Royal Authority TV */}
       <section className="px-6 py-16 lg:px-16">
