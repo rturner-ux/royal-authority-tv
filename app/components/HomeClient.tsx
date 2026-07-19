@@ -478,6 +478,26 @@ export default function HomeClient({
             rel="noopener noreferrer"
             className="group relative h-40 w-40 flex-shrink-0 sm:h-48 sm:w-48"
           >
+            {isLive && (
+              <style>{`
+                @keyframes tiktok-live-ring-pulse {
+                  0% { transform: scale(1); opacity: 0.9; }
+                  100% { transform: scale(1.35); opacity: 0; }
+                }
+                @keyframes tiktok-live-badge-pulse {
+                  0%, 100% { opacity: 1; }
+                  50% { opacity: 0.55; }
+                }
+              `}</style>
+            )}
+
+            {isLive && (
+              <div
+                className="absolute inset-0 rounded-full border-2 border-[#FE2C55]"
+                style={{ animation: "tiktok-live-ring-pulse 1.6s ease-out infinite" }}
+              />
+            )}
+
             <div
               className={`absolute inset-0 rounded-full border-[3px] transition group-hover:scale-105 ${
                 isLive ? "border-[#FE2C55]" : "border-[#C9A24A]/40"
@@ -492,7 +512,10 @@ export default function HomeClient({
               />
             </div>
             {isLive && (
-              <span className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/3 rounded-full bg-[#FE2C55] px-3 py-1 text-xs font-black uppercase tracking-[0.1em] text-white shadow-lg">
+              <span
+                className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/3 rounded-full bg-[#FE2C55] px-3 py-1 text-xs font-black uppercase tracking-[0.1em] text-white shadow-lg"
+                style={{ animation: "tiktok-live-badge-pulse 1.6s ease-in-out infinite" }}
+              >
                 Live
               </span>
             )}
