@@ -75,7 +75,7 @@ export default function Navbar({
           href="/"
           className="absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 items-center gap-2"
         >
-          <Image src="/icon.png" alt="Royal Authority" width={36} height={36} unoptimized />
+          <Image src="/crown-logo.png" alt="Royal Authority" width={34} height={34} unoptimized />
           <span className="hidden text-sm font-bold tracking-[0.2em] text-white sm:inline">
             ROYAL AUTHORITY
           </span>
