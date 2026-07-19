@@ -51,7 +51,7 @@ function markerIcon(incident: Incident): L.DivIcon {
   const html = `
     <div style="position:relative;width:${incident.is_featured ? 40 : 18}px;height:${incident.is_featured ? 40 : 18}px;">
       ${ring}
-      <div style="position:absolute;top:50%;left:50%;width:18px;height:18px;margin-top:-9px;margin-left:-9px;border-radius:50%;background:${color};opacity:${opacity};border:2px solid rgba(255,255,255,0.85);"></div>
+      <div style="position:absolute;top:50%;left:50%;width:18px;height:18px;margin-top:-9px;margin-left:-9px;border-radius:50%;background:${color};opacity:${opacity};border:2px solid rgba(255,255,255,0.85);box-shadow:0 0 10px ${color}cc,0 1px 4px rgba(0,0,0,0.6);"></div>
     </div>
   `;
 
@@ -93,8 +93,8 @@ export default function SiteMap() {
       `}</style>
       <MapContainer center={DFW_CENTER} zoom={9} minZoom={4} style={{ width: "100%", height: "100%" }}>
         <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
-          url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+          attribution="Tiles &copy; Esri. Source: Esri, Maxar, Earthstar Geographics"
+          url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
         />
         <ViewAllCasesButton incidents={visibleIncidents} />
         <MapLegend hidden={hidden} onToggle={toggleCategory} />

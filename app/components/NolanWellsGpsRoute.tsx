@@ -108,7 +108,7 @@ export default function NolanWellsGpsRoute() {
           <div className="h-[420px] overflow-hidden rounded-2xl border border-white/10 lg:h-[560px]">
             <MapContainer center={[30.33, -88.8]} zoom={11} style={{ width: "100%", height: "100%", background: "#0a0d14" }}>
               <TileLayer
-                attribution='Tiles &copy; Esri &mdash; Source: Esri, Maxar, Earthstar Geographics'
+                attribution='Tiles &copy; Esri. Source: Esri, Maxar, Earthstar Geographics'
                 url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
               />
               <FitToRoute pts={points} />
