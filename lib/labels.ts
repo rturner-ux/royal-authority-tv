@@ -9,6 +9,7 @@ export const CATEGORY_LABELS: Record<IncidentCategory, string> = {
   missing_person: 'Missing Person',
   drowning_report: 'Drowning Report',
   death_investigation: 'Death Investigation',
+  criminal_investigation: 'Criminal Investigation',
 }
 
 export const CATEGORY_COLORS: Record<IncidentCategory, string> = {
@@ -20,6 +21,7 @@ export const CATEGORY_COLORS: Record<IncidentCategory, string> = {
   missing_person: '#7C3AED',
   drowning_report: '#0D9488',
   death_investigation: '#DC2626',
+  criminal_investigation: '#7C2D12',
 }
 
 export const CLAIM_TYPE_LABELS: Record<ClaimType, string> = {

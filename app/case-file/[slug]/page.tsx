@@ -31,7 +31,7 @@ export default async function CaseFileSlugPage({
   const result = await getCaseBySlug(slug);
   if (!result) notFound();
 
-  const { incident, updates, people, transcript } = result;
+  const { incident, updates, people, transcript, relatedIncident } = result;
 
   return (
     <main className="relative min-h-screen bg-[#05070b] text-white overflow-hidden">
@@ -211,6 +211,29 @@ export default async function CaseFileSlugPage({
             <p className="mt-4 max-w-3xl whitespace-pre-line text-sm leading-8 text-slate-300">
               {incident.location_history}
             </p>
+          </section>
+        )}
+
+        {/* RELATED INVESTIGATION */}
+        {relatedIncident?.slug && (
+          <section className="mt-10">
+            <Link
+              href={`/case-file/${relatedIncident.slug}`}
+              className="group flex items-center gap-5 rounded-[32px] border border-[#C9A24A]/20 bg-gradient-to-r from-[#C9A24A]/[0.06] to-transparent p-6 transition hover:border-[#C9A24A]/40"
+            >
+              <div className="relative h-20 w-20 flex-shrink-0 overflow-hidden rounded-xl border border-white/10 bg-black/40">
+                {relatedIncident.image_url ? (
+                  <Image src={relatedIncident.image_url} alt={relatedIncident.title} fill unoptimized className="object-cover" />
+                ) : (
+                  <div className="flex h-full items-center justify-center text-2xl text-white/20">?</div>
+                )}
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="text-xs uppercase tracking-[0.26em] text-[#E8D19A]">Related Investigation</div>
+                <h3 className="mt-1 truncate font-serif text-xl text-white">{relatedIncident.title}</h3>
+              </div>
+              <span className="flex-shrink-0 text-[#E8D19A] transition group-hover:translate-x-1">→</span>
+            </Link>
           </section>
         )}
 

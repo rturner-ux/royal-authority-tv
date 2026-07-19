@@ -70,6 +70,7 @@ export async function getCaseBySlug(slug: string): Promise<{
   updates: IncidentUpdate[]
   people: IncidentPerson[]
   transcript: IncidentTranscriptRow[]
+  relatedIncident: Pick<Incident, 'slug' | 'title' | 'category' | 'image_url'> | null
 } | null> {
   const db = supabase()
   const { data: incident, error } = await db
@@ -81,7 +82,7 @@ export async function getCaseBySlug(slug: string): Promise<{
   if (error) throw error
   if (!incident || incident.is_hidden) return null
 
-  const [{ data: updates }, { data: people }, { data: transcript }] = await Promise.all([
+  const [{ data: updates }, { data: people }, { data: transcript }, relatedResult] = await Promise.all([
     db
       .from('incident_updates')
       .select('*')
@@ -90,6 +91,13 @@ export async function getCaseBySlug(slug: string): Promise<{
       .order('created_at', { ascending: true }),
     db.from('incident_people').select('*').eq('incident_id', incident.id).order('sequence', { ascending: true }),
     db.from('incident_transcripts').select('*').eq('incident_id', incident.id).order('sequence', { ascending: true }),
+    incident.related_incident_id
+      ? db
+          .from('incidents')
+          .select('slug, title, category, image_url')
+          .eq('id', incident.related_incident_id)
+          .maybeSingle()
+      : Promise.resolve({ data: null }),
   ])
 
   return {
@@ -97,5 +105,6 @@ export async function getCaseBySlug(slug: string): Promise<{
     updates: (updates ?? []) as IncidentUpdate[],
     people: await attachQAAndCases(db, (people ?? []) as IncidentPerson[]),
     transcript: (transcript ?? []) as IncidentTranscriptRow[],
+    relatedIncident: relatedResult.data,
   }
 }

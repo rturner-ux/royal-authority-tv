@@ -7,6 +7,7 @@ export type IncidentCategory =
   | 'missing_person'
   | 'drowning_report'
   | 'death_investigation'
+  | 'criminal_investigation'
 
 export type IncidentStatus = 'active' | 'resolved' | 'cleared'
 export type ClaimType = 'confirmed_fact' | 'official_statement' | 'family_claim' | 'disputed_allegation' | 'unconfirmed_report'
@@ -38,6 +39,7 @@ export type Incident = {
   scene_description: string | null
   scene_image_url: string | null
   location_history: string | null
+  related_incident_id: string | null
   published_at: string
   created_at: string
   updated_at: string
