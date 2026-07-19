@@ -23,19 +23,19 @@ export async function POST() {
       return NextResponse.json({ error: 'No phase found on plan variation' }, { status: 500 })
     }
 
+    // Square doesn't allow changing pricing on an existing plan variation, so
+    // create a brand new one (same plan, static pricing) instead of upserting.
     const result = await square.catalog.object.upsert({
       idempotencyKey: randomUUID(),
       object: {
         type: 'SUBSCRIPTION_PLAN_VARIATION',
-        id: obj.id!,
-        version: obj.version,
+        id: '#new-royal-authority-plan-variation',
         presentAtAllLocations: obj.presentAtAllLocations,
         subscriptionPlanVariationData: {
           name: obj.subscriptionPlanVariationData.name,
           subscriptionPlanId: obj.subscriptionPlanVariationData.subscriptionPlanId,
           phases: [
             {
-              uid: phase.uid,
               cadence: phase.cadence,
               ordinal: phase.ordinal,
               pricing: {
