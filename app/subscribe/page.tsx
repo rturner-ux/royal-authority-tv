@@ -14,13 +14,18 @@ type SquareCard = {
   }>;
 };
 
+type SquarePayments = {
+  card: () => Promise<SquareCard>;
+  verifyBuyer: (
+    token: string,
+    details: { intent: "STORE" | "CHARGE"; amount?: string; currencyCode?: string }
+  ) => Promise<{ token?: string } | null>;
+};
+
 declare global {
   interface Window {
     Square?: {
-      payments: (
-        appId: string,
-        locationId: string
-      ) => Promise<{ card: () => Promise<SquareCard> }>;
+      payments: (appId: string, locationId: string) => Promise<SquarePayments>;
     };
     grecaptcha?: {
       ready: (cb: () => void) => void;
@@ -37,6 +42,7 @@ const SQUARE_JS_SRC =
 export default function SubscribePage() {
   const router = useRouter();
   const cardRef = useRef<SquareCard | null>(null);
+  const paymentsRef = useRef<SquarePayments | null>(null);
   const [ready, setReady] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -71,6 +77,7 @@ export default function SubscribePage() {
         const card = await payments.card();
         await card.attach("#square-card-container");
         cardRef.current = card;
+        paymentsRef.current = payments;
         if (!cancelled) setReady(true);
       };
       document.body.appendChild(script);
@@ -97,6 +104,22 @@ export default function SubscribePage() {
       return;
     }
 
+    // Square requires buyer verification (SCA/3-D Secure) to save a card on
+    // file in production for many card issuers/regions -- Sandbox doesn't
+    // enforce this the same way, which is why this can pass locally but
+    // fail for real cards.
+    let verificationToken: string | undefined;
+    if (paymentsRef.current) {
+      try {
+        const verification = await paymentsRef.current.verifyBuyer(result.token, {
+          intent: "STORE",
+        });
+        verificationToken = verification?.token;
+      } catch (err) {
+        console.error("verifyBuyer failed:", err);
+      }
+    }
+
     let recaptchaToken = "";
     const siteKey = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY;
     if (siteKey && window.grecaptcha) {
@@ -107,7 +130,7 @@ export default function SubscribePage() {
     const res = await fetch("/api/square/create-subscription", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ sourceId: result.token, recaptchaToken }),
+      body: JSON.stringify({ sourceId: result.token, verificationToken, recaptchaToken }),
     });
 
     setSubmitting(false);

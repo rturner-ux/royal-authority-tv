@@ -15,7 +15,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Not signed in' }, { status: 401 })
   }
 
-  const { sourceId, recaptchaToken } = await req.json()
+  const { sourceId, verificationToken, recaptchaToken } = await req.json()
   if (!sourceId) {
     return NextResponse.json({ error: 'Missing card token' }, { status: 400 })
   }
@@ -55,6 +55,7 @@ export async function POST(req: NextRequest) {
     const cardResult = await square.cards.create({
       idempotencyKey: randomUUID(),
       sourceId,
+      verificationToken,
       card: { customerId },
     })
 
