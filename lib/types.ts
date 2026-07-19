@@ -44,6 +44,8 @@ export type Incident = {
   location_history: string | null
   related_incident_id: string | null
   early_access_until: string | null
+  ai_summary: string | null
+  ai_summary_updated_at: string | null
   published_at: string
   created_at: string
   updated_at: string

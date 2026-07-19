@@ -376,6 +376,31 @@ export default async function CaseFileSlugPage({
           </section>
         )}
 
+        {/* AI CASE BRIEF */}
+        {incident.ai_summary && (
+          <section className="mt-10 rounded-[32px] border border-[#C9A24A]/20 bg-gradient-to-br from-[#C9A24A]/[0.07] to-transparent p-7 backdrop-blur-sm">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <div className="text-xs uppercase tracking-[0.3em] text-[#E8D19A]">
+                AI Case Brief
+              </div>
+              {incident.ai_summary_updated_at && (
+                <div className="text-xs text-slate-500">
+                  Updated{" "}
+                  {new Date(incident.ai_summary_updated_at).toLocaleDateString("en-US", {
+                    dateStyle: "medium",
+                  })}
+                </div>
+              )}
+            </div>
+            <p className="mt-4 max-w-3xl whitespace-pre-line text-sm leading-8 text-slate-200 md:text-base">
+              {incident.ai_summary}
+            </p>
+            <p className="mt-4 text-xs text-slate-500">
+              Auto-generated from the sourced Case Log below. Full timeline and sources always available underneath.
+            </p>
+          </section>
+        )}
+
         {/* TIMELINE + TRANSCRIPT PREVIEW */}
         <section className="mt-10 grid gap-6 lg:grid-cols-[0.95fr_1.05fr]">
           <div className="rounded-[32px] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.04),rgba(255,255,255,0.02))] p-7 backdrop-blur-sm">
