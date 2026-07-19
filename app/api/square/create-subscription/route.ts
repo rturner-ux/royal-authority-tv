@@ -3,6 +3,7 @@ import { randomUUID } from 'crypto'
 import { supabaseServerAuth } from '@/lib/supabase/serverAuth'
 import { supabase } from '@/lib/supabase/server'
 import { squareClient, mapSquareStatus } from '@/lib/square/client'
+import { verifyRecaptcha } from '@/lib/recaptcha'
 
 export async function POST(req: NextRequest) {
   const authDb = await supabaseServerAuth()
@@ -14,9 +15,14 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Not signed in' }, { status: 401 })
   }
 
-  const { sourceId } = await req.json()
+  const { sourceId, recaptchaToken } = await req.json()
   if (!sourceId) {
     return NextResponse.json({ error: 'Missing card token' }, { status: 400 })
+  }
+
+  const human = await verifyRecaptcha(recaptchaToken || '')
+  if (!human) {
+    return NextResponse.json({ error: 'Security check failed. Please refresh and try again.' }, { status: 400 })
   }
 
   const square = squareClient()

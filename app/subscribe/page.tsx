@@ -22,6 +22,10 @@ declare global {
         locationId: string
       ) => Promise<{ card: () => Promise<SquareCard> }>;
     };
+    grecaptcha?: {
+      ready: (cb: () => void) => void;
+      execute: (siteKey: string, opts: { action: string }) => Promise<string>;
+    };
   }
 }
 
@@ -36,6 +40,7 @@ export default function SubscribePage() {
   const [ready, setReady] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const recaptchaLoaded = useRef(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -45,6 +50,13 @@ export default function SubscribePage() {
       if (!data.user) {
         router.push("/login?next=/subscribe");
         return;
+      }
+
+      if (!recaptchaLoaded.current && process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY) {
+        const rc = document.createElement("script");
+        rc.src = `https://www.google.com/recaptcha/api.js?render=${process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY}`;
+        document.body.appendChild(rc);
+        recaptchaLoaded.current = true;
       }
 
       const script = document.createElement("script");
@@ -85,10 +97,17 @@ export default function SubscribePage() {
       return;
     }
 
+    let recaptchaToken = "";
+    const siteKey = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY;
+    if (siteKey && window.grecaptcha) {
+      await new Promise<void>((resolve) => window.grecaptcha!.ready(resolve));
+      recaptchaToken = await window.grecaptcha.execute(siteKey, { action: "subscribe" });
+    }
+
     const res = await fetch("/api/square/create-subscription", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ sourceId: result.token }),
+      body: JSON.stringify({ sourceId: result.token, recaptchaToken }),
     });
 
     setSubmitting(false);
@@ -140,6 +159,20 @@ export default function SubscribePage() {
             >
               {submitting ? "Processing…" : "Subscribe for $4.99/mo"}
             </button>
+
+            {process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY && (
+              <p className="mt-4 text-center text-[11px] text-slate-500">
+                This site is protected by reCAPTCHA and the Google{" "}
+                <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer" className="underline">
+                  Privacy Policy
+                </a>{" "}
+                and{" "}
+                <a href="https://policies.google.com/terms" target="_blank" rel="noopener noreferrer" className="underline">
+                  Terms of Service
+                </a>{" "}
+                apply.
+              </p>
+            )}
           </div>
         </div>
       </div>
