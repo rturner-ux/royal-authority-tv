@@ -96,6 +96,13 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ success: true })
   } catch (err) {
     console.error('create-subscription error:', err)
-    return NextResponse.json({ error: 'Could not start your subscription' }, { status: 500 })
+    // TEMPORARY: surface the real Square error while diagnosing a live
+    // subscribe failure. Revert once root-caused.
+    const squareDetail = (err as { errors?: { detail?: string; code?: string }[] })?.errors
+    const message = err instanceof Error ? err.message : String(err)
+    return NextResponse.json(
+      { error: 'Could not start your subscription', detail: squareDetail || message },
+      { status: 500 }
+    )
   }
 }

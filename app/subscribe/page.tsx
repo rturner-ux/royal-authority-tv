@@ -114,7 +114,10 @@ export default function SubscribePage() {
 
     if (!res.ok) {
       const body = await res.json().catch(() => ({}));
-      setError(body.error || "Couldn't start your subscription. Please try again.");
+      // TEMPORARY: show the raw diagnostic detail while tracking down a live
+      // subscribe failure. Revert once root-caused.
+      const detail = body.detail ? ` (${JSON.stringify(body.detail)})` : "";
+      setError((body.error || "Couldn't start your subscription. Please try again.") + detail);
       return;
     }
 
