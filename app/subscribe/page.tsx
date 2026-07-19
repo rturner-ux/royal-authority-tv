@@ -114,10 +114,12 @@ export default function SubscribePage() {
 
     if (!res.ok) {
       const body = await res.json().catch(() => ({}));
-      // TEMPORARY: show the raw diagnostic detail while tracking down a live
-      // subscribe failure. Revert once root-caused.
-      const detail = body.detail ? ` (${JSON.stringify(body.detail)})` : "";
-      setError((body.error || "Couldn't start your subscription. Please try again.") + detail);
+      const code = body.detail?.[0]?.code || body.detail?.code;
+      const friendly =
+        code === "INVALID_CARD_DATA" || code === "CARD_DECLINED" || code === "GENERIC_DECLINE"
+          ? "Your card was declined. Please check your card details, make sure the card isn't frozen or blocked, or try a different card."
+          : body.error || "Couldn't start your subscription. Please try again.";
+      setError(friendly);
       return;
     }
 
