@@ -27,16 +27,19 @@ export default function CaseRow({ title, cases }: { title: string; cases: Incide
             <Link
               key={c.id}
               href={`/case-file/${c.slug}`}
-              className="group relative flex flex-shrink-0 items-end"
+              className="group relative z-0 flex flex-shrink-0 items-end transition-[z-index] hover:z-30"
               style={{ width: 220 }}
             >
-              <div className="relative h-[150px] w-[150px] flex-shrink-0 overflow-hidden rounded-xl border border-white/10 bg-black/40 shadow-xl transition group-hover:scale-105 group-hover:border-[#C9A24A]/50">
+              <div className="relative h-[150px] w-[150px] flex-shrink-0 origin-center overflow-hidden rounded-xl border border-white/10 bg-black/40 shadow-xl transition duration-300 ease-out group-hover:scale-[1.45] group-hover:border-[#C9A24A]/60 group-hover:shadow-2xl">
                 {c.image_url ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img src={c.image_url} alt={c.title} className="h-full w-full object-cover" />
                 ) : (
                   <div className="flex h-full items-center justify-center text-2xl text-white/20">?</div>
                 )}
+                <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/90 to-transparent p-2 opacity-0 transition group-hover:opacity-100">
+                  <div className="line-clamp-2 text-[11px] font-bold leading-tight text-white">{c.title}</div>
+                </div>
                 <span
                   className="absolute left-2 top-2 rounded-full px-2 py-0.5 text-[9px] font-black uppercase tracking-[0.1em] text-black"
                   style={{ backgroundColor: CATEGORY_COLORS[c.category] }}
