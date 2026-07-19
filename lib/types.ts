@@ -30,6 +30,7 @@ export type Incident = {
   status: IncidentStatus
   is_hidden: boolean
   is_featured: boolean
+  is_trending: boolean
   title: string
   description: string | null
   lat: number

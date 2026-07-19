@@ -46,6 +46,21 @@ export async function getFeaturedCases(): Promise<Incident[]> {
   return (data ?? []) as Incident[]
 }
 
+export async function getTrendingCases(): Promise<Incident[]> {
+  const db = supabase()
+  const { data, error } = await db
+    .from('incidents')
+    .select('*')
+    .eq('is_hidden', false)
+    .eq('is_featured', true)
+    .eq('is_trending', true)
+    .not('slug', 'is', null)
+    .order('published_at', { ascending: false })
+
+  if (error) throw error
+  return (data ?? []) as Incident[]
+}
+
 export async function getSiteStats(): Promise<{
   totalCases: number
   featuredCases: number
