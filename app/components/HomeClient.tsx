@@ -468,6 +468,32 @@ export default function HomeClient({
         </div>
       </section>
 
+      {/* Meet Royal Authority */}
+      <section className="px-6 py-16 lg:px-16">
+        <Reveal className="mx-auto flex max-w-5xl flex-col items-center gap-8 rounded-[32px] border border-white/10 bg-white/[0.03] p-8 sm:flex-row sm:p-10">
+          <div className="relative h-40 w-40 flex-shrink-0 overflow-hidden rounded-full border-2 border-[#C9A24A]/40 sm:h-48 sm:w-48">
+            <Image
+              src="/royal-authority-host.webp"
+              alt="Royal Authority"
+              fill
+              className="object-cover"
+            />
+          </div>
+          <div className="text-center sm:text-left">
+            <div className="text-xs font-black uppercase tracking-[0.2em] text-[#E8D19A]">
+              Meet Royal Authority
+            </div>
+            <p className="mt-3 text-sm leading-7 text-white/70 md:text-base">
+              Royal Authority tracks missing-persons cases, suspicious deaths, and
+              investigations that deserve more scrutiny than a single news cycle
+              gives them &mdash; verified sources, claim-type labeling on every
+              fact, and coverage that stays with a case long after the headlines
+              move on.
+            </p>
+          </div>
+        </Reveal>
+      </section>
+
       {/* FAQ */}
       <section className="px-6 py-16 lg:px-16">
         <div className="mx-auto max-w-4xl">
