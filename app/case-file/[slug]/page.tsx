@@ -6,6 +6,7 @@ import Navbar from "../../components/Navbar";
 import PersonProfileTabs from "../../components/PersonProfileTabs";
 import ShareButton from "../../components/ShareButton";
 import { getCaseBySlug } from "@/lib/cases";
+import { getSubscriberStatus } from "@/lib/subscription";
 import { CATEGORY_LABELS, CLAIM_TYPE_LABELS, CLAIM_TYPE_CLASSES, PERSON_ROLE_LABELS, PERSON_ROLE_CLASSES } from "@/lib/labels";
 
 export async function generateMetadata({
@@ -32,6 +33,54 @@ export default async function CaseFileSlugPage({
   if (!result) notFound();
 
   const { incident, updates, people, transcript, relatedIncident } = result;
+  const { user, isActive } = await getSubscriberStatus();
+  const accountProps = user
+    ? { accountLabel: "My Account", accountHref: "/account" }
+    : { accountLabel: "Sign In", accountHref: "/login" };
+
+  const earlyAccessLocked =
+    !!incident.early_access_until &&
+    new Date(incident.early_access_until) > new Date() &&
+    !isActive;
+
+  if (earlyAccessLocked) {
+    return (
+      <main className="relative min-h-screen bg-[#05070b] text-white overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-[#05070b] via-[#08111d] to-black" />
+        <div className="absolute top-0 left-0 h-[500px] w-[500px] rounded-full bg-red-700/10 blur-[140px]" />
+        <div className="absolute right-0 top-40 h-[450px] w-[450px] rounded-full bg-[#C9A24A]/10 blur-[140px]" />
+
+        <div className="relative z-10 mx-auto max-w-7xl px-6 py-6 lg:px-10">
+          <Navbar rightButtonLabel="Back Home" rightButtonHref="/case-file" {...accountProps} />
+
+          <div className="mx-auto max-w-2xl py-16 text-center">
+            <div className="text-xs uppercase tracking-[0.34em] text-[#E8D19A]">
+              {CATEGORY_LABELS[incident.category]}
+            </div>
+            <h1 className="mt-3 font-serif text-4xl text-white md:text-5xl">
+              {incident.title}
+            </h1>
+
+            <div className="mx-auto mt-8 max-w-md rounded-[30px] border border-[#C9A24A]/30 bg-[#C9A24A]/10 p-8">
+              <div className="text-xs font-semibold uppercase tracking-[0.2em] text-[#E8D19A]">
+                Subscriber Early Access
+              </div>
+              <p className="mt-4 text-sm leading-7 text-slate-300">
+                Subscribers can view this case now. It opens to the public on{" "}
+                {new Date(incident.early_access_until!).toLocaleDateString("en-US", { dateStyle: "long" })}.
+              </p>
+              <Link
+                href="/subscribe"
+                className="mt-6 inline-flex rounded-2xl bg-[#C9A24A] px-5 py-3 text-sm font-semibold text-black transition hover:opacity-90"
+              >
+                Subscribe — $4.99/mo
+              </Link>
+            </div>
+          </div>
+        </div>
+      </main>
+    );
+  }
 
   return (
     <main className="relative min-h-screen bg-[#05070b] text-white overflow-hidden">
@@ -43,6 +92,7 @@ export default async function CaseFileSlugPage({
         <Navbar
           rightButtonLabel="Open Transcript"
           rightButtonHref={transcript.length > 0 ? `/case-file/${slug}/transcript` : "/case-file"}
+          {...accountProps}
         />
 
         <div className="mb-8">
@@ -328,6 +378,7 @@ export default async function CaseFileSlugPage({
                 const contradicted = u.contradicts_update_id
                   ? updates.find((x) => x.id === u.contradicts_update_id)
                   : null;
+                const locked = u.is_premium && !isActive;
                 return (
                   <div
                     key={u.id}
@@ -349,25 +400,47 @@ export default async function CaseFileSlugPage({
                           ? new Date(u.event_date + "T12:00:00").toLocaleDateString("en-US", { dateStyle: "medium" })
                           : new Date(u.created_at).toLocaleDateString("en-US", { dateStyle: "medium" })}
                       </span>
+                      {u.is_premium && (
+                        <span className="rounded-full border border-[#C9A24A]/30 bg-[#C9A24A]/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-[#E8D19A]">
+                          Premium
+                        </span>
+                      )}
                     </div>
-                    <div className="text-sm leading-7 text-slate-400">
-                      {u.body}
-                    </div>
-                    {contradicted && (
-                      <div className="mt-2 rounded-xl border border-amber-500/20 bg-amber-500/5 p-3 text-xs leading-6 text-amber-200/80">
-                        <span className="font-semibold text-amber-300">Originally stated:</span> {contradicted.body}
-                        {u.correction_note && <div className="mt-1.5 text-amber-200/70">{u.correction_note}</div>}
+
+                    {locked ? (
+                      <div className="relative">
+                        <div className="select-none text-sm leading-7 text-slate-400 blur-sm">
+                          {u.body}
+                        </div>
+                        <Link
+                          href="/subscribe"
+                          className="mt-2 inline-block text-xs font-semibold text-[#E8D19A] hover:underline"
+                        >
+                          Subscribe to read this update →
+                        </Link>
                       </div>
-                    )}
-                    {u.source_url && (
-                      <a
-                        href={u.source_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="mt-1 inline-block text-xs text-[#67e8f9]"
-                      >
-                        Source
-                      </a>
+                    ) : (
+                      <>
+                        <div className="text-sm leading-7 text-slate-400">
+                          {u.body}
+                        </div>
+                        {contradicted && (
+                          <div className="mt-2 rounded-xl border border-amber-500/20 bg-amber-500/5 p-3 text-xs leading-6 text-amber-200/80">
+                            <span className="font-semibold text-amber-300">Originally stated:</span> {contradicted.body}
+                            {u.correction_note && <div className="mt-1.5 text-amber-200/70">{u.correction_note}</div>}
+                          </div>
+                        )}
+                        {u.source_url && (
+                          <a
+                            href={u.source_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="mt-1 inline-block text-xs text-[#67e8f9]"
+                          >
+                            Source
+                          </a>
+                        )}
+                      </>
                     )}
                   </div>
                 );

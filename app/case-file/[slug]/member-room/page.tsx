@@ -1,27 +1,28 @@
-"use client";
-
-import { use, useState } from "react";
+import { redirect } from "next/navigation";
 import Link from "next/link";
 import Navbar from "../../../components/Navbar";
+import MemberRoomForm from "./MemberRoomForm";
+import { getSubscriberStatus } from "@/lib/subscription";
+import { supabase } from "@/lib/supabase/server";
 
-export default function MemberRoomPage({
+export default async function MemberRoomPage({
   params,
 }: {
   params: Promise<{ slug: string }>;
 }) {
-  const { slug } = use(params);
+  const { slug } = await params;
 
-  const [form, setForm] = useState({ name: "", email: "", topic: "", message: "" });
-  const [submitted, setSubmitted] = useState(false);
+  const { user, isActive } = await getSubscriberStatus();
 
-  function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) {
-    setForm({ ...form, [e.target.name]: e.target.value });
+  if (!user) {
+    redirect(`/login?next=/case-file/${slug}/member-room`);
   }
 
-  function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    setSubmitted(true);
-  }
+  const { data: incident } = await supabase()
+    .from("incidents")
+    .select("id, title")
+    .eq("slug", slug)
+    .maybeSingle();
 
   return (
     <main className="relative min-h-screen bg-[#05070b] text-white overflow-hidden">
@@ -81,81 +82,38 @@ export default function MemberRoomPage({
             </div>
           </div>
 
-          <div className="rounded-[30px] border border-white/10 bg-black/30 p-6 backdrop-blur-sm">
-            <div className="mb-5 flex items-center justify-between">
-              <div>
-                <div className="text-xs uppercase tracking-[0.26em] text-[#E8D19A]">
-                  Member Question Form
+          {isActive && incident ? (
+            <MemberRoomForm incidentId={incident.id} />
+          ) : (
+            <div className="rounded-[30px] border border-white/10 bg-black/30 p-6 backdrop-blur-sm">
+              <div className="mb-5 flex items-center justify-between">
+                <div>
+                  <div className="text-xs uppercase tracking-[0.26em] text-[#E8D19A]">
+                    Locked
+                  </div>
+                  <h2 className="mt-2 font-serif text-2xl text-white">
+                    Subscribe to Unlock
+                  </h2>
                 </div>
-                <h2 className="mt-2 font-serif text-2xl text-white">
-                  Submit a Case Request
-                </h2>
+                <div className="rounded-full border border-[#C9A24A]/30 bg-[#C9A24A]/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-[#E8D19A]">
+                  Premium
+                </div>
               </div>
 
-              <div className="rounded-full border border-[#C9A24A]/30 bg-[#C9A24A]/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-[#E8D19A]">
-                Premium
-              </div>
+              <p className="text-sm leading-7 text-slate-300">
+                The Member Room is reserved for active subscribers. Subscribe
+                for $4.99/mo to submit case questions and get deeper
+                breakdowns.
+              </p>
+
+              <Link
+                href="/subscribe"
+                className="mt-5 inline-flex rounded-2xl bg-[#C9A24A] px-5 py-3 text-sm font-semibold text-black transition hover:opacity-90"
+              >
+                Subscribe — $4.99/mo
+              </Link>
             </div>
-
-            {!submitted ? (
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="grid gap-4 md:grid-cols-2">
-                  <input
-                    name="name"
-                    value={form.name}
-                    onChange={handleChange}
-                    placeholder="Your name"
-                    className="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-white outline-none placeholder:text-slate-500 focus:border-[#C9A24A]/40"
-                    required
-                  />
-                  <input
-                    name="email"
-                    type="email"
-                    value={form.email}
-                    onChange={handleChange}
-                    placeholder="Your email"
-                    className="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-white outline-none placeholder:text-slate-500 focus:border-[#C9A24A]/40"
-                    required
-                  />
-                </div>
-
-                <input
-                  name="topic"
-                  value={form.topic}
-                  onChange={handleChange}
-                  placeholder="Topic or question title"
-                  className="w-full rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-white outline-none placeholder:text-slate-500 focus:border-[#C9A24A]/40"
-                  required
-                />
-
-                <textarea
-                  name="message"
-                  value={form.message}
-                  onChange={handleChange}
-                  placeholder="Type your question, theory, or request here..."
-                  rows={7}
-                  className="w-full rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-white outline-none placeholder:text-slate-500 focus:border-[#C9A24A]/40"
-                  required
-                />
-
-                <div className="flex flex-wrap gap-3 pt-2">
-                  <button
-                    type="submit"
-                    className="rounded-2xl bg-red-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-red-700"
-                  >
-                    Submit Request
-                  </button>
-                </div>
-              </form>
-            ) : (
-              <div className="rounded-2xl border border-green-500/20 bg-green-500/10 p-5">
-                <div className="text-sm font-semibold text-green-300">Request submitted</div>
-                <p className="mt-2 text-sm leading-7 text-slate-300">
-                  Your subscriber question has been recorded for review.
-                </p>
-              </div>
-            )}
-          </div>
+          )}
         </section>
       </div>
     </main>

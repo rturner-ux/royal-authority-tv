@@ -43,6 +43,7 @@ export type Incident = {
   scene_image_url: string | null
   location_history: string | null
   related_incident_id: string | null
+  early_access_until: string | null
   published_at: string
   created_at: string
   updated_at: string
@@ -58,6 +59,7 @@ export type IncidentUpdate = {
   created_at: string
   contradicts_update_id: string | null
   correction_note: string | null
+  is_premium: boolean
 }
 
 export type IncidentPerson = {
