@@ -21,7 +21,14 @@ export default async function CaseTranscriptPage({
       <div className="absolute top-0 right-0 h-[400px] w-[400px] rounded-full bg-[#C9A24A]/10 blur-[140px]" />
 
       <div className="relative z-10 mx-auto max-w-7xl px-6 py-6 lg:px-10">
-        <Navbar rightButtonLabel="Case Files" rightButtonHref="/case-file" />
+        <Navbar
+          breadcrumbs={[
+            { label: "Home", href: "/" },
+            { label: "Case Files", href: "/case-file" },
+            { label: incident.title, href: `/case-file/${slug}` },
+            { label: "Transcript" },
+          ]}
+        />
 
         <div className="mb-8">
           <div className="text-xs uppercase tracking-[0.34em] text-[#E8D19A]">

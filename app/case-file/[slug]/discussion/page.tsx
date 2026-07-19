@@ -93,7 +93,14 @@ export default function DiscussionPage({
       <div className="absolute right-0 top-40 h-[450px] w-[450px] rounded-full bg-[#C9A24A]/10 blur-[140px]" />
 
       <div className="relative z-10 mx-auto max-w-7xl px-6 py-6 lg:px-10">
-        <Navbar rightButtonLabel="Back to Case" rightButtonHref={`/case-file/${slug}`} />
+        <Navbar
+          breadcrumbs={[
+            { label: "Home", href: "/" },
+            { label: "Case Files", href: "/case-file" },
+            { label: slug.replace(/-/g, " "), href: `/case-file/${slug}` },
+            { label: "Discussion" },
+          ]}
+        />
 
         <div className="mb-10">
           <div className="text-xs uppercase tracking-[0.34em] text-[#E8D19A]">Open Forum</div>

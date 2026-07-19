@@ -110,7 +110,7 @@ export default function SubscribePage() {
       <div className="absolute right-0 top-40 h-[450px] w-[450px] rounded-full bg-[#C9A24A]/10 blur-[140px]" />
 
       <div className="relative z-10 mx-auto max-w-7xl px-6 py-6 lg:px-10">
-        <Navbar rightButtonLabel="Back Home" rightButtonHref="/" />
+        <Navbar breadcrumbs={[{ label: "Home", href: "/" }, { label: "Subscribe" }]} />
 
         <div className="mx-auto max-w-md">
           <div className="text-xs uppercase tracking-[0.34em] text-[#E8D19A]">

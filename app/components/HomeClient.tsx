@@ -276,7 +276,14 @@ function TrendingCarousel({ cases }: { cases: Incident[] }) {
 
 type Stats = { totalCases: number; featuredCases: number; transcriptRows: number };
 
-export default function HomeClient({ cases, stats }: { cases: Incident[]; stats: Stats }) {
+type AccountProps = { accountLabel?: string; accountHref?: string };
+
+export default function HomeClient({
+  cases,
+  stats,
+  accountLabel,
+  accountHref,
+}: { cases: Incident[]; stats: Stats } & AccountProps) {
   const statRow = [
     { value: stats.totalCases, label: "Cases Tracked" },
     { value: stats.transcriptRows, label: "Verified Transcript Entries" },
@@ -303,7 +310,7 @@ export default function HomeClient({ cases, stats }: { cases: Incident[]; stats:
         />
 
         <div className="relative z-10 mx-auto max-w-6xl px-6 pt-6 lg:px-16">
-          <Navbar rightButtonLabel="Case Files" rightButtonHref="/case-file" />
+          <Navbar accountLabel={accountLabel} accountHref={accountHref} />
         </div>
 
         <div className="relative z-10 mx-auto flex max-w-3xl flex-col items-center px-6 pb-28 pt-16 text-center lg:pb-36 lg:pt-24">

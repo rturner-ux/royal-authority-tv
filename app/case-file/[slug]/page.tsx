@@ -51,7 +51,14 @@ export default async function CaseFileSlugPage({
         <div className="absolute right-0 top-40 h-[450px] w-[450px] rounded-full bg-[#C9A24A]/10 blur-[140px]" />
 
         <div className="relative z-10 mx-auto max-w-7xl px-6 py-6 lg:px-10">
-          <Navbar rightButtonLabel="Back Home" rightButtonHref="/case-file" {...accountProps} />
+          <Navbar
+            breadcrumbs={[
+              { label: "Home", href: "/" },
+              { label: "Case Files", href: "/case-file" },
+              { label: incident.title },
+            ]}
+            {...accountProps}
+          />
 
           <div className="mx-auto max-w-2xl py-16 text-center">
             <div className="text-xs uppercase tracking-[0.34em] text-[#E8D19A]">
@@ -90,8 +97,11 @@ export default async function CaseFileSlugPage({
 
       <div className="relative z-10 mx-auto max-w-7xl px-6 py-6 lg:px-10">
         <Navbar
-          rightButtonLabel="Open Transcript"
-          rightButtonHref={transcript.length > 0 ? `/case-file/${slug}/transcript` : "/case-file"}
+          breadcrumbs={[
+            { label: "Home", href: "/" },
+            { label: "Case Files", href: "/case-file" },
+            { label: incident.title },
+          ]}
           {...accountProps}
         />
 
