@@ -298,8 +298,6 @@ export default function HomeClient({
     { value: stats.featuredCases, label: "Featured Investigations" },
   ];
 
-  const heroCase = cases[0] || featuredCases[0];
-
   const genreRows = Array.from(new Set(featuredCases.map((c) => c.category))).map((category) => ({
     category,
     cases: featuredCases.filter((c) => c.category === category),
@@ -310,12 +308,7 @@ export default function HomeClient({
       {/* Hero */}
       <section className="relative overflow-hidden">
         <div className="absolute inset-0">
-          {heroCase?.image_url ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={heroCase.image_url} alt="" className="h-full w-full object-cover opacity-[0.85]" />
-          ) : (
-            <Image src="/hero-wallpaper.webp" alt="" fill priority className="object-cover opacity-[0.85]" />
-          )}
+          <Image src="/hero-wallpaper.webp" alt="" fill priority className="object-cover opacity-[0.85]" />
         </div>
         <div className="absolute inset-0 bg-gradient-to-b from-black/75 via-black/55 to-[#020617]" />
         <FilmGrain opacity={0.045} />
@@ -341,7 +334,7 @@ export default function HomeClient({
             className="mb-8 select-none rounded-sm border-2 border-red-600/60 px-4 py-1.5"
           >
             <div className="font-mono text-[10px] uppercase leading-tight tracking-[0.3em] text-red-500/90">
-              {heroCase ? CATEGORY_LABELS[heroCase.category] : "Case File: Active"}
+              Case File: Active
             </div>
           </motion.div>
 
@@ -349,9 +342,10 @@ export default function HomeClient({
             initial={{ opacity: 0, y: 40 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1, delay: 0.15, ease: EASE }}
-            className="font-serif text-4xl font-medium leading-[1.1] tracking-tight md:text-6xl"
+            className="font-serif text-5xl font-medium leading-[1.05] tracking-tight md:text-7xl"
           >
-            {heroCase ? heroCase.title : "Investigate every case."}
+            Investigate every case.
+            <span className="block italic text-red-500">Anytime.</span>
           </motion.h1>
 
           <motion.p
@@ -360,9 +354,8 @@ export default function HomeClient({
             transition={{ duration: 0.9, delay: 0.4, ease: EASE }}
             className="mt-6 max-w-xl text-lg leading-relaxed text-white/80 md:text-xl"
           >
-            {heroCase?.description
-              ? heroCase.description.slice(0, 220) + (heroCase.description.length > 220 ? "…" : "")
-              : "Documentary-grade coverage of missing-persons cases and high-profile investigations. Sourced facts, labeled by confidence, tracked in real time."}
+            Documentary-grade coverage of missing-persons cases and high-profile investigations.
+            Sourced facts, labeled by confidence, tracked in real time.
           </motion.p>
 
           <motion.p
@@ -382,18 +375,18 @@ export default function HomeClient({
           >
             <motion.div variants={staggerItem}>
               <Link
-                href={heroCase ? `/case-file/${heroCase.slug}` : "/case-file"}
+                href="/case-file"
                 className="inline-flex items-center gap-2 rounded-md bg-red-600 px-8 py-4 text-base font-bold text-white shadow-lg shadow-red-600/30 transition hover:bg-red-700"
               >
-                {heroCase ? "Open Case File" : "Browse Case Files"} <span>→</span>
+                Browse Case Files <span>→</span>
               </Link>
             </motion.div>
             <motion.div variants={staggerItem}>
               <Link
-                href={heroCase ? `/case-file/${heroCase.slug}` : "/map"}
+                href="/map"
                 className="inline-flex items-center gap-2 rounded-md border border-white/25 bg-black/30 px-8 py-4 text-base font-bold text-white backdrop-blur-sm transition hover:bg-white/10"
               >
-                {heroCase ? "More Info" : "Open Live Map"}
+                Open Live Map
               </Link>
             </motion.div>
           </motion.div>
