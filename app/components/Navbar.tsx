@@ -73,12 +73,16 @@ export default function Navbar({
 
         <Link
           href="/"
-          className="absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 items-center gap-2"
+          className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
         >
-          <Image src="/crown-logo.png" alt="Royal Authority" width={34} height={34} unoptimized />
-          <span className="hidden text-sm font-bold tracking-[0.2em] text-white sm:inline">
-            ROYAL AUTHORITY
-          </span>
+          <Image
+            src="/royal-authority-wordmark.png"
+            alt="Royal Authority TV"
+            width={65}
+            height={60}
+            unoptimized
+            className="h-14 w-auto"
+          />
         </Link>
 
         <form action="/search" className="flex items-center">
