@@ -193,11 +193,45 @@ function FaqItem({ q, a, index }: { q: string; a: string; index: number }) {
 
 function TrendingCarousel({ cases }: { cases: Incident[] }) {
   const scrollerRef = useRef<HTMLDivElement>(null);
+  const [activeCategory, setActiveCategory] = useState<Incident["category"] | "all">("all");
+
+  const categories = Array.from(new Set(cases.map((c) => c.category)));
+  const filtered = activeCategory === "all" ? cases : cases.filter((c) => c.category === activeCategory);
 
   return (
-    <div className="relative">
-      <div ref={scrollerRef} className="flex gap-6 overflow-x-auto pb-4 pl-1 pt-6 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-        {cases.map((c, i) => (
+    <div>
+      <div className="mb-2 flex flex-wrap gap-2 pt-6">
+        <button
+          type="button"
+          onClick={() => setActiveCategory("all")}
+          className={`rounded-full border px-4 py-1.5 text-xs font-black uppercase tracking-[0.1em] transition ${
+            activeCategory === "all"
+              ? "border-[#C9A24A] bg-[#C9A24A] text-black"
+              : "border-white/15 text-white/60 hover:border-white/30 hover:text-white"
+          }`}
+        >
+          All
+        </button>
+        {categories.map((cat) => (
+          <button
+            key={cat}
+            type="button"
+            onClick={() => setActiveCategory(cat)}
+            className={`rounded-full border px-4 py-1.5 text-xs font-black uppercase tracking-[0.1em] transition ${
+              activeCategory === cat
+                ? "border-transparent text-black"
+                : "border-white/15 text-white/60 hover:border-white/30 hover:text-white"
+            }`}
+            style={activeCategory === cat ? { backgroundColor: CATEGORY_COLORS[cat] } : undefined}
+          >
+            {CATEGORY_LABELS[cat]}
+          </button>
+        ))}
+      </div>
+
+      <div className="relative">
+      <div ref={scrollerRef} className="flex gap-6 overflow-x-auto pb-4 pl-1 pt-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        {filtered.map((c, i) => (
           <Link
             key={c.id}
             href={`/case-file/${c.slug}`}
@@ -235,6 +269,7 @@ function TrendingCarousel({ cases }: { cases: Incident[] }) {
       >
         →
       </button>
+      </div>
     </div>
   );
 }

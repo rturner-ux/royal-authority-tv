@@ -8,6 +8,8 @@ export type IncidentCategory =
   | 'drowning_report'
   | 'death_investigation'
   | 'criminal_investigation'
+  | 'murder'
+  | 'sex_trafficking'
 
 export type IncidentStatus = 'active' | 'resolved' | 'cleared'
 export type ClaimType = 'confirmed_fact' | 'official_statement' | 'family_claim' | 'disputed_allegation' | 'unconfirmed_report'

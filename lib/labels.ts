@@ -10,6 +10,8 @@ export const CATEGORY_LABELS: Record<IncidentCategory, string> = {
   drowning_report: 'Drowning Report',
   death_investigation: 'Death Investigation',
   criminal_investigation: 'Criminal Investigation',
+  murder: 'Murder',
+  sex_trafficking: 'Sex Trafficking',
 }
 
 export const CATEGORY_COLORS: Record<IncidentCategory, string> = {
@@ -22,6 +24,8 @@ export const CATEGORY_COLORS: Record<IncidentCategory, string> = {
   drowning_report: '#0D9488',
   death_investigation: '#DC2626',
   criminal_investigation: '#7C2D12',
+  murder: '#991B1B',
+  sex_trafficking: '#BE185D',
 }
 
 export const CLAIM_TYPE_LABELS: Record<ClaimType, string> = {
