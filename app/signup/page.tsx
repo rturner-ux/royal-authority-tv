@@ -23,6 +23,9 @@ export default function SignupPage() {
     const { data, error } = await supabaseBrowser().auth.signUp({
       email,
       password,
+      options: {
+        emailRedirectTo: `${window.location.origin}/login`,
+      },
     });
 
     setLoading(false);
