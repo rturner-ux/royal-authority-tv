@@ -5,7 +5,7 @@ import type { Metadata } from "next";
 import Navbar from "../../components/Navbar";
 import PersonProfileTabs from "../../components/PersonProfileTabs";
 import ShareButton from "../../components/ShareButton";
-import CaseMapClient from "../../components/CaseMapClient";
+import LocationZoomReveal from "../../components/LocationZoomReveal";
 import { getCaseBySlug } from "@/lib/cases";
 import { getSubscriberStatus } from "@/lib/subscription";
 import { CATEGORY_LABELS, CLAIM_TYPE_LABELS, CLAIM_TYPE_CLASSES, PERSON_ROLE_LABELS, PERSON_ROLE_CLASSES } from "@/lib/labels";
@@ -241,13 +241,8 @@ export default async function CaseFileSlugPage({
         </section>
 
         {/* LOCATION MAP */}
-        <section className="mt-10 overflow-hidden rounded-[32px] border border-white/10 bg-black/30 backdrop-blur-sm">
-          <div className="p-6 pb-0 text-xs uppercase tracking-[0.26em] text-[#E8D19A]">
-            Location
-          </div>
-          <div className="h-[380px] w-full md:h-[440px]">
-            <CaseMapClient lat={incident.lat} lng={incident.lng} label={incident.location_label} />
-          </div>
+        <section className="mt-10 overflow-hidden rounded-[32px] border border-white/10 bg-black/30 p-6 backdrop-blur-sm">
+          <LocationZoomReveal lat={incident.lat} lng={incident.lng} label={incident.location_label} />
         </section>
 
         {/* SCENE TEASER */}

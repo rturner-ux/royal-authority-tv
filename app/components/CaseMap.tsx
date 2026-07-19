@@ -1,8 +1,24 @@
 "use client";
 
 import "leaflet/dist/leaflet.css";
-import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
+import { useEffect } from "react";
+import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
 import L from "leaflet";
+
+// CSI-style establishing shot: render a wide global view first, then
+// swoop the map down into the precise location a beat later.
+function AutoZoomIn({ lat, lng }: { lat: number; lng: number }) {
+  const map = useMap();
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      map.flyTo([lat, lng], 16, { duration: 2.4, easeLinearity: 0.25 });
+    }, 400);
+    return () => clearTimeout(timer);
+  }, [map, lat, lng]);
+
+  return null;
+}
 
 function markerIcon(): L.DivIcon {
   return L.divIcon({
@@ -37,13 +53,18 @@ export default function CaseMap({
       `}</style>
       <MapContainer
         center={[lat, lng]}
-        zoom={15}
+        zoom={3}
+        zoomControl={false}
+        dragging={false}
+        scrollWheelZoom={false}
+        doubleClickZoom={false}
         style={{ width: "100%", height: "100%" }}
       >
         <TileLayer
           attribution="Tiles &copy; Esri. Source: Esri, Maxar, Earthstar Geographics"
           url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
         />
+        <AutoZoomIn lat={lat} lng={lng} />
         <Marker position={[lat, lng]} icon={markerIcon()}>
           {label && <Popup>{label}</Popup>}
         </Marker>
