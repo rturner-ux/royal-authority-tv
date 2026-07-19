@@ -11,7 +11,14 @@ export async function verifyRecaptcha(token: string): Promise<boolean> {
       body: `secret=${secret}&response=${token}`,
     })
     const data = await res.json()
-    return data.success && (data.score ?? 1) >= 0.5
+
+    // reCAPTCHA v3 scores brand-new domains conservatively since Google has
+    // no trust history yet -- this blocked a real paying subscriber on launch
+    // week. Log the real score for visibility, but don't hard-block on it
+    // until there's enough traffic history for the threshold to be
+    // meaningful. Revisit once this site has an established score baseline.
+    console.log('recaptcha result:', { success: data.success, score: data.score })
+    return data.success !== false
   } catch {
     return true // Non-fatal -- allow through if verification itself fails
   }
