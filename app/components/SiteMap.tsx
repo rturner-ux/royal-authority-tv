@@ -1,11 +1,15 @@
 "use client";
 
+import "leaflet.markercluster/dist/MarkerCluster.css";
+import "leaflet.markercluster/dist/MarkerCluster.Default.css";
 import { useEffect, useState } from "react";
 import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
+import MarkerClusterGroup from "react-leaflet-cluster";
 import L from "leaflet";
 import Link from "next/link";
 import type { Incident, IncidentCategory } from "@/lib/types";
 import { CATEGORY_LABELS, CATEGORY_COLORS } from "@/lib/labels";
+import { CATEGORY_SHAPES, shapeSvg } from "@/lib/mapShapes";
 import MapLegend from "./MapLegend";
 
 const DFW_CENTER: [number, number] = [32.85, -97.05];
@@ -43,20 +47,40 @@ function ViewAllCasesButton({ incidents }: { incidents: Incident[] }) {
 
 function markerIcon(incident: Incident): L.DivIcon {
   const color = CATEGORY_COLORS[incident.category] || "#94a3b8";
+  const shape = CATEGORY_SHAPES[incident.category] || "circle";
   const opacity = incident.status === "active" ? 1 : 0.5;
+  const glyphSize = incident.is_featured ? 26 : 18;
+  const size = incident.is_featured ? 40 : 18;
+
   const ring = incident.is_featured
-    ? `<div style="position:absolute;top:50%;left:50%;width:34px;height:34px;margin-top:-17px;margin-left:-17px;border-radius:50%;border:3px solid #ef4444;animation:ra-flash 1.1s ease-in-out infinite;"></div>`
+    ? `<div style="position:absolute;top:50%;left:50%;width:${size}px;height:${size}px;margin-top:-${size / 2}px;margin-left:-${size / 2}px;border-radius:50%;border:3px solid #ef4444;animation:ra-flash 1.1s ease-in-out infinite;"></div>`
     : "";
 
+  const glyph = shapeSvg(shape, color, glyphSize);
+
   const html = `
-    <div style="position:relative;width:${incident.is_featured ? 40 : 18}px;height:${incident.is_featured ? 40 : 18}px;">
+    <div style="position:relative;width:${size}px;height:${size}px;">
       ${ring}
-      <div style="position:absolute;top:50%;left:50%;width:18px;height:18px;margin-top:-9px;margin-left:-9px;border-radius:50%;background:${color};opacity:${opacity};border:2px solid rgba(255,255,255,0.85);box-shadow:0 0 10px ${color}cc,0 1px 4px rgba(0,0,0,0.6);"></div>
+      <div style="position:absolute;top:50%;left:50%;width:${glyphSize}px;height:${glyphSize}px;margin-top:-${glyphSize / 2}px;margin-left:-${glyphSize / 2}px;opacity:${opacity};filter:drop-shadow(0 0 6px ${color}cc) drop-shadow(0 1px 3px rgba(0,0,0,0.6));">${glyph}</div>
     </div>
   `;
 
-  const size = incident.is_featured ? 40 : 18;
   return L.divIcon({ html, className: "", iconSize: [size, size], iconAnchor: [size / 2, size / 2] });
+}
+
+function clusterIcon(cluster: { getChildCount: () => number }): L.DivIcon {
+  const count = cluster.getChildCount();
+  const size = count >= 20 ? 52 : count >= 8 ? 44 : 36;
+  return L.divIcon({
+    html: `
+      <div style="width:${size}px;height:${size}px;border-radius:50%;background:rgba(15,23,42,0.9);border:2px solid rgba(201,162,74,0.8);box-shadow:0 0 14px rgba(201,162,74,0.5);display:flex;align-items:center;justify-content:center;font:700 ${size >= 44 ? 15 : 13}px system-ui;color:#E8D19A;">
+        ${count}
+      </div>
+    `,
+    className: "",
+    iconSize: [size, size],
+    iconAnchor: [size / 2, size / 2],
+  });
 }
 
 export default function SiteMap() {
@@ -98,24 +122,31 @@ export default function SiteMap() {
         />
         <ViewAllCasesButton incidents={visibleIncidents} />
         <MapLegend hidden={hidden} onToggle={toggleCategory} />
-        {visibleIncidents.map((incident) => (
-          <Marker key={incident.id} position={[incident.lat, incident.lng]} icon={markerIcon(incident)}>
-            <Popup>
-              <div style={{ minWidth: 200, fontSize: 13, color: "#0f172a" }}>
-                <div style={{ fontWeight: 700, marginBottom: 4 }}>{incident.title}</div>
-                <div style={{ color: "#475569", marginBottom: 6 }}>
-                  {CATEGORY_LABELS[incident.category]}
+        <MarkerClusterGroup
+          chunkedLoading
+          iconCreateFunction={clusterIcon}
+          maxClusterRadius={50}
+          spiderfyOnMaxZoom
+        >
+          {visibleIncidents.map((incident) => (
+            <Marker key={incident.id} position={[incident.lat, incident.lng]} icon={markerIcon(incident)}>
+              <Popup>
+                <div style={{ minWidth: 200, fontSize: 13, color: "#0f172a" }}>
+                  <div style={{ fontWeight: 700, marginBottom: 4 }}>{incident.title}</div>
+                  <div style={{ color: "#475569", marginBottom: 6 }}>
+                    {CATEGORY_LABELS[incident.category]}
+                  </div>
+                  {incident.location_label && <div style={{ marginBottom: 6 }}>{incident.location_label}</div>}
+                  {incident.slug && (
+                    <Link href={`/case-file/${incident.slug}`} style={{ fontWeight: 700, color: "#2563eb" }}>
+                      View case file →
+                    </Link>
+                  )}
                 </div>
-                {incident.location_label && <div style={{ marginBottom: 6 }}>{incident.location_label}</div>}
-                {incident.slug && (
-                  <Link href={`/case-file/${incident.slug}`} style={{ fontWeight: 700, color: "#2563eb" }}>
-                    View case file →
-                  </Link>
-                )}
-              </div>
-            </Popup>
-          </Marker>
-        ))}
+              </Popup>
+            </Marker>
+          ))}
+        </MarkerClusterGroup>
       </MapContainer>
     </div>
   );

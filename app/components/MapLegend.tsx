@@ -3,6 +3,7 @@
 import { useState } from "react";
 import type { IncidentCategory } from "@/lib/types";
 import { CATEGORY_COLORS, CATEGORY_LABELS } from "@/lib/labels";
+import { CATEGORY_SHAPES, shapeSvg } from "@/lib/mapShapes";
 
 export default function MapLegend({
   hidden,
@@ -48,8 +49,8 @@ export default function MapLegend({
               style={{ accentColor: CATEGORY_COLORS[c] }}
             />
             <span
-              className="h-2.5 w-2.5 flex-shrink-0 rounded-full"
-              style={{ background: CATEGORY_COLORS[c] }}
+              className="flex-shrink-0"
+              dangerouslySetInnerHTML={{ __html: shapeSvg(CATEGORY_SHAPES[c], CATEGORY_COLORS[c], 14) }}
             />
             <span>{CATEGORY_LABELS[c]}</span>
           </label>
