@@ -20,7 +20,7 @@ export default function CaseRow({ title, cases }: { title: string; cases: Incide
       <div className="relative">
         <div
           ref={scrollerRef}
-          className="flex gap-6 overflow-x-auto pb-40 pl-1 pt-6 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          className="flex gap-6 overflow-x-auto pb-4 pl-1 pt-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
         >
           {capped.map((c) => (
             <CaseHoverCard key={c.id} incident={c} />
@@ -30,7 +30,7 @@ export default function CaseRow({ title, cases }: { title: string; cases: Incide
           type="button"
           aria-label={`Scroll ${title}`}
           onClick={() => scrollerRef.current?.scrollBy({ left: 320, behavior: "smooth" })}
-          className="absolute right-0 top-[129px] hidden h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full border border-white/15 bg-black/70 text-white backdrop-blur-sm transition hover:bg-black/90 md:flex"
+          className="absolute right-0 top-1/2 hidden h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full border border-white/15 bg-black/70 text-white backdrop-blur-sm transition hover:bg-black/90 md:flex"
         >
           →
         </button>
