@@ -243,7 +243,7 @@ function TrendingCarousel({ cases }: { cases: Incident[] }) {
                 height: 210,
                 marginRight: -80,
                 color: "transparent",
-                WebkitTextStroke: "1.5px rgba(255,255,255,0.35)",
+                WebkitTextStroke: "3px rgba(255,255,255,0.65)",
               }}
             >
               {i + 1}
