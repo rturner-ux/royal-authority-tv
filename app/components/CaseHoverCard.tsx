@@ -7,10 +7,10 @@ import type { Incident } from "@/lib/types";
 import { CATEGORY_LABELS, CATEGORY_COLORS } from "@/lib/labels";
 import ShareButton from "./ShareButton";
 
-const EXPANDED_WIDTH = 240;
-const COLLAPSED_WIDTH = 140;
-const COLLAPSED_HEIGHT = 210;
-const IMAGE_HEIGHT_EXPANDED = 135;
+const EXPANDED_WIDTH = 280;
+export const COLLAPSED_WIDTH = 165;
+export const COLLAPSED_HEIGHT = 235;
+const IMAGE_HEIGHT_EXPANDED = 150;
 const CLOSE_DELAY_MS = 120;
 
 function CardImage({

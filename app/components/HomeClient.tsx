@@ -9,7 +9,7 @@ import { CATEGORY_LABELS, CATEGORY_COLORS } from "@/lib/labels";
 import Navbar from "./Navbar";
 import FilmGrain from "./FilmGrain";
 import CaseRow from "./CaseRow";
-import CaseHoverCard from "./CaseHoverCard";
+import CaseHoverCard, { COLLAPSED_WIDTH, COLLAPSED_HEIGHT } from "./CaseHoverCard";
 
 const EASE = [0.16, 1, 0.3, 1] as [number, number, number, number];
 
@@ -232,22 +232,26 @@ function TrendingCarousel({ cases }: { cases: Incident[] }) {
       </div>
 
       <div className="relative">
-      <div ref={scrollerRef} className="flex gap-6 overflow-x-auto pb-4 pl-1 pt-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+      <div ref={scrollerRef} className="flex gap-2 overflow-x-auto pb-4 pl-1 pt-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         {filtered.map((c, i) => (
-          <div key={c.id} className="flex flex-shrink-0 items-end">
-            <span
-              className="pointer-events-none select-none font-sans font-black"
+          <div key={c.id} className="relative flex flex-shrink-0 items-end" style={{ width: 300, height: 260 }}>
+            <div
+              className="pointer-events-none absolute bottom-0 left-0 select-none font-sans font-black"
               style={{
-                fontSize: 230,
-                lineHeight: "210px",
-                height: 210,
-                marginRight: -70,
-                color: "rgba(255,255,255,0.16)",
+                height: COLLAPSED_HEIGHT,
+                fontSize: 326,
+                lineHeight: 0.72,
+                color: "transparent",
+                WebkitTextStroke: "4px #595959",
+                letterSpacing: "-16px",
+                zIndex: 1,
               }}
             >
               {i + 1}
-            </span>
-            <CaseHoverCard incident={c} />
+            </div>
+            <div className="relative z-[2]" style={{ marginLeft: 110, width: COLLAPSED_WIDTH }}>
+              <CaseHoverCard incident={c} />
+            </div>
           </div>
         ))}
       </div>

@@ -20,7 +20,7 @@ export default function CaseRow({ title, cases }: { title: string; cases: Incide
       <div className="relative">
         <div
           ref={scrollerRef}
-          className="flex gap-6 overflow-x-auto pb-4 pl-1 pt-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          className="flex gap-2 overflow-x-auto pb-4 pl-1 pt-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
         >
           {capped.map((c) => (
             <CaseHoverCard key={c.id} incident={c} />
