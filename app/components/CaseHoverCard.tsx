@@ -28,10 +28,11 @@ function CardImage({
         // eslint-disable-next-line @next/next/no-img-element
         <img src={incident.image_url} alt={incident.title} className="h-full w-full object-cover" />
       ) : (
-        <div
-          className="flex h-full items-center justify-center bg-gradient-to-br from-white/[0.06] to-transparent"
-          style={{ backgroundColor: `${CATEGORY_COLORS[incident.category]}14` }}
-        >
+        <div className="flex h-full items-center justify-center bg-[#181818]">
+          <div
+            className="absolute inset-0"
+            style={{ background: `linear-gradient(135deg, ${CATEGORY_COLORS[incident.category]}26, transparent)` }}
+          />
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="h-8 w-8 text-white/25">
             <path d="M4 4h11l5 5v11a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1Z" strokeLinejoin="round" />
             <path d="M15 4v5h5" strokeLinejoin="round" />
