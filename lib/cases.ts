@@ -61,6 +61,18 @@ export async function getTrendingCases(): Promise<Incident[]> {
   return (data ?? []) as Incident[]
 }
 
+// Unlike getFeaturedCases/getTrendingCases, this deliberately includes cases
+// without a slug (most automated-ingestion cases never get one) since the
+// pattern intelligence tool correlates against the full map, not just cases
+// with a dedicated case-file page.
+export async function getAllVisibleCases(): Promise<Incident[]> {
+  const db = supabase()
+  const { data, error } = await db.from('incidents').select('*').eq('is_hidden', false)
+
+  if (error) throw error
+  return (data ?? []) as Incident[]
+}
+
 export async function getSiteStats(): Promise<{
   totalCases: number
   featuredCases: number

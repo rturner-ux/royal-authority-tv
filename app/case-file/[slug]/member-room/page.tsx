@@ -73,6 +73,12 @@ export default async function MemberRoomPage({
                 <div className="rounded-2xl border border-[#C9A24A]/20 bg-[#C9A24A]/[0.04] px-4 py-3">
                   <span className="font-semibold text-[#E8D19A]">Early access:</span> new cases go live for subscribers up to 48 hours before the public
                 </div>
+                <Link
+                  href="/pattern-intelligence"
+                  className="block rounded-2xl border border-[#C9A24A]/20 bg-[#C9A24A]/[0.04] px-4 py-3 transition hover:border-[#C9A24A]/40"
+                >
+                  <span className="font-semibold text-[#E8D19A]">Pattern Intelligence:</span> see cases across the map clustered by location, timing, and category
+                </Link>
               </div>
 
               <p className="pt-2">Use this space to submit:</p>
