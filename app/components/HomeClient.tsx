@@ -234,7 +234,7 @@ function TrendingCarousel({ cases }: { cases: Incident[] }) {
       <div className="relative">
       <div ref={scrollerRef} className="flex gap-6 overflow-x-auto pb-40 pl-1 pt-6 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         {filtered.map((c, i) => (
-          <div key={c.id} className="flex flex-shrink-0 items-end" style={{ width: 200 }}>
+          <div key={c.id} className="flex flex-shrink-0 items-end">
             <span
               className="pointer-events-none select-none font-serif font-bold"
               style={{

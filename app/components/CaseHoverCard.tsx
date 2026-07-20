@@ -30,7 +30,15 @@ export default function CaseHoverCard({ incident }: { incident: Incident }) {
               // eslint-disable-next-line @next/next/no-img-element
               <img src={incident.image_url} alt={incident.title} className="h-full w-full object-cover" />
             ) : (
-              <div className="flex h-full items-center justify-center text-2xl text-white/20">?</div>
+              <div
+                className="flex h-full items-center justify-center bg-gradient-to-br from-white/[0.06] to-transparent"
+                style={{ backgroundColor: `${CATEGORY_COLORS[incident.category]}14` }}
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="h-8 w-8 text-white/25">
+                  <path d="M4 4h11l5 5v11a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1Z" strokeLinejoin="round" />
+                  <path d="M15 4v5h5" strokeLinejoin="round" />
+                </svg>
+              </div>
             )}
             <span
               className="absolute left-2 top-2 rounded-full px-2 py-0.5 text-[9px] font-black uppercase tracking-[0.1em] text-black"
