@@ -61,7 +61,21 @@ export default async function MemberRoomPage({
 
             <div className="mt-5 space-y-4 text-sm leading-8 text-slate-300">
               <p>This room is designed for premium subscribers who want more than the public case page.</p>
-              <p>Use this space to submit:</p>
+              <p>What subscribing unlocks on every case:</p>
+
+              <div className="grid gap-3">
+                <div className="rounded-2xl border border-[#C9A24A]/20 bg-[#C9A24A]/[0.04] px-4 py-3">
+                  <span className="font-semibold text-[#E8D19A]">Member Analysis:</span> exclusive AI-written commentary on open questions, contradictions, and timeline gaps in each case
+                </div>
+                <div className="rounded-2xl border border-[#C9A24A]/20 bg-[#C9A24A]/[0.04] px-4 py-3">
+                  <span className="font-semibold text-[#E8D19A]">Premium Case Log entries:</span> deeper updates marked Premium in the timeline, hidden from public view
+                </div>
+                <div className="rounded-2xl border border-[#C9A24A]/20 bg-[#C9A24A]/[0.04] px-4 py-3">
+                  <span className="font-semibold text-[#E8D19A]">Early access:</span> new cases go live for subscribers up to 48 hours before the public
+                </div>
+              </div>
+
+              <p className="pt-2">Use this space to submit:</p>
 
               <div className="grid gap-3">
                 <div className="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3">

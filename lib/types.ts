@@ -46,6 +46,8 @@ export type Incident = {
   early_access_until: string | null
   ai_summary: string | null
   ai_summary_updated_at: string | null
+  member_analysis: string | null
+  member_analysis_updated_at: string | null
   published_at: string
   created_at: string
   updated_at: string

@@ -407,6 +407,55 @@ export default async function CaseFileSlugPage({
           </section>
         )}
 
+        {/* MEMBER ANALYSIS */}
+        {incident.member_analysis && (
+          <section className="mt-6 rounded-[32px] border border-[#C9A24A]/30 bg-gradient-to-br from-[#C9A24A]/[0.1] to-transparent p-7 backdrop-blur-sm">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <div className="text-xs uppercase tracking-[0.3em] text-[#E8D19A]">
+                  Member Analysis
+                </div>
+                <span className="rounded-full border border-[#C9A24A]/30 bg-[#C9A24A]/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-[#E8D19A]">
+                  Premium
+                </span>
+              </div>
+              {incident.member_analysis_updated_at && (
+                <div className="text-xs text-slate-500">
+                  Updated{" "}
+                  {new Date(incident.member_analysis_updated_at).toLocaleDateString("en-US", {
+                    dateStyle: "medium",
+                  })}
+                </div>
+              )}
+            </div>
+
+            {isActive ? (
+              <>
+                <p className="mt-4 max-w-3xl whitespace-pre-line text-sm leading-8 text-slate-200 md:text-base">
+                  {incident.member_analysis}
+                </p>
+                <p className="mt-4 text-xs text-slate-500">
+                  Editorial commentary on open questions in the case log above, not new reporting.
+                </p>
+              </>
+            ) : (
+              <div className="relative mt-4">
+                <p className="max-w-3xl select-none whitespace-pre-line text-sm leading-8 text-slate-400 blur-sm">
+                  {incident.member_analysis}
+                </p>
+                <div className="absolute inset-0 flex items-end">
+                  <Link
+                    href="/subscribe"
+                    className="inline-flex rounded-2xl bg-[#C9A24A] px-5 py-3 text-sm font-semibold text-black transition hover:opacity-90"
+                  >
+                    Subscribe to Read the Member Analysis
+                  </Link>
+                </div>
+              </div>
+            )}
+          </section>
+        )}
+
         {/* TIMELINE + TRANSCRIPT PREVIEW */}
         <section className="mt-10 grid gap-6 lg:grid-cols-[0.95fr_1.05fr]">
           <div className="rounded-[32px] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.04),rgba(255,255,255,0.02))] p-7 backdrop-blur-sm">
