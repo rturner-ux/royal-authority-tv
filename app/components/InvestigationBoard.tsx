@@ -15,6 +15,8 @@ type BoardItem = {
   note: string | null;
   pos_x: number;
   pos_y: number;
+  width: number;
+  height: number;
   incident: Incident | null;
   person: Person | null;
 };
@@ -23,6 +25,15 @@ type BoardConnection = { id: string; item_a_id: string; item_b_id: string; label
 
 const CARD_WIDTH = 160;
 const CARD_HEIGHT = 190;
+const MIN_NOTE_SIZE = 120;
+const MAX_NOTE_SIZE = 420;
+
+function itemWidth(item: BoardItem): number {
+  return item.item_type === "suspect_note" ? item.width || CARD_WIDTH : CARD_WIDTH;
+}
+function itemHeight(item: BoardItem): number {
+  return item.item_type === "suspect_note" ? item.height || CARD_HEIGHT : CARD_HEIGHT;
+}
 
 export default function InvestigationBoard() {
   const [items, setItems] = useState<BoardItem[]>([]);
@@ -38,6 +49,7 @@ export default function InvestigationBoard() {
 
   const boardRef = useRef<HTMLDivElement>(null);
   const dragState = useRef<{ id: string; offsetX: number; offsetY: number } | null>(null);
+  const resizeState = useRef<{ id: string; startX: number; startY: number; startWidth: number; startHeight: number } | null>(null);
 
   const loadBoard = useCallback(() => {
     fetch("/api/board")
@@ -151,23 +163,43 @@ export default function InvestigationBoard() {
 
   useEffect(() => {
     function onMove(e: MouseEvent) {
-      if (!dragState.current || !boardRef.current) return;
-      const rect = boardRef.current.getBoundingClientRect();
-      const x = Math.max(0, e.clientX - rect.left - dragState.current.offsetX);
-      const y = Math.max(0, e.clientY - rect.top - dragState.current.offsetY);
-      setItems((prev) => prev.map((i) => (i.id === dragState.current!.id ? { ...i, pos_x: x, pos_y: y } : i)));
+      if (dragState.current && boardRef.current) {
+        const rect = boardRef.current.getBoundingClientRect();
+        const x = Math.max(0, e.clientX - rect.left - dragState.current.offsetX);
+        const y = Math.max(0, e.clientY - rect.top - dragState.current.offsetY);
+        setItems((prev) => prev.map((i) => (i.id === dragState.current!.id ? { ...i, pos_x: x, pos_y: y } : i)));
+      }
+      if (resizeState.current) {
+        const { id, startX, startY, startWidth, startHeight } = resizeState.current;
+        const newWidth = Math.min(MAX_NOTE_SIZE, Math.max(MIN_NOTE_SIZE, startWidth + (e.clientX - startX)));
+        const newHeight = Math.min(MAX_NOTE_SIZE, Math.max(MIN_NOTE_SIZE, startHeight + (e.clientY - startY)));
+        setItems((prev) => prev.map((i) => (i.id === id ? { ...i, width: newWidth, height: newHeight } : i)));
+      }
     }
     function onUp() {
-      if (!dragState.current) return;
-      const id = dragState.current.id;
-      const item = items.find((i) => i.id === id);
-      dragState.current = null;
-      if (item) {
-        fetch("/api/board/items", {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ id, posX: item.pos_x, posY: item.pos_y }),
-        });
+      if (dragState.current) {
+        const id = dragState.current.id;
+        const item = items.find((i) => i.id === id);
+        dragState.current = null;
+        if (item) {
+          fetch("/api/board/items", {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ id, posX: item.pos_x, posY: item.pos_y }),
+          });
+        }
+      }
+      if (resizeState.current) {
+        const id = resizeState.current.id;
+        const item = items.find((i) => i.id === id);
+        resizeState.current = null;
+        if (item) {
+          fetch("/api/board/items", {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ id, width: item.width, height: item.height }),
+          });
+        }
       }
     }
     window.addEventListener("mousemove", onMove);
@@ -178,6 +210,18 @@ export default function InvestigationBoard() {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [items]);
+
+  function onResizeMouseDown(e: React.MouseEvent, item: BoardItem) {
+    e.stopPropagation();
+    e.preventDefault();
+    resizeState.current = {
+      id: item.id,
+      startX: e.clientX,
+      startY: e.clientY,
+      startWidth: itemWidth(item),
+      startHeight: itemHeight(item),
+    };
+  }
 
   const itemById = new Map(items.map((i) => [i.id, i]));
 
@@ -287,10 +331,10 @@ export default function InvestigationBoard() {
             const a = itemById.get(conn.item_a_id);
             const b = itemById.get(conn.item_b_id);
             if (!a || !b) return null;
-            const ax = a.pos_x + CARD_WIDTH / 2;
-            const ay = a.pos_y + CARD_HEIGHT / 2;
-            const bx = b.pos_x + CARD_WIDTH / 2;
-            const by = b.pos_y + CARD_HEIGHT / 2;
+            const ax = a.pos_x + itemWidth(a) / 2;
+            const ay = a.pos_y + itemHeight(a) / 2;
+            const bx = b.pos_x + itemWidth(b) / 2;
+            const by = b.pos_y + itemHeight(b) / 2;
             return (
               <g key={conn.id} className="pointer-events-auto" onClick={() => removeConnection(conn.id)} style={{ cursor: "pointer" }}>
                 <line x1={ax} y1={ay} x2={bx} y2={by} stroke="#b91c1c" strokeWidth={2.5} strokeOpacity={0.85} />
@@ -309,7 +353,7 @@ export default function InvestigationBoard() {
               position: "absolute",
               left: item.pos_x,
               top: item.pos_y,
-              width: CARD_WIDTH,
+              width: itemWidth(item),
               cursor: connectMode ? "crosshair" : "grab",
               zIndex: connectFrom === item.id ? 20 : 10,
               outline: connectFrom === item.id ? "2px solid #ef4444" : "none",
@@ -322,13 +366,14 @@ export default function InvestigationBoard() {
                   backgroundImage: "url('/board/sticky-note.png')",
                   color: "#3a2f10",
                   transform: "rotate(-2deg)",
-                  minHeight: CARD_HEIGHT - 20,
+                  width: itemWidth(item),
+                  height: itemHeight(item),
                   filter: "drop-shadow(0 8px 10px rgba(0,0,0,0.55))",
                 }}
               >
                 <PinIcon />
-                <div className="text-sm font-bold leading-tight">{item.suspect_name}</div>
-                {item.note && <div className="mt-1.5 text-xs leading-snug">{item.note}</div>}
+                <div className="overflow-hidden text-sm font-bold leading-tight">{item.suspect_name}</div>
+                {item.note && <div className="mt-1.5 overflow-hidden text-xs leading-snug">{item.note}</div>}
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
@@ -338,6 +383,15 @@ export default function InvestigationBoard() {
                 >
                   ✕
                 </button>
+                <div
+                  onMouseDown={(e) => onResizeMouseDown(e, item)}
+                  className="absolute bottom-1 right-1 h-4 w-4 cursor-nwse-resize"
+                  style={{
+                    background:
+                      "linear-gradient(135deg, transparent 0%, transparent 45%, rgba(0,0,0,0.35) 45%, rgba(0,0,0,0.35) 55%, transparent 55%, transparent 100%)",
+                  }}
+                  title="Drag to resize"
+                />
               </div>
             ) : (
               <div

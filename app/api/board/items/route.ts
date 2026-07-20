@@ -67,13 +67,17 @@ export async function PATCH(req: NextRequest) {
   const boardId = await getOwnBoardId(db, user.id)
   if (!boardId) return NextResponse.json({ error: 'Board not found' }, { status: 404 })
 
-  const { id, posX, posY, note } = await req.json()
+  const { id, posX, posY, note, width, height } = await req.json()
   if (!id) return NextResponse.json({ error: 'Missing id' }, { status: 400 })
+
+  const clamp = (n: number, min: number, max: number) => Math.min(max, Math.max(min, n))
 
   const update: Record<string, unknown> = {}
   if (typeof posX === 'number') update.pos_x = posX
   if (typeof posY === 'number') update.pos_y = posY
   if (typeof note === 'string') update.note = note
+  if (typeof width === 'number') update.width = clamp(width, 120, 420)
+  if (typeof height === 'number') update.height = clamp(height, 120, 420)
 
   const { error } = await db.from('board_items').update(update).eq('id', id).eq('board_id', boardId)
 
