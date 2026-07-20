@@ -114,8 +114,8 @@ export async function getCaseBySlug(slug: string): Promise<{
       .from('incident_updates')
       .select('*')
       .eq('incident_id', incident.id)
-      .order('event_date', { ascending: true, nullsFirst: false })
-      .order('created_at', { ascending: true }),
+      .order('event_date', { ascending: false, nullsFirst: false })
+      .order('created_at', { ascending: false }),
     db.from('incident_people').select('*').eq('incident_id', incident.id).order('sequence', { ascending: true }),
     db.from('incident_transcripts').select('*').eq('incident_id', incident.id).order('sequence', { ascending: true }),
     incident.related_incident_id
