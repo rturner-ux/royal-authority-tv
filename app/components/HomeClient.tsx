@@ -232,13 +232,13 @@ function TrendingCarousel({ cases }: { cases: Incident[] }) {
       </div>
 
       <div className="relative">
-      <div ref={scrollerRef} className="flex gap-6 overflow-x-auto pb-4 pl-1 pt-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+      <div ref={scrollerRef} className="flex gap-6 overflow-x-auto pb-48 pl-1 pt-20 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         {filtered.map((c, i) => (
-          <div key={c.id} className="flex flex-shrink-0 items-end" style={{ width: 220 }}>
+          <div key={c.id} className="flex flex-shrink-0 items-end" style={{ width: 195 }}>
             <span
-              className="pointer-events-none select-none font-serif text-[7rem] font-bold leading-none"
+              className="pointer-events-none select-none font-serif text-[11rem] font-bold leading-none"
               style={{
-                marginRight: -28,
+                marginRight: -60,
                 color: "transparent",
                 WebkitTextStroke: "1.5px rgba(255,255,255,0.35)",
               }}
@@ -253,7 +253,7 @@ function TrendingCarousel({ cases }: { cases: Incident[] }) {
         type="button"
         aria-label="Scroll trending cases"
         onClick={() => scrollerRef.current?.scrollBy({ left: 320, behavior: "smooth" })}
-        className="absolute right-0 top-1/2 hidden h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full border border-white/15 bg-black/70 text-white backdrop-blur-sm transition hover:bg-black/90 md:flex"
+        className="absolute right-0 top-[185px] hidden h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full border border-white/15 bg-black/70 text-white backdrop-blur-sm transition hover:bg-black/90 md:flex"
       >
         →
       </button>
@@ -434,7 +434,7 @@ export default function HomeClient({
       </section>
 
       {/* Trending Cases */}
-      <section className="px-6 py-16 lg:px-16">
+      <section className="px-6 pt-16 lg:px-16">
         <div className="mx-auto max-w-6xl">
           <Reveal>
             <h2 className="text-2xl font-black md:text-3xl">Top 10 Trending Cases</h2>
@@ -445,7 +445,7 @@ export default function HomeClient({
 
       {/* Genre-style rows, one per category */}
       {genreRows.map(({ category, cases: rowCases }) => (
-        <section key={category} className="px-6 py-8 lg:px-16">
+        <section key={category} className="px-6 pt-8 lg:px-16">
           <div className="mx-auto max-w-6xl">
             <Reveal>
               <CaseRow title={CATEGORY_LABELS[category]} cases={rowCases} />

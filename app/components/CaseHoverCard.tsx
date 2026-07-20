@@ -11,12 +11,12 @@ import { CATEGORY_LABELS, CATEGORY_COLORS } from "@/lib/labels";
 // is what grows and detaches on hover.
 export default function CaseHoverCard({ incident }: { incident: Incident }) {
   return (
-    <div className="relative h-[150px] w-[150px] flex-shrink-0">
+    <div className="relative h-[210px] w-[140px] flex-shrink-0">
       <Link
         href={`/case-file/${incident.slug}`}
-        className="group absolute inset-0 z-0 overflow-hidden rounded-md border border-white/10 bg-black/40 shadow-xl transition-all duration-200 ease-out hover:z-30 hover:-translate-y-3 hover:scale-[1.4] hover:rounded-b-none hover:shadow-2xl"
+        className="group absolute left-0 right-0 top-0 z-0 rounded-md border border-white/10 bg-black/40 shadow-xl transition-all duration-200 ease-out hover:z-30 hover:-translate-y-3 hover:scale-[1.3] hover:rounded-b-none hover:shadow-2xl"
       >
-        <div className="relative h-[150px] w-full">
+        <div className="relative h-[210px] w-full overflow-hidden rounded-md group-hover:rounded-b-none">
           {incident.image_url ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img src={incident.image_url} alt={incident.title} className="h-full w-full object-cover" />
@@ -31,7 +31,7 @@ export default function CaseHoverCard({ incident }: { incident: Incident }) {
           </span>
         </div>
 
-        <div className="hidden bg-[#141414] p-3 group-hover:block">
+        <div className="hidden overflow-hidden rounded-b-md bg-[#141414] p-3 group-hover:block">
           <div className="mb-2 flex items-center gap-2">
             <span className="grid h-7 w-7 place-items-center rounded-full bg-white text-black">
               <svg viewBox="0 0 24 24" fill="currentColor" className="ml-0.5 h-3.5 w-3.5">
