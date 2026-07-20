@@ -234,11 +234,14 @@ function TrendingCarousel({ cases }: { cases: Incident[] }) {
       <div className="relative">
       <div ref={scrollerRef} className="flex gap-6 overflow-x-auto pb-40 pl-1 pt-6 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         {filtered.map((c, i) => (
-          <div key={c.id} className="flex flex-shrink-0 items-end" style={{ width: 195 }}>
+          <div key={c.id} className="flex flex-shrink-0 items-end" style={{ width: 200 }}>
             <span
-              className="pointer-events-none select-none font-serif text-[11rem] font-bold leading-none"
+              className="pointer-events-none select-none font-serif font-bold"
               style={{
-                marginRight: -60,
+                fontSize: 230,
+                lineHeight: "210px",
+                height: 210,
+                marginRight: -80,
                 color: "transparent",
                 WebkitTextStroke: "1.5px rgba(255,255,255,0.35)",
               }}
