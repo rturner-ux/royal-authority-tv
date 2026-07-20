@@ -11,6 +11,8 @@ import type { Incident, IncidentCategory } from "@/lib/types";
 import { CATEGORY_LABELS, CATEGORY_COLORS } from "@/lib/labels";
 import { CATEGORY_SHAPES, shapeSvg } from "@/lib/mapShapes";
 import MapLegend from "./MapLegend";
+import TraffickingHotspotsLayer from "./TraffickingHotspotsLayer";
+import { TRAFFICKING_HOTLINE_DATA_YEAR } from "@/lib/traffickingHotspots";
 
 const DFW_CENTER: [number, number] = [32.85, -97.05];
 
@@ -42,6 +44,76 @@ function ViewAllCasesButton({ incidents }: { incidents: Incident[] }) {
     >
       View All Cases
     </button>
+  );
+}
+
+function TraffickingHotspotsToggle({
+  isActive,
+  showHotspots,
+  onToggle,
+}: {
+  isActive: boolean;
+  showHotspots: boolean;
+  onToggle: () => void;
+}) {
+  return (
+    <div style={{ position: "absolute", top: 56, right: 10, zIndex: 1000, maxWidth: 260 }}>
+      {isActive ? (
+        <button
+          onClick={onToggle}
+          style={{
+            background: showHotspots ? "#7a2323" : "#0f172a",
+            color: "#fff",
+            border: "1px solid rgba(255,77,61,0.5)",
+            borderRadius: 8,
+            padding: "8px 14px",
+            fontSize: 13,
+            fontWeight: 600,
+            cursor: "pointer",
+            width: "100%",
+          }}
+        >
+          {showHotspots ? "Hide" : "Show"} Trafficking Hot Spots
+        </button>
+      ) : (
+        <a
+          href="/subscribe"
+          style={{
+            display: "block",
+            background: "#0f172a",
+            color: "#E8D19A",
+            border: "1px solid rgba(201,162,74,0.4)",
+            borderRadius: 8,
+            padding: "8px 14px",
+            fontSize: 12,
+            fontWeight: 600,
+            textDecoration: "none",
+            textAlign: "center",
+          }}
+        >
+          🔒 Trafficking Hot Spots (Subscribe)
+        </a>
+      )}
+      {showHotspots && isActive && (
+        <div
+          style={{
+            marginTop: 8,
+            background: "rgba(10,12,18,0.92)",
+            border: "1px solid rgba(255,77,61,0.3)",
+            borderRadius: 8,
+            padding: "10px 12px",
+            fontSize: 11,
+            lineHeight: 1.5,
+            color: "#cbd5e1",
+          }}
+        >
+          <strong style={{ color: "#ff8a7a" }}>Not a claim of trafficking activity.</strong> Shading
+          reflects {TRAFFICKING_HOTLINE_DATA_YEAR} reported cases per 100,000 residents from the
+          National Human Trafficking Hotline, by state. It does not identify any city,
+          neighborhood, or individual.
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -83,9 +155,10 @@ function clusterIcon(cluster: { getChildCount: () => number }): L.DivIcon {
   });
 }
 
-export default function SiteMap() {
+export default function SiteMap({ isActive = false }: { isActive?: boolean }) {
   const [incidents, setIncidents] = useState<Incident[]>([]);
   const [hidden, setHidden] = useState<Set<IncidentCategory>>(new Set());
+  const [showHotspots, setShowHotspots] = useState(false);
 
   useEffect(() => {
     fetch("/api/incidents", { cache: "no-store" })
@@ -122,6 +195,12 @@ export default function SiteMap() {
         />
         <ViewAllCasesButton incidents={visibleIncidents} />
         <MapLegend hidden={hidden} onToggle={toggleCategory} />
+        <TraffickingHotspotsToggle
+          isActive={isActive}
+          showHotspots={showHotspots}
+          onToggle={() => setShowHotspots((v) => !v)}
+        />
+        {isActive && showHotspots && <TraffickingHotspotsLayer />}
         <MarkerClusterGroup
           chunkedLoading
           iconCreateFunction={clusterIcon}
