@@ -236,14 +236,13 @@ function TrendingCarousel({ cases }: { cases: Incident[] }) {
         {filtered.map((c, i) => (
           <div key={c.id} className="flex flex-shrink-0 items-end">
             <span
-              className="pointer-events-none select-none font-serif font-bold"
+              className="pointer-events-none select-none font-sans font-black"
               style={{
                 fontSize: 230,
                 lineHeight: "210px",
                 height: 210,
-                marginRight: -80,
-                color: "transparent",
-                WebkitTextStroke: "3px rgba(255,255,255,0.65)",
+                marginRight: -70,
+                color: "rgba(255,255,255,0.16)",
               }}
             >
               {i + 1}
