@@ -29,8 +29,10 @@ export default async function SubscribePage() {
             <>
               <h1 className="mt-3 font-serif text-4xl text-white">You&apos;re subscribed</h1>
               <p className="mt-3 text-sm leading-7 text-slate-300">
-                Your $4.99/mo subscription is active. The Member Room, deeper
-                case content, and early access to new cases are unlocked.
+                Your $4.99/mo subscription is active. Pattern Intelligence,
+                Trafficking Hot Spots, Member Analysis, Premium Case Log
+                entries, early access, and the Case Member Room are all
+                unlocked.
               </p>
               <div className="mt-8 rounded-[30px] border border-white/10 bg-black/30 p-6 backdrop-blur-sm">
                 <Link
@@ -47,9 +49,48 @@ export default async function SubscribePage() {
                 $4.99<span className="text-lg font-normal text-slate-400">/mo</span>
               </h1>
               <p className="mt-3 text-sm leading-7 text-slate-300">
-                Unlocks the Member Room, deeper case content, and early access to
-                new cases. Cancel anytime.
+                Cancel anytime. Here&apos;s what a subscription unlocks:
               </p>
+
+              <div className="mt-6 grid gap-3">
+                <div className="rounded-2xl border border-[#C9A24A]/20 bg-[#C9A24A]/[0.04] px-4 py-3">
+                  <span className="font-semibold text-[#E8D19A]">Pattern Intelligence:</span>{" "}
+                  <span className="text-sm text-slate-300">
+                    see cases across the entire map clustered by location, timing, and category
+                  </span>
+                </div>
+                <div className="rounded-2xl border border-[#C9A24A]/20 bg-[#C9A24A]/[0.04] px-4 py-3">
+                  <span className="font-semibold text-[#E8D19A]">Trafficking Hot Spots:</span>{" "}
+                  <span className="text-sm text-slate-300">
+                    state-by-state shading on the Investigation Map from National Human Trafficking Hotline data
+                  </span>
+                </div>
+                <div className="rounded-2xl border border-[#C9A24A]/20 bg-[#C9A24A]/[0.04] px-4 py-3">
+                  <span className="font-semibold text-[#E8D19A]">Member Analysis:</span>{" "}
+                  <span className="text-sm text-slate-300">
+                    exclusive AI-written commentary on open questions, contradictions, and timeline gaps in every case
+                  </span>
+                </div>
+                <div className="rounded-2xl border border-[#C9A24A]/20 bg-[#C9A24A]/[0.04] px-4 py-3">
+                  <span className="font-semibold text-[#E8D19A]">Premium Case Log entries:</span>{" "}
+                  <span className="text-sm text-slate-300">
+                    deeper updates marked Premium in the timeline, hidden from public view
+                  </span>
+                </div>
+                <div className="rounded-2xl border border-[#C9A24A]/20 bg-[#C9A24A]/[0.04] px-4 py-3">
+                  <span className="font-semibold text-[#E8D19A]">Early access:</span>{" "}
+                  <span className="text-sm text-slate-300">
+                    new cases go live for subscribers up to 48 hours before the public
+                  </span>
+                </div>
+                <div className="rounded-2xl border border-[#C9A24A]/20 bg-[#C9A24A]/[0.04] px-4 py-3">
+                  <span className="font-semibold text-[#E8D19A]">Case Member Room:</span>{" "}
+                  <span className="text-sm text-slate-300">
+                    submit case questions, theory requests, and transcript deep dives directly
+                  </span>
+                </div>
+              </div>
+
               <SubscribeForm />
             </>
           )}
