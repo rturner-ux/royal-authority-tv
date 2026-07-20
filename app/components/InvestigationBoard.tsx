@@ -275,11 +275,11 @@ export default function InvestigationBoard() {
         ref={boardRef}
         className="relative h-[640px] w-full overflow-auto rounded-[24px] border border-black/40 shadow-inner"
         style={{
-          backgroundColor: "#6b4a2f",
-          backgroundImage:
-            "radial-gradient(circle at 20% 20%, rgba(255,255,255,0.05) 0, transparent 3px), radial-gradient(circle at 60% 45%, rgba(255,255,255,0.04) 0, transparent 2px), radial-gradient(circle at 80% 70%, rgba(0,0,0,0.15) 0, transparent 3px), radial-gradient(circle at 35% 80%, rgba(0,0,0,0.12) 0, transparent 2px), linear-gradient(135deg, #7a5638 0%, #6b4a2f 40%, #5c3d27 100%)",
-          backgroundSize: "40px 40px, 55px 55px, 30px 30px, 45px 45px, 100% 100%",
-          boxShadow: "inset 0 0 80px rgba(0,0,0,0.55)",
+          backgroundImage: "url('/board/corkboard-bg.jpg')",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          backgroundRepeat: "no-repeat",
+          boxShadow: "inset 0 0 100px rgba(0,0,0,0.6)",
         }}
       >
         <svg className="pointer-events-none absolute left-0 top-0 h-full w-full" style={{ minWidth: "100%", minHeight: "100%" }}>
@@ -317,8 +317,14 @@ export default function InvestigationBoard() {
           >
             {item.item_type === "suspect_note" ? (
               <div
-                className="relative rounded-sm p-3 shadow-[0_6px_14px_rgba(0,0,0,0.5)]"
-                style={{ background: "#f4e28c", color: "#3a2f10", transform: "rotate(-2deg)", minHeight: CARD_HEIGHT - 20 }}
+                className="relative bg-contain bg-center bg-no-repeat p-4 pt-6"
+                style={{
+                  backgroundImage: "url('/board/sticky-note.png')",
+                  color: "#3a2f10",
+                  transform: "rotate(-2deg)",
+                  minHeight: CARD_HEIGHT - 20,
+                  filter: "drop-shadow(0 8px 10px rgba(0,0,0,0.55))",
+                }}
               >
                 <PinIcon />
                 <div className="text-sm font-bold leading-tight">{item.suspect_name}</div>
@@ -328,15 +334,15 @@ export default function InvestigationBoard() {
                     e.stopPropagation();
                     removeItem(item.id);
                   }}
-                  className="absolute right-1 top-1 text-xs text-black/40 hover:text-black/70"
+                  className="absolute right-2 top-2 text-xs text-black/40 hover:text-black/70"
                 >
                   ✕
                 </button>
               </div>
             ) : (
               <div
-                className="relative rounded-sm bg-white p-1.5 shadow-[0_6px_14px_rgba(0,0,0,0.5)]"
-                style={{ transform: "rotate(1.5deg)" }}
+                className="relative rounded-sm bg-white p-1.5"
+                style={{ transform: "rotate(1.5deg)", filter: "drop-shadow(0 8px 10px rgba(0,0,0,0.6))" }}
               >
                 <PinIcon />
                 <div className="relative h-[110px] w-full overflow-hidden bg-slate-800">
@@ -383,12 +389,12 @@ export default function InvestigationBoard() {
 
 function PinIcon() {
   return (
-    <div
-      className="absolute left-1/2 top-0 z-10 h-4 w-4 -translate-x-1/2 -translate-y-1/2 rounded-full"
-      style={{
-        background: "radial-gradient(circle at 35% 35%, #ff6b5e, #b91c1c)",
-        boxShadow: "0 2px 4px rgba(0,0,0,0.6)",
-      }}
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      src="/board/thumbtack.png"
+      alt=""
+      className="pointer-events-none absolute left-1/2 top-0 z-10 h-7 w-7 -translate-x-1/2 -translate-y-[45%]"
+      style={{ filter: "drop-shadow(0 3px 3px rgba(0,0,0,0.6))" }}
     />
   );
 }
