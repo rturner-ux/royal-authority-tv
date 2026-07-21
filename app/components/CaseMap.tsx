@@ -9,6 +9,15 @@ import L from "leaflet";
 const INITIAL_ZOOM = 16;
 const DEEP_ZOOM = 19;
 
+function playZoomSound() {
+  const audio = new Audio("/sfx/zoom-whoosh.mp3");
+  audio.volume = 0.5;
+  audio.play().catch(() => {
+    // Autoplay can still be blocked in some browsers/contexts -- a missed
+    // sound effect isn't worth surfacing an error over.
+  });
+}
+
 // CSI-style establishing shot: render a wide global view first, then
 // swoop the map down into the precise location a beat later.
 function AutoZoomIn({ lat, lng }: { lat: number; lng: number }) {
@@ -16,6 +25,7 @@ function AutoZoomIn({ lat, lng }: { lat: number; lng: number }) {
 
   useEffect(() => {
     const startTimer = setTimeout(() => {
+      playZoomSound();
       map.flyTo([lat, lng], INITIAL_ZOOM, { duration: 2.4, easeLinearity: 0.25 });
     }, 400);
     return () => clearTimeout(startTimer);
@@ -85,6 +95,7 @@ export default function CaseMap({
       setShowLockedPrompt(true);
       return;
     }
+    playZoomSound();
     setDeepZoomed(true);
     onDeepZoomChange?.(true);
     setDeepZoomTrigger((n) => n + 1);
