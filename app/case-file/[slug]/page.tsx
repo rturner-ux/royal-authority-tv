@@ -9,9 +9,11 @@ import LocationZoomReveal from "../../components/LocationZoomReveal";
 import PhotoGallery from "../../components/PhotoGallery";
 import CaseLog from "../../components/CaseLog";
 import RecordLastCase from "../../components/RecordLastCase";
+import InvestigatorToolkit from "../../components/InvestigatorToolkit";
 import { getCaseBySlug } from "@/lib/cases";
 import { getCollection } from "@/lib/collections";
 import { getSubscriberStatus } from "@/lib/subscription";
+import { supabaseServerAuth } from "@/lib/supabase/serverAuth";
 import {
   CATEGORY_LABELS,
   PERSON_ROLE_LABELS,
@@ -49,6 +51,17 @@ export default async function CaseFileSlugPage({
   const accountProps = user
     ? { accountLabel: "My Account", accountHref: "/account" }
     : { accountLabel: "Sign In", accountHref: "/login" };
+
+  let hasRole = false;
+  if (user && isActive) {
+    const authDb = await supabaseServerAuth();
+    const { data: profile } = await authDb
+      .from("subscriber_profiles")
+      .select("role")
+      .eq("user_id", user.id)
+      .maybeSingle();
+    hasRole = !!profile?.role;
+  }
 
   const earlyAccessLocked =
     !!incident.early_access_until &&
@@ -493,6 +506,9 @@ export default async function CaseFileSlugPage({
             )}
           </section>
         )}
+
+        {/* INVESTIGATOR TOOLKIT */}
+        <InvestigatorToolkit slug={slug} isActive={isActive} hasRole={hasRole} />
 
         {/* VIDEO */}
         {incident.video_embed_url && (
