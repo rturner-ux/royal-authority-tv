@@ -6,6 +6,7 @@ import Navbar from "../../components/Navbar";
 import PersonProfileTabs from "../../components/PersonProfileTabs";
 import ShareButton from "../../components/ShareButton";
 import LocationZoomReveal from "../../components/LocationZoomReveal";
+import PhotoGallery from "../../components/PhotoGallery";
 import { getCaseBySlug } from "@/lib/cases";
 import { getSubscriberStatus } from "@/lib/subscription";
 import {
@@ -392,35 +393,7 @@ export default async function CaseFileSlugPage({
 
         {/* FUNERAL */}
         {photos.length > 0 && (
-          <section className="mt-10 rounded-[32px] border border-white/10 bg-black/30 p-7 backdrop-blur-sm">
-            <div className="text-xs uppercase tracking-[0.3em] text-[#E8D19A]">
-              Funeral
-            </div>
-            <div className="mt-6 grid grid-cols-2 gap-4 md:grid-cols-3">
-              {photos.map((p) => (
-                <a
-                  key={p.id}
-                  href={p.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="group block"
-                >
-                  <div className="relative aspect-[4/3] w-full overflow-hidden rounded-2xl border border-white/10 bg-white/[0.02]">
-                    <Image
-                      src={p.url}
-                      alt={p.caption || incident.title}
-                      fill
-                      unoptimized
-                      className="object-cover transition group-hover:scale-105"
-                    />
-                  </div>
-                  {p.caption && (
-                    <p className="mt-2 text-xs leading-5 text-slate-400">{p.caption}</p>
-                  )}
-                </a>
-              ))}
-            </div>
-          </section>
+          <PhotoGallery photos={photos} title="Funeral" altFallback={incident.title} />
         )}
 
         {/* AI CASE BRIEF */}
