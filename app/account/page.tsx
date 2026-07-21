@@ -1,7 +1,9 @@
 import { redirect } from "next/navigation";
 import Navbar from "../components/Navbar";
 import AccountActions from "./AccountActions";
+import InvestigatorProfile from "./InvestigatorProfile";
 import { supabaseServerAuth } from "@/lib/supabase/serverAuth";
+import { getRole } from "@/lib/roles";
 
 export default async function AccountPage() {
   const db = await supabaseServerAuth();
@@ -13,13 +15,13 @@ export default async function AccountPage() {
     redirect("/login?next=/account");
   }
 
-  const { data: subscriber } = await db
-    .from("subscribers")
-    .select("status, current_period_end")
-    .eq("user_id", user.id)
-    .maybeSingle();
+  const [{ data: subscriber }, { data: profile }] = await Promise.all([
+    db.from("subscribers").select("status, current_period_end").eq("user_id", user.id).maybeSingle(),
+    db.from("subscriber_profiles").select("role, callsign").eq("user_id", user.id).maybeSingle(),
+  ]);
 
   const isActive = subscriber?.status === "active";
+  const role = getRole(profile?.role);
 
   return (
     <main className="relative min-h-screen bg-[#05070b] text-white overflow-hidden">
@@ -34,7 +36,12 @@ export default async function AccountPage() {
           <div className="text-xs uppercase tracking-[0.34em] text-[#E8D19A]">
             My Account
           </div>
-          <h1 className="mt-3 font-serif text-4xl text-white">{user.email}</h1>
+          <h1 className="mt-3 font-serif text-4xl text-white">
+            {role
+              ? `Welcome back, ${role.title}${profile?.callsign ? ` ${profile.callsign}` : ""}`
+              : user.email}
+          </h1>
+          {role && <p className="mt-2 text-sm text-slate-500">{user.email}</p>}
 
           <div className="mt-8 rounded-[30px] border border-white/10 bg-black/30 p-6 backdrop-blur-sm">
             <div className="flex items-center justify-between">
@@ -73,6 +80,14 @@ export default async function AccountPage() {
 
             <AccountActions isActive={isActive} />
           </div>
+
+          {isActive && (
+            <InvestigatorProfile
+              userId={user.id}
+              initialRole={profile?.role ?? null}
+              initialCallsign={profile?.callsign ?? null}
+            />
+          )}
         </div>
       </div>
     </main>
