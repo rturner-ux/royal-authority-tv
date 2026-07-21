@@ -11,18 +11,14 @@ const DEEP_ZOOM = 19;
 
 // CSI-style establishing shot: render a wide global view first, then
 // swoop the map down into the precise location a beat later.
-function AutoZoomIn({ lat, lng, onArrived }: { lat: number; lng: number; onArrived: () => void }) {
+function AutoZoomIn({ lat, lng }: { lat: number; lng: number }) {
   const map = useMap();
 
   useEffect(() => {
     const startTimer = setTimeout(() => {
       map.flyTo([lat, lng], INITIAL_ZOOM, { duration: 2.4, easeLinearity: 0.25 });
     }, 400);
-    const arrivedTimer = setTimeout(() => onArrived(), 400 + 2400 + 200);
-    return () => {
-      clearTimeout(startTimer);
-      clearTimeout(arrivedTimer);
-    };
+    return () => clearTimeout(startTimer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [map, lat, lng]);
 
@@ -44,10 +40,10 @@ function DeepZoomTrigger({ lat, lng, trigger }: { lat: number; lng: number; trig
   return null;
 }
 
-function markerIcon(clickable: boolean): L.DivIcon {
+function markerIcon(): L.DivIcon {
   return L.divIcon({
     html: `
-      <div style="position:relative;width:26px;height:26px;${clickable ? "cursor:pointer;" : ""}">
+      <div style="position:relative;width:26px;height:26px;cursor:pointer;">
         <div style="position:absolute;inset:-8px;border-radius:50%;border:2px solid #C9A24A;animation:case-map-pulse 1.6s ease-out infinite;"></div>
         <div style="width:26px;height:26px;border-radius:50%;background:#C9A24A;border:3px solid rgba(255,255,255,0.95);box-shadow:0 0 14px rgba(201,162,74,0.9),0 1px 4px rgba(0,0,0,0.6);"></div>
       </div>
@@ -75,7 +71,6 @@ export default function CaseMap({
   preciseLabel?: string | null;
   isActive?: boolean;
 }) {
-  const [ready, setReady] = useState(false);
   const [deepZoomed, setDeepZoomed] = useState(false);
   const [deepZoomTrigger, setDeepZoomTrigger] = useState(0);
   const [showLockedPrompt, setShowLockedPrompt] = useState(false);
@@ -84,7 +79,6 @@ export default function CaseMap({
   const targetLng = preciseLng ?? lng;
 
   function handleMarkerClick() {
-    if (!ready) return;
     if (!isActive) {
       setShowLockedPrompt(true);
       return;
@@ -114,18 +108,18 @@ export default function CaseMap({
           attribution="Tiles &copy; Esri. Source: Esri, Maxar, Earthstar Geographics"
           url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
         />
-        <AutoZoomIn lat={lat} lng={lng} onArrived={() => setReady(true)} />
+        <AutoZoomIn lat={lat} lng={lng} />
         <DeepZoomTrigger lat={targetLat} lng={targetLng} trigger={deepZoomTrigger} />
         <Marker
           position={[lat, lng]}
-          icon={markerIcon(ready)}
+          icon={markerIcon()}
           eventHandlers={{ click: handleMarkerClick }}
         >
           {(preciseLabel || label) && <Popup>{deepZoomed ? preciseLabel || label : label}</Popup>}
         </Marker>
       </MapContainer>
 
-      {ready && !deepZoomed && (
+      {!deepZoomed && (
         <div className="pointer-events-none absolute inset-x-0 bottom-4 flex justify-center px-4">
           <div className="rounded-full border border-[#C9A24A]/40 bg-black/70 px-4 py-2 text-center text-xs font-semibold uppercase tracking-wide text-[#E8D19A] backdrop-blur-sm">
             {isActive
