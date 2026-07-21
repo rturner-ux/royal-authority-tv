@@ -456,6 +456,24 @@ export default async function CaseFileSlugPage({
           </section>
         )}
 
+        {/* VIDEO */}
+        {incident.video_embed_url && (
+          <section className="mt-10 rounded-[32px] border border-white/10 bg-black/30 p-4 backdrop-blur-sm">
+            <div className="mb-3 px-3 text-xs uppercase tracking-[0.3em] text-[#E8D19A]">
+              News Coverage
+            </div>
+            <div className="relative w-full overflow-hidden rounded-2xl" style={{ aspectRatio: "16 / 9" }}>
+              <iframe
+                src={incident.video_embed_url}
+                className="absolute inset-0 h-full w-full"
+                allow="autoplay; fullscreen"
+                allowFullScreen
+                loading="lazy"
+              />
+            </div>
+          </section>
+        )}
+
         {/* TIMELINE + TRANSCRIPT PREVIEW */}
         <section className="mt-10 grid gap-6 lg:grid-cols-[0.95fr_1.05fr]">
           <div className="rounded-[32px] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.04),rgba(255,255,255,0.02))] p-7 backdrop-blur-sm">
