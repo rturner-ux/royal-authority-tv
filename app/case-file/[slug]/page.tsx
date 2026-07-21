@@ -138,7 +138,7 @@ export default async function CaseFileSlugPage({
                 alt={incident.title}
                 fill
                 unoptimized
-                className="object-cover"
+                className="object-cover object-top"
                 priority
               />
             ) : (
