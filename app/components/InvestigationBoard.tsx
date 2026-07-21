@@ -46,6 +46,8 @@ export default function InvestigationBoard() {
   const [results, setResults] = useState<{ cases: Incident[]; people: Person[] }>({ cases: [], people: [] });
   const [suspectName, setSuspectName] = useState("");
   const [suspectNote, setSuspectNote] = useState("");
+  const [hoveredId, setHoveredId] = useState<string | null>(null);
+  const [interactingId, setInteractingId] = useState<string | null>(null);
 
   const boardRef = useRef<HTMLDivElement>(null);
   const dragState = useRef<{ id: string; offsetX: number; offsetY: number } | null>(null);
@@ -154,6 +156,7 @@ export default function InvestigationBoard() {
 
     const boardRect = boardRef.current?.getBoundingClientRect();
     if (!boardRect) return;
+    setInteractingId(item.id);
     dragState.current = {
       id: item.id,
       offsetX: e.clientX - boardRect.left - item.pos_x,
@@ -177,6 +180,7 @@ export default function InvestigationBoard() {
       }
     }
     function onUp() {
+      setInteractingId(null);
       if (dragState.current) {
         const id = dragState.current.id;
         const item = items.find((i) => i.id === id);
@@ -214,6 +218,7 @@ export default function InvestigationBoard() {
   function onResizeMouseDown(e: React.MouseEvent, item: BoardItem) {
     e.stopPropagation();
     e.preventDefault();
+    setInteractingId(item.id);
     resizeState.current = {
       id: item.id,
       startX: e.clientX,
@@ -345,17 +350,22 @@ export default function InvestigationBoard() {
 
         {loading && <div className="p-6 text-sm text-white/60">Loading your board...</div>}
 
-        {items.map((item) => (
+        {items.map((item) => {
+          const isHovered = hoveredId === item.id && interactingId !== item.id;
+          const noteScale = item.item_type === "suspect_note" && isHovered ? 1.4 : 1;
+          return (
           <div
             key={item.id}
             onMouseDown={(e) => onPinMouseDown(e, item)}
+            onMouseEnter={() => setHoveredId(item.id)}
+            onMouseLeave={() => setHoveredId((prev) => (prev === item.id ? null : prev))}
             style={{
               position: "absolute",
               left: item.pos_x,
               top: item.pos_y,
               width: itemWidth(item),
               cursor: connectMode ? "crosshair" : "grab",
-              zIndex: connectFrom === item.id ? 20 : 10,
+              zIndex: isHovered ? 30 : connectFrom === item.id ? 20 : 10,
               outline: connectFrom === item.id ? "2px solid #ef4444" : "none",
             }}
           >
@@ -366,8 +376,9 @@ export default function InvestigationBoard() {
                   backgroundImage: "url('/board/sticky-note.png')",
                   color: "#3a2f10",
                   transform: "rotate(-2deg)",
-                  width: itemWidth(item),
-                  height: itemHeight(item),
+                  width: itemWidth(item) * noteScale,
+                  height: itemHeight(item) * noteScale,
+                  transition: "width 150ms ease, height 150ms ease",
                   filter: "drop-shadow(0 8px 10px rgba(0,0,0,0.55))",
                 }}
               >
@@ -435,7 +446,8 @@ export default function InvestigationBoard() {
               </div>
             )}
           </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
