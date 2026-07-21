@@ -12,6 +12,7 @@ export default function CaseMapClient(props: {
   preciseLng?: number | null;
   preciseLabel?: string | null;
   isActive?: boolean;
+  onDeepZoomChange?: (deepZoomed: boolean) => void;
 }) {
   return <CaseMap {...props} />;
 }

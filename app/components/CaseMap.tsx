@@ -62,6 +62,7 @@ export default function CaseMap({
   preciseLng,
   preciseLabel,
   isActive,
+  onDeepZoomChange,
 }: {
   lat: number;
   lng: number;
@@ -70,6 +71,7 @@ export default function CaseMap({
   preciseLng?: number | null;
   preciseLabel?: string | null;
   isActive?: boolean;
+  onDeepZoomChange?: (deepZoomed: boolean) => void;
 }) {
   const [deepZoomed, setDeepZoomed] = useState(false);
   const [deepZoomTrigger, setDeepZoomTrigger] = useState(0);
@@ -84,6 +86,7 @@ export default function CaseMap({
       return;
     }
     setDeepZoomed(true);
+    onDeepZoomChange?.(true);
     setDeepZoomTrigger((n) => n + 1);
   }
 
@@ -125,8 +128,8 @@ export default function CaseMap({
         <div className="pointer-events-none absolute inset-x-0 bottom-4 flex justify-center px-4">
           <div className="rounded-full border border-[#C9A24A]/40 bg-black/70 px-4 py-2 text-center text-xs font-semibold uppercase tracking-wide text-[#E8D19A] backdrop-blur-sm">
             {isActive
-              ? "Click the location marker for a high-resolution aerial view"
-              : "🔒 Subscribers can unlock a high-resolution aerial view of this location"}
+              ? "Click the location marker for the exact site, then vs. now"
+              : "🔒 Subscribers can unlock the exact site, with then-vs-now context"}
           </div>
         </div>
       )}
@@ -138,7 +141,8 @@ export default function CaseMap({
               Subscriber Feature
             </div>
             <p className="mt-3 text-sm leading-6 text-slate-300">
-              High-resolution aerial imagery of the exact location is reserved for subscribers.
+              A close-up satellite view of the exact site, plus historical then-and-now
+              context where available, is reserved for subscribers.
             </p>
             <div className="mt-5 flex justify-center gap-2">
               <Link

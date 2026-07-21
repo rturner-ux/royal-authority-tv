@@ -258,6 +258,10 @@ export default async function CaseFileSlugPage({
             preciseLng={incident.precise_lng}
             preciseLabel={incident.precise_location_label}
             isActive={isActive}
+            thenPhotoUrl={incident.precise_then_photo_url}
+            thenCaption={incident.precise_then_caption}
+            thenSourceUrl={incident.precise_then_source_url}
+            annotation={incident.precise_annotation}
           />
         </section>
 
