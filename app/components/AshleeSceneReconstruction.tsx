@@ -85,8 +85,8 @@ export default function AshleeSceneReconstruction() {
 
         <p className="mt-4 text-sm leading-7 text-slate-400">
           Marker placement is based on the numbered villa clusters shown on the
-          resort map. Villa 25 aligns with the Cardamom 21–26 zone, while
-          Villa 65 aligns with the Lemongrass 61–68 zone. This is a scene
+          resort map. Villa 25 aligns with the Cardamom 21-26 zone, while
+          Villa 65 aligns with the Lemongrass 61-68 zone. This is a scene
           reconstruction reference, not an exact room-number confirmation.
         </p>
       </section>

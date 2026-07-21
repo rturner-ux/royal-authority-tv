@@ -107,6 +107,8 @@ export default function CaseMap({
         <TileLayer
           attribution="Tiles &copy; Esri. Source: Esri, Maxar, Earthstar Geographics"
           url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+          maxNativeZoom={19}
+          maxZoom={21}
         />
         <AutoZoomIn lat={lat} lng={lng} />
         <DeepZoomTrigger lat={targetLat} lng={targetLng} trigger={deepZoomTrigger} />
