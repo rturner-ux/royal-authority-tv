@@ -1,11 +1,9 @@
 import Link from "next/link";
-import Image from "next/image";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import Navbar from "../../components/Navbar";
 import { getCasesByCollection } from "@/lib/cases";
-import { getCollection } from "@/lib/collections";
-import { CATEGORY_LABELS } from "@/lib/labels";
+import { getCollection, citySlug } from "@/lib/collections";
 
 export async function generateMetadata({
   params,
@@ -32,6 +30,22 @@ export default async function CollectionPage({
 
   const cases = await getCasesByCollection(slug);
 
+  const cityGroups = new Map<string, { city: string; state: string; count: number }>();
+  const uncategorized: typeof cases = [];
+
+  for (const c of cases) {
+    if (!c.city || !c.state) {
+      uncategorized.push(c);
+      continue;
+    }
+    const key = citySlug(c.city, c.state);
+    const existing = cityGroups.get(key);
+    if (existing) existing.count += 1;
+    else cityGroups.set(key, { city: c.city, state: c.state, count: 1 });
+  }
+
+  const cities = Array.from(cityGroups.entries()).sort((a, b) => b[1].count - a[1].count);
+
   return (
     <main className="relative min-h-screen bg-[#05070b] text-white overflow-hidden">
       <div className="absolute inset-0 bg-gradient-to-br from-[#05070b] via-[#08111d] to-black" />
@@ -55,49 +69,33 @@ export default async function CollectionPage({
           <p className="mt-3 max-w-2xl text-gray-400">{collection.description}</p>
         </div>
 
+        <div className="mb-4 text-xs uppercase tracking-[0.25em] text-gray-500">
+          Browse by City
+        </div>
+
         <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-          {cases.map((c) => (
+          {cities.map(([key, group]) => (
             <Link
-              key={c.id}
-              href={`/case-file/${c.slug}`}
-              className="group overflow-hidden rounded-2xl border border-white/10 bg-zinc-900/80 transition hover:scale-[1.02] hover:border-[#C9A24A]/30"
+              key={key}
+              href={`/collections/${slug}/${key}`}
+              className="group flex items-center justify-between gap-4 overflow-hidden rounded-2xl border border-white/10 bg-zinc-900/80 p-6 transition hover:scale-[1.02] hover:border-[#C9A24A]/30"
             >
-              <div className="relative h-[280px] overflow-hidden border-b border-white/10 bg-gradient-to-b from-white/[0.02] to-white/[0.01]">
-                {c.image_url ? (
-                  <Image
-                    src={c.image_url}
-                    alt={c.title}
-                    fill
-                    unoptimized
-                    className="object-cover transition duration-300 group-hover:scale-105"
-                  />
-                ) : (
-                  <div className="flex h-full items-center justify-center text-6xl text-white/10">?</div>
-                )}
-              </div>
-
-              <div className="space-y-3 p-5">
-                <span className="text-xs tracking-[0.2em] text-red-400">
-                  {CATEGORY_LABELS[c.category].toUpperCase()}
-                </span>
-
-                <h3 className="text-xl font-bold text-white">{c.title}</h3>
-
-                <p className="text-sm leading-6 text-gray-400">
-                  {c.location_label || ""}
+              <div>
+                <h3 className="text-xl font-bold text-white">
+                  {group.city}, {group.state}
+                </h3>
+                <p className="mt-2 text-sm text-gray-400">
+                  {group.count} {group.count === 1 ? "case" : "cases"}
                 </p>
-
-                <div className="pt-2">
-                  <span className="text-sm font-semibold text-[#C9A24A] transition group-hover:text-white">
-                    Open Case →
-                  </span>
-                </div>
               </div>
+              <span className="flex-shrink-0 text-[#E8D19A] transition group-hover:translate-x-1">
+                →
+              </span>
             </Link>
           ))}
 
-          {cases.length === 0 && (
-            <div className="flex min-h-[420px] items-center justify-center rounded-2xl border border-dashed border-white/10 bg-zinc-800/30 text-center text-gray-500 md:col-span-2 xl:col-span-3">
+          {cities.length === 0 && uncategorized.length === 0 && (
+            <div className="flex min-h-[280px] items-center justify-center rounded-2xl border border-dashed border-white/10 bg-zinc-800/30 text-center text-gray-500 md:col-span-2 xl:col-span-3">
               <div className="px-6">
                 <div className="text-sm uppercase tracking-[0.25em] text-gray-500">
                   Coming Soon
@@ -109,6 +107,12 @@ export default async function CollectionPage({
             </div>
           )}
         </div>
+
+        {uncategorized.length > 0 && (
+          <div className="mt-6 rounded-2xl border border-dashed border-white/10 bg-zinc-800/20 p-6 text-sm text-gray-500">
+            {uncategorized.length} {uncategorized.length === 1 ? "case hasn't" : "cases haven't"} been assigned a city yet.
+          </div>
+        )}
       </div>
     </main>
   );

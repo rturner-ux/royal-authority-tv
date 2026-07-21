@@ -19,3 +19,7 @@ export const COLLECTIONS: Record<string, Collection> = {
 export function getCollection(slug: string): Collection | null {
   return COLLECTIONS[slug] ?? null
 }
+
+export function citySlug(city: string, state: string): string {
+  return `${city}-${state}`.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '')
+}
