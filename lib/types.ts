@@ -103,6 +103,28 @@ export type InterviewQA = {
   sequence: number
 }
 
+export type CourtRecordType = 'arrest' | 'charge' | 'bond_hearing' | 'docket_event' | 'court_filing'
+
+export type IncidentCourtRecord = {
+  id: string
+  incident_id: string
+  record_type: CourtRecordType
+  title: string
+  description: string | null
+  event_date: string | null
+  document_url: string | null
+  source_url: string | null
+  sequence: number
+}
+
+export type IncidentPhoto = {
+  id: string
+  incident_id: string
+  url: string
+  caption: string | null
+  sequence: number
+}
+
 export type IncidentTranscriptRow = {
   id: string
   incident_id: string

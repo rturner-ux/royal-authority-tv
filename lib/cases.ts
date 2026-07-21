@@ -1,6 +1,6 @@
 import 'server-only'
 import { supabase } from './supabase/server'
-import type { Incident, IncidentUpdate, IncidentPerson, IncidentTranscriptRow, InterviewQA, PersonConnectedCase } from './types'
+import type { Incident, IncidentUpdate, IncidentPerson, IncidentTranscriptRow, IncidentCourtRecord, IncidentPhoto, InterviewQA, PersonConnectedCase } from './types'
 
 async function attachQAAndCases(db: ReturnType<typeof supabase>, people: IncidentPerson[]): Promise<IncidentPerson[]> {
   if (people.length === 0) return people
@@ -97,6 +97,8 @@ export async function getCaseBySlug(slug: string): Promise<{
   updates: IncidentUpdate[]
   people: IncidentPerson[]
   transcript: IncidentTranscriptRow[]
+  courtRecords: IncidentCourtRecord[]
+  photos: IncidentPhoto[]
   relatedIncident: Pick<Incident, 'slug' | 'title' | 'category' | 'image_url'> | null
 } | null> {
   const db = supabase()
@@ -109,7 +111,7 @@ export async function getCaseBySlug(slug: string): Promise<{
   if (error) throw error
   if (!incident || incident.is_hidden) return null
 
-  const [{ data: updates }, { data: people }, { data: transcript }, relatedResult] = await Promise.all([
+  const [{ data: updates }, { data: people }, { data: transcript }, { data: courtRecords }, { data: photos }, relatedResult] = await Promise.all([
     db
       .from('incident_updates')
       .select('*')
@@ -118,6 +120,8 @@ export async function getCaseBySlug(slug: string): Promise<{
       .order('created_at', { ascending: false }),
     db.from('incident_people').select('*').eq('incident_id', incident.id).order('sequence', { ascending: true }),
     db.from('incident_transcripts').select('*').eq('incident_id', incident.id).order('sequence', { ascending: true }),
+    db.from('incident_court_records').select('*').eq('incident_id', incident.id).order('sequence', { ascending: true }),
+    db.from('incident_photos').select('*').eq('incident_id', incident.id).order('sequence', { ascending: true }),
     incident.related_incident_id
       ? db
           .from('incidents')
@@ -132,6 +136,8 @@ export async function getCaseBySlug(slug: string): Promise<{
     updates: (updates ?? []) as IncidentUpdate[],
     people: await attachQAAndCases(db, (people ?? []) as IncidentPerson[]),
     transcript: (transcript ?? []) as IncidentTranscriptRow[],
+    courtRecords: (courtRecords ?? []) as IncidentCourtRecord[],
+    photos: (photos ?? []) as IncidentPhoto[],
     relatedIncident: relatedResult.data,
   }
 }

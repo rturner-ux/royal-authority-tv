@@ -1,4 +1,4 @@
-import type { IncidentCategory, ClaimType, PersonRole } from './types'
+import type { IncidentCategory, ClaimType, PersonRole, CourtRecordType } from './types'
 
 export const CATEGORY_LABELS: Record<IncidentCategory, string> = {
   amber_alert: 'Amber Alert',
@@ -42,6 +42,22 @@ export const CLAIM_TYPE_CLASSES: Record<ClaimType, string> = {
   family_claim: 'border-amber-400/30 bg-amber-400/10 text-amber-300',
   disputed_allegation: 'border-red-500/30 bg-red-500/10 text-red-300',
   unconfirmed_report: 'border-gray-400/30 bg-gray-400/10 text-gray-300',
+}
+
+export const COURT_RECORD_LABELS: Record<CourtRecordType, string> = {
+  arrest: 'Arrest',
+  charge: 'Charge Filed',
+  bond_hearing: 'Bond Hearing',
+  docket_event: 'Docket Event',
+  court_filing: 'Court Filing',
+}
+
+export const COURT_RECORD_CLASSES: Record<CourtRecordType, string> = {
+  arrest: 'border-red-500/30 bg-red-500/10 text-red-300',
+  charge: 'border-orange-400/30 bg-orange-400/10 text-orange-300',
+  bond_hearing: 'border-sky-400/30 bg-sky-400/10 text-sky-300',
+  docket_event: 'border-slate-400/30 bg-slate-400/10 text-slate-300',
+  court_filing: 'border-indigo-400/30 bg-indigo-400/10 text-indigo-300',
 }
 
 export const PERSON_ROLE_LABELS: Record<PersonRole, string> = {

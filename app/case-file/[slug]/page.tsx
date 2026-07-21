@@ -8,7 +8,15 @@ import ShareButton from "../../components/ShareButton";
 import LocationZoomReveal from "../../components/LocationZoomReveal";
 import { getCaseBySlug } from "@/lib/cases";
 import { getSubscriberStatus } from "@/lib/subscription";
-import { CATEGORY_LABELS, CLAIM_TYPE_LABELS, CLAIM_TYPE_CLASSES, PERSON_ROLE_LABELS, PERSON_ROLE_CLASSES } from "@/lib/labels";
+import {
+  CATEGORY_LABELS,
+  CLAIM_TYPE_LABELS,
+  CLAIM_TYPE_CLASSES,
+  PERSON_ROLE_LABELS,
+  PERSON_ROLE_CLASSES,
+  COURT_RECORD_LABELS,
+  COURT_RECORD_CLASSES,
+} from "@/lib/labels";
 
 export async function generateMetadata({
   params,
@@ -33,7 +41,7 @@ export default async function CaseFileSlugPage({
   const result = await getCaseBySlug(slug);
   if (!result) notFound();
 
-  const { incident, updates, people, transcript, relatedIncident } = result;
+  const { incident, updates, people, transcript, courtRecords, photos, relatedIncident } = result;
   const { user, isActive } = await getSubscriberStatus();
   const accountProps = user
     ? { accountLabel: "My Account", accountHref: "/account" }
@@ -382,6 +390,39 @@ export default async function CaseFileSlugPage({
           </section>
         )}
 
+        {/* FUNERAL */}
+        {photos.length > 0 && (
+          <section className="mt-10 rounded-[32px] border border-white/10 bg-black/30 p-7 backdrop-blur-sm">
+            <div className="text-xs uppercase tracking-[0.3em] text-[#E8D19A]">
+              Funeral
+            </div>
+            <div className="mt-6 grid grid-cols-2 gap-4 md:grid-cols-3">
+              {photos.map((p) => (
+                <a
+                  key={p.id}
+                  href={p.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group block"
+                >
+                  <div className="relative aspect-[4/3] w-full overflow-hidden rounded-2xl border border-white/10 bg-white/[0.02]">
+                    <Image
+                      src={p.url}
+                      alt={p.caption || incident.title}
+                      fill
+                      unoptimized
+                      className="object-cover transition group-hover:scale-105"
+                    />
+                  </div>
+                  {p.caption && (
+                    <p className="mt-2 text-xs leading-5 text-slate-400">{p.caption}</p>
+                  )}
+                </a>
+              ))}
+            </div>
+          </section>
+        )}
+
         {/* AI CASE BRIEF */}
         {incident.ai_summary && (
           <section className="mt-10 rounded-[32px] border border-[#C9A24A]/20 bg-gradient-to-br from-[#C9A24A]/[0.07] to-transparent p-7 backdrop-blur-sm">
@@ -471,6 +512,90 @@ export default async function CaseFileSlugPage({
                 loading="lazy"
               />
             </div>
+          </section>
+        )}
+
+        {/* COURT & ARREST RECORDS */}
+        {courtRecords.length > 0 && (
+          <section className="mt-10 rounded-[32px] border border-[#C9A24A]/30 bg-gradient-to-br from-[#C9A24A]/[0.1] to-transparent p-7 backdrop-blur-sm">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <div className="text-xs uppercase tracking-[0.3em] text-[#E8D19A]">
+                  Court &amp; Arrest Records
+                </div>
+                <span className="rounded-full border border-[#C9A24A]/30 bg-[#C9A24A]/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-[#E8D19A]">
+                  Premium
+                </span>
+              </div>
+            </div>
+
+            {isActive ? (
+              <div className="mt-6 space-y-5">
+                {courtRecords.map((r) => (
+                  <div key={r.id} className="border-l border-[#C9A24A]/30 pl-4">
+                    <div className="mb-1 flex flex-wrap items-center gap-2">
+                      <span
+                        className={`rounded-full border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide ${COURT_RECORD_CLASSES[r.record_type]}`}
+                      >
+                        {COURT_RECORD_LABELS[r.record_type]}
+                      </span>
+                      {r.event_date && (
+                        <span className="text-xs text-slate-500">
+                          {new Date(r.event_date + "T12:00:00").toLocaleDateString("en-US", { dateStyle: "medium" })}
+                        </span>
+                      )}
+                    </div>
+                    <div className="text-sm font-semibold text-white">{r.title}</div>
+                    {r.description && (
+                      <div className="mt-1 text-sm leading-7 text-slate-400">{r.description}</div>
+                    )}
+                    <div className="mt-1 flex flex-wrap gap-3">
+                      {r.document_url && (
+                        <a
+                          href={r.document_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-block text-xs text-[#67e8f9]"
+                        >
+                          View Document
+                        </a>
+                      )}
+                      {r.source_url && (
+                        <a
+                          href={r.source_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-block text-xs text-[#67e8f9]"
+                        >
+                          Source
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="relative mt-4">
+                <div className="select-none space-y-4 blur-sm">
+                  {courtRecords.slice(0, 3).map((r) => (
+                    <div key={r.id} className="border-l border-[#C9A24A]/30 pl-4">
+                      <div className="text-sm font-semibold text-white">{r.title}</div>
+                      {r.description && (
+                        <div className="mt-1 text-sm leading-7 text-slate-400">{r.description}</div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+                <div className="absolute inset-0 flex items-end">
+                  <Link
+                    href="/subscribe"
+                    className="inline-flex rounded-2xl bg-[#C9A24A] px-5 py-3 text-sm font-semibold text-black transition hover:opacity-90"
+                  >
+                    Subscribe to View Court &amp; Arrest Records
+                  </Link>
+                </div>
+              </div>
+            )}
           </section>
         )}
 

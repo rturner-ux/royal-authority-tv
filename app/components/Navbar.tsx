@@ -60,15 +60,15 @@ export default function Navbar({
       }`}
     >
       {/* Top row: menu / logo / search */}
-      <div className="relative flex items-center justify-between gap-4 px-4 py-4">
+      <div className="relative flex items-center justify-between gap-1 px-2 py-3 sm:gap-4 sm:px-4 sm:py-4">
         <div className="relative">
           <button
             onClick={() => setMenuOpen((v) => !v)}
-            className="flex items-center gap-2 text-sm font-bold tracking-widest text-white transition hover:text-[#E8D19A]"
+            className="flex items-center gap-1 text-xs font-bold tracking-widest text-white transition hover:text-[#E8D19A] sm:gap-2 sm:text-sm"
             aria-expanded={menuOpen}
           >
-            <span className="text-lg leading-none">☰</span>
-            MENU
+            <span className="text-base leading-none sm:text-lg">☰</span>
+            <span className="hidden sm:inline">MENU</span>
           </button>
 
           {menuOpen && (
@@ -121,7 +121,7 @@ export default function Navbar({
             width={65}
             height={60}
             unoptimized
-            className="h-14 w-auto"
+            className="h-9 w-auto sm:h-14"
           />
         </Link>
 
@@ -130,13 +130,13 @@ export default function Navbar({
             type="search"
             name="q"
             placeholder="Search cases…"
-            className="w-32 rounded-full border border-white/15 bg-white/5 px-4 py-2 text-sm text-white outline-none placeholder:text-slate-500 transition focus:w-48 focus:border-[#C9A24A]/40 sm:w-48 sm:focus:w-64"
+            className="w-16 min-w-0 rounded-full border border-white/15 bg-white/5 px-3 py-1.5 text-xs text-white outline-none placeholder:text-slate-500 transition focus:w-32 focus:border-[#C9A24A]/40 sm:w-32 sm:px-4 sm:py-2 sm:text-sm sm:focus:w-48 md:w-48 md:focus:w-64"
           />
         </form>
       </div>
 
       {/* Primary nav row */}
-      <div className="flex flex-wrap items-center justify-center gap-6 border-t border-white/5 px-4 py-3 text-xs font-semibold uppercase tracking-[0.15em]">
+      <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1.5 border-t border-white/5 px-2 py-2 text-[10px] font-semibold uppercase tracking-[0.08em] sm:gap-6 sm:px-4 sm:py-3 sm:text-xs sm:tracking-[0.15em]">
         {PRIMARY_LINKS.map((link) => (
           <Link
             key={link.href}
@@ -175,7 +175,7 @@ export default function Navbar({
 
       {/* Breadcrumbs */}
       {breadcrumbs && breadcrumbs.length > 0 && (
-        <div className="flex flex-wrap items-center gap-1.5 px-4 py-2 text-xs text-slate-500">
+        <div className="flex flex-wrap items-center gap-1.5 px-2 py-2 text-[11px] text-slate-500 sm:px-4 sm:text-xs">
           {breadcrumbs.map((crumb, i) => (
             <span key={i} className="flex items-center gap-1.5">
               {i > 0 && <span className="text-slate-700">›</span>}
