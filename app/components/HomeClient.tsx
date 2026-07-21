@@ -296,14 +296,24 @@ export default function HomeClient({
     cases: featuredCases.filter((c) => c.category === category),
   }));
 
+  const spotlight = cases[0] ?? featuredCases[0] ?? null;
+  const spotlightYear = spotlight ? new Date(spotlight.published_at).getFullYear() : null;
+  const spotlightIsRecent =
+    spotlight && Date.now() - new Date(spotlight.published_at).getTime() < 1000 * 60 * 60 * 24 * 14;
+
   return (
     <main className="relative min-h-screen overflow-hidden bg-[#020617] text-white">
       {/* Hero */}
       <section className="relative overflow-hidden">
         <div className="absolute inset-0">
-          <Image src="/hero-wallpaper.webp" alt="" fill priority className="object-cover opacity-[0.85]" />
+          {spotlight?.image_url ? (
+            <Image src={spotlight.image_url} alt="" fill priority unoptimized className="object-cover object-top opacity-[0.85]" />
+          ) : (
+            <Image src="/hero-wallpaper.webp" alt="" fill priority className="object-cover opacity-[0.85]" />
+          )}
         </div>
         <div className="absolute inset-0 bg-gradient-to-b from-black/75 via-black/55 to-[#020617]" />
+        <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/20 to-transparent" />
         <FilmGrain opacity={0.045} />
         <div
           aria-hidden="true"
@@ -319,76 +329,119 @@ export default function HomeClient({
           <Navbar accountLabel={accountLabel} accountHref={accountHref} />
         </div>
 
-        <div className="relative z-10 mx-auto flex max-w-3xl flex-col items-center px-6 pb-28 pt-16 text-center lg:pb-36 lg:pt-24">
-          <motion.div
-            initial={{ opacity: 0, rotate: -6, scale: 0.9 }}
-            animate={{ opacity: 1, rotate: -4, scale: 1 }}
-            transition={{ duration: 0.7, delay: 0.5, ease: EASE }}
-            className="mb-8 select-none rounded-sm border-2 border-red-600/60 px-4 py-1.5"
-          >
-            <div className="font-mono text-[10px] uppercase leading-tight tracking-[0.3em] text-red-500/90">
-              Case File: Active
-            </div>
-          </motion.div>
+        {spotlight ? (
+          <div className="relative z-10 mx-auto flex max-w-3xl flex-col px-6 pb-28 pt-16 lg:pb-36 lg:pt-24">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.7, delay: 0.2, ease: EASE }}
+              className="mb-4 text-xs font-black uppercase tracking-[0.3em] text-[#E8D19A]"
+            >
+              {CATEGORY_LABELS[spotlight.category]}
+            </motion.div>
 
-          <motion.h1
-            initial={{ opacity: 0, y: 40 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1, delay: 0.15, ease: EASE }}
-            className="font-serif text-5xl font-medium leading-[1.05] tracking-tight md:text-7xl"
-          >
-            Investigate every case.
-            <span className="block italic text-red-500">Anytime.</span>
-          </motion.h1>
+            <motion.h1
+              initial={{ opacity: 0, y: 40 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 1, delay: 0.3, ease: EASE }}
+              className="font-serif text-4xl font-medium leading-[1.05] tracking-tight md:text-6xl"
+            >
+              {spotlight.title}
+            </motion.h1>
 
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.9, delay: 0.4, ease: EASE }}
-            className="mt-6 max-w-xl text-lg leading-relaxed text-white/80 md:text-xl"
-          >
-            Documentary-grade coverage of missing-persons cases and high-profile investigations.
-            Sourced facts, labeled by confidence, tracked in real time.
-          </motion.p>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.8, delay: 0.5 }}
+              className="mt-4 flex items-center gap-2 text-sm font-semibold text-white/70"
+            >
+              <span>{CATEGORY_LABELS[spotlight.category]}</span>
+              <span className="text-white/30">•</span>
+              <span>{spotlightYear}</span>
+              <span className="text-white/30">•</span>
+              <span className="capitalize">{spotlight.status}</span>
+            </motion.div>
 
+            {spotlight.description && (
+              <motion.p
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.9, delay: 0.6, ease: EASE }}
+                className="mt-6 max-w-xl text-base leading-relaxed text-white/80 md:text-lg"
+              >
+                {spotlight.description}
+              </motion.p>
+            )}
+
+            <motion.div
+              variants={staggerContainer(0.1, 0.8)}
+              initial="hidden"
+              animate="show"
+              className="mt-8 flex flex-wrap items-center gap-4"
+            >
+              <motion.div variants={staggerItem}>
+                <Link
+                  href={`/case-file/${spotlight.slug}`}
+                  className="inline-flex items-center gap-2 rounded-md bg-white px-8 py-4 text-base font-bold text-black shadow-lg transition hover:bg-white/85"
+                >
+                  <span>▶</span> Open Case File
+                </Link>
+              </motion.div>
+              <motion.div variants={staggerItem}>
+                <Link
+                  href={`/case-file/${spotlight.slug}`}
+                  className="inline-flex items-center gap-2 rounded-md border border-white/25 bg-white/10 px-8 py-4 text-base font-bold text-white backdrop-blur-sm transition hover:bg-white/20"
+                >
+                  More Info
+                </Link>
+              </motion.div>
+            </motion.div>
+
+            {spotlightIsRecent && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.8, delay: 1 }}
+                className="mt-10 inline-flex w-fit items-center gap-2 rounded-sm border-2 border-red-600/60 px-4 py-1.5"
+              >
+                <span className="h-1.5 w-1.5 rounded-full bg-red-500" />
+                <span className="font-mono text-[10px] uppercase leading-tight tracking-[0.3em] text-red-500/90">
+                  Recently Updated
+                </span>
+              </motion.div>
+            )}
+          </div>
+        ) : (
+          <div className="relative z-10 mx-auto flex max-w-3xl flex-col items-center px-6 pb-28 pt-16 text-center lg:pb-36 lg:pt-24">
+            <motion.h1
+              initial={{ opacity: 0, y: 40 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 1, delay: 0.15, ease: EASE }}
+              className="font-serif text-5xl font-medium leading-[1.05] tracking-tight md:text-7xl"
+            >
+              Investigate every case.
+              <span className="block italic text-red-500">Anytime.</span>
+            </motion.h1>
+          </div>
+        )}
+
+        <div className="relative z-10 mx-auto max-w-6xl px-6 pb-16 lg:px-16">
           <motion.p
             initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.8, delay: 0.55 }}
-            className="mt-4 text-sm text-white/60"
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8 }}
+            className="text-sm text-white/60"
           >
             Free to browse. No paywall on the map or the case files.
           </motion.p>
 
           <motion.div
-            variants={staggerContainer(0.1, 0.7)}
+            variants={staggerContainer(0.1, 0)}
             initial="hidden"
-            animate="show"
-            className="mt-9 flex flex-wrap items-center justify-center gap-4"
-          >
-            <motion.div variants={staggerItem}>
-              <Link
-                href="/case-file"
-                className="inline-flex items-center gap-2 rounded-md bg-red-600 px-8 py-4 text-base font-bold text-white shadow-lg shadow-red-600/30 transition hover:bg-red-700"
-              >
-                Browse Case Files <span>→</span>
-              </Link>
-            </motion.div>
-            <motion.div variants={staggerItem}>
-              <Link
-                href="/map"
-                className="inline-flex items-center gap-2 rounded-md border border-white/25 bg-black/30 px-8 py-4 text-base font-bold text-white backdrop-blur-sm transition hover:bg-white/10"
-              >
-                Open Live Map
-              </Link>
-            </motion.div>
-          </motion.div>
-
-          <motion.div
-            variants={staggerContainer(0.1, 0.9)}
-            initial="hidden"
-            animate="show"
-            className="mt-16 grid grid-cols-1 gap-4 sm:grid-cols-3"
+            whileInView="show"
+            viewport={{ once: true, margin: "-60px" }}
+            className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-3"
           >
             {statRow.map((s, i) => (
               <motion.div key={s.label} variants={staggerItem} className="rounded-2xl border border-white/10 bg-black/30 p-6 backdrop-blur-sm">
