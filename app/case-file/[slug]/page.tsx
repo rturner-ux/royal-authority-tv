@@ -8,6 +8,7 @@ import ShareButton from "../../components/ShareButton";
 import LocationZoomReveal from "../../components/LocationZoomReveal";
 import PhotoGallery from "../../components/PhotoGallery";
 import CaseLog from "../../components/CaseLog";
+import RecordLastCase from "../../components/RecordLastCase";
 import { getCaseBySlug } from "@/lib/cases";
 import { getCollection } from "@/lib/collections";
 import { getSubscriberStatus } from "@/lib/subscription";
@@ -107,6 +108,7 @@ export default async function CaseFileSlugPage({
       <div className="absolute right-0 top-40 h-[450px] w-[450px] rounded-full bg-[#C9A24A]/10 blur-[140px]" />
 
       <div className="relative z-10 mx-auto max-w-7xl px-6 py-6 lg:px-10">
+        <RecordLastCase slug={slug} title={incident.title} />
         <Navbar
           breadcrumbs={[
             { label: "Home", href: "/" },

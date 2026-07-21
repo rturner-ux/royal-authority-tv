@@ -315,6 +315,8 @@ export default function HomeClient({
   }
 
   const [welcome, setWelcome] = useState<{ role: string; callsign: string | null } | null>(null);
+  const [subscriberCount, setSubscriberCount] = useState<number | null>(null);
+  const [lastCase, setLastCase] = useState<{ slug: string; title: string } | null>(null);
 
   useEffect(() => {
     fetch("/api/subscriber-status")
@@ -322,8 +324,19 @@ export default function HomeClient({
       .then((d) => {
         const role = getRole(d.role);
         if (role) setWelcome({ role: role.title, callsign: d.callsign ?? null });
+        if (typeof d.subscriberCount === "number") setSubscriberCount(d.subscriberCount);
       })
       .catch(() => {});
+
+    try {
+      const stored = localStorage.getItem("ra-last-case");
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (parsed?.slug && parsed?.title) setLastCase({ slug: parsed.slug, title: parsed.title });
+      }
+    } catch {
+      // corrupt/unavailable localStorage isn't worth surfacing an error over
+    }
   }, []);
 
   return (
@@ -375,10 +388,26 @@ export default function HomeClient({
             transition={{ duration: 0.6 }}
             className="relative z-10 mx-auto max-w-6xl px-6 lg:px-16"
           >
-            <div className="mt-4 inline-flex items-center gap-2 rounded-full border border-[#C9A24A]/40 bg-black/50 px-4 py-2 text-sm font-semibold text-[#E8D19A] backdrop-blur-sm">
-              Welcome back, {welcome.role}
-              {welcome.callsign ? ` ${welcome.callsign}` : ""}
+            <div className="mt-4 flex flex-wrap items-center gap-3">
+              <div className="inline-flex items-center gap-2 rounded-full border border-[#C9A24A]/40 bg-black/50 px-4 py-2 text-sm font-semibold text-[#E8D19A] backdrop-blur-sm">
+                Welcome back, {welcome.role}
+                {welcome.callsign ? ` ${welcome.callsign}` : ""}. What case are we working on today?
+              </div>
+              {subscriberCount !== null && (
+                <div className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-black/40 px-3 py-1.5 text-xs font-semibold text-white/70 backdrop-blur-sm">
+                  <span className="h-1.5 w-1.5 rounded-full bg-[#C9A24A]" />
+                  {subscriberCount.toLocaleString()} subscribers on the case
+                </div>
+              )}
             </div>
+            {lastCase && (
+              <Link
+                href={`/case-file/${lastCase.slug}`}
+                className="mt-3 inline-flex items-center gap-2 text-sm font-semibold text-white/80 transition hover:text-white"
+              >
+                Continue where you left off: <span className="text-[#E8D19A]">{lastCase.title}</span> →
+              </Link>
+            )}
           </motion.div>
         )}
 

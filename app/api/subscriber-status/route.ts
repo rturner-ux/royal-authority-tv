@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { getSubscriberStatus } from '@/lib/subscription'
 import { supabaseServerAuth } from '@/lib/supabase/serverAuth'
+import { supabase } from '@/lib/supabase/server'
 
 // Lightweight endpoint just for client components (like Navbar) that need to
 // know subscriber status but can't call the server-only getSubscriberStatus
@@ -23,5 +24,11 @@ export async function GET() {
     callsign = data?.callsign ?? null
   }
 
-  return NextResponse.json({ isActive, role, callsign })
+  const serviceDb = supabase()
+  const { count: subscriberCount } = await serviceDb
+    .from('subscribers')
+    .select('*', { count: 'exact', head: true })
+    .eq('status', 'active')
+
+  return NextResponse.json({ isActive, role, callsign, subscriberCount: subscriberCount ?? 0 })
 }
