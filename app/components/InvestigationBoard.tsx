@@ -27,6 +27,9 @@ const CARD_WIDTH = 160;
 const CARD_HEIGHT = 190;
 const MIN_NOTE_SIZE = 120;
 const MAX_NOTE_SIZE = 420;
+const EDIT_WIDTH = 340;
+const EDIT_HEIGHT = 380;
+const CLICK_MOVE_THRESHOLD = 4;
 
 function itemWidth(item: BoardItem): number {
   return item.item_type === "suspect_note" ? item.width || CARD_WIDTH : CARD_WIDTH;
@@ -48,9 +51,18 @@ export default function InvestigationBoard() {
   const [suspectNote, setSuspectNote] = useState("");
   const [hoveredId, setHoveredId] = useState<string | null>(null);
   const [interactingId, setInteractingId] = useState<string | null>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [draft, setDraft] = useState<{ name: string; note: string } | null>(null);
 
   const boardRef = useRef<HTMLDivElement>(null);
-  const dragState = useRef<{ id: string; offsetX: number; offsetY: number } | null>(null);
+  const dragState = useRef<{
+    id: string;
+    offsetX: number;
+    offsetY: number;
+    startClientX: number;
+    startClientY: number;
+    moved: boolean;
+  } | null>(null);
   const resizeState = useRef<{ id: string; startX: number; startY: number; startWidth: number; startHeight: number } | null>(null);
 
   const loadBoard = useCallback(() => {
@@ -138,6 +150,8 @@ export default function InvestigationBoard() {
   }
 
   function onPinMouseDown(e: React.MouseEvent, item: BoardItem) {
+    if (editingId === item.id) return;
+
     if (connectMode) {
       if (!connectFrom) {
         setConnectFrom(item.id);
@@ -161,7 +175,35 @@ export default function InvestigationBoard() {
       id: item.id,
       offsetX: e.clientX - boardRect.left - item.pos_x,
       offsetY: e.clientY - boardRect.top - item.pos_y,
+      startClientX: e.clientX,
+      startClientY: e.clientY,
+      moved: false,
     };
+  }
+
+  function openEdit(item: BoardItem) {
+    setEditingId(item.id);
+    setDraft({ name: item.suspect_name || "", note: item.note || "" });
+  }
+
+  async function saveAndCloseEdit(id: string) {
+    const current = draft;
+    setEditingId(null);
+    setDraft(null);
+    if (!current) return;
+    setItems((prev) =>
+      prev.map((i) => (i.id === id ? { ...i, suspect_name: current.name || i.suspect_name, note: current.note } : i))
+    );
+    await fetch("/api/board/items", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id, suspectName: current.name, note: current.note }),
+    });
+  }
+
+  function onEditContainerBlur(e: React.FocusEvent<HTMLDivElement>, id: string) {
+    if (e.currentTarget.contains(e.relatedTarget as Node)) return;
+    saveAndCloseEdit(id);
   }
 
   useEffect(() => {
@@ -170,6 +212,12 @@ export default function InvestigationBoard() {
         const rect = boardRef.current.getBoundingClientRect();
         const x = Math.max(0, e.clientX - rect.left - dragState.current.offsetX);
         const y = Math.max(0, e.clientY - rect.top - dragState.current.offsetY);
+        if (
+          Math.abs(e.clientX - dragState.current.startClientX) > CLICK_MOVE_THRESHOLD ||
+          Math.abs(e.clientY - dragState.current.startClientY) > CLICK_MOVE_THRESHOLD
+        ) {
+          dragState.current.moved = true;
+        }
         setItems((prev) => prev.map((i) => (i.id === dragState.current!.id ? { ...i, pos_x: x, pos_y: y } : i)));
       }
       if (resizeState.current) {
@@ -183,14 +231,19 @@ export default function InvestigationBoard() {
       setInteractingId(null);
       if (dragState.current) {
         const id = dragState.current.id;
+        const wasClick = !dragState.current.moved;
         const item = items.find((i) => i.id === id);
         dragState.current = null;
         if (item) {
-          fetch("/api/board/items", {
-            method: "PATCH",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ id, posX: item.pos_x, posY: item.pos_y }),
-          });
+          if (wasClick && item.item_type === "suspect_note") {
+            openEdit(item);
+          } else {
+            fetch("/api/board/items", {
+              method: "PATCH",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ id, posX: item.pos_x, posY: item.pos_y }),
+            });
+          }
         }
       }
       if (resizeState.current) {
@@ -351,7 +404,8 @@ export default function InvestigationBoard() {
         {loading && <div className="p-6 text-sm text-white/60">Loading your board...</div>}
 
         {items.map((item) => {
-          const isHovered = hoveredId === item.id && interactingId !== item.id;
+          const isEditing = editingId === item.id;
+          const isHovered = hoveredId === item.id && interactingId !== item.id && !isEditing;
           const noteScale = item.item_type === "suspect_note" && isHovered ? 1.4 : 1;
           return (
           <div
@@ -364,46 +418,78 @@ export default function InvestigationBoard() {
               left: item.pos_x,
               top: item.pos_y,
               width: itemWidth(item),
-              cursor: connectMode ? "crosshair" : "grab",
-              zIndex: isHovered ? 30 : connectFrom === item.id ? 20 : 10,
+              cursor: connectMode ? "crosshair" : isEditing ? "text" : "grab",
+              zIndex: isEditing ? 40 : isHovered ? 30 : connectFrom === item.id ? 20 : 10,
               outline: connectFrom === item.id ? "2px solid #ef4444" : "none",
             }}
           >
             {item.item_type === "suspect_note" ? (
-              <div
-                className="relative bg-contain bg-center bg-no-repeat p-4 pt-6"
-                style={{
-                  backgroundImage: "url('/board/sticky-note.png')",
-                  color: "#3a2f10",
-                  transform: "rotate(-2deg)",
-                  width: itemWidth(item) * noteScale,
-                  height: itemHeight(item) * noteScale,
-                  transition: "width 150ms ease, height 150ms ease",
-                  filter: "drop-shadow(0 8px 10px rgba(0,0,0,0.55))",
-                }}
-              >
-                <PinIcon />
-                <div className="overflow-hidden text-sm font-bold leading-tight">{item.suspect_name}</div>
-                {item.note && <div className="mt-1.5 overflow-hidden text-xs leading-snug">{item.note}</div>}
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    removeItem(item.id);
-                  }}
-                  className="absolute right-2 top-2 text-xs text-black/40 hover:text-black/70"
-                >
-                  ✕
-                </button>
+              isEditing ? (
                 <div
-                  onMouseDown={(e) => onResizeMouseDown(e, item)}
-                  className="absolute bottom-1 right-1 h-4 w-4 cursor-nwse-resize"
+                  onBlur={(e) => onEditContainerBlur(e, item.id)}
+                  className="relative bg-contain bg-center bg-no-repeat p-4 pt-7"
                   style={{
-                    background:
-                      "linear-gradient(135deg, transparent 0%, transparent 45%, rgba(0,0,0,0.35) 45%, rgba(0,0,0,0.35) 55%, transparent 55%, transparent 100%)",
+                    backgroundImage: "url('/board/sticky-note.png')",
+                    color: "#3a2f10",
+                    width: EDIT_WIDTH,
+                    height: EDIT_HEIGHT,
+                    filter: "drop-shadow(0 12px 18px rgba(0,0,0,0.6))",
                   }}
-                  title="Drag to resize"
-                />
-              </div>
+                >
+                  <PinIcon />
+                  <input
+                    autoFocus
+                    value={draft?.name ?? ""}
+                    onChange={(e) => setDraft((d) => (d ? { ...d, name: e.target.value } : d))}
+                    placeholder="Name"
+                    className="w-full bg-transparent text-base font-bold leading-tight outline-none placeholder:text-black/40"
+                  />
+                  <textarea
+                    value={draft?.note ?? ""}
+                    onChange={(e) => setDraft((d) => (d ? { ...d, note: e.target.value } : d))}
+                    placeholder="Why do you suspect them?"
+                    className="mt-2 h-[calc(100%-72px)] w-full resize-none bg-transparent text-sm leading-relaxed outline-none placeholder:text-black/40"
+                  />
+                  <div className="absolute bottom-2 right-3 text-[10px] font-semibold uppercase tracking-wide text-black/40">
+                    Saves automatically
+                  </div>
+                </div>
+              ) : (
+                <div
+                  className="relative bg-contain bg-center bg-no-repeat p-4 pt-6"
+                  style={{
+                    backgroundImage: "url('/board/sticky-note.png')",
+                    color: "#3a2f10",
+                    transform: "rotate(-2deg)",
+                    width: itemWidth(item) * noteScale,
+                    height: itemHeight(item) * noteScale,
+                    transition: "width 150ms ease, height 150ms ease",
+                    filter: "drop-shadow(0 8px 10px rgba(0,0,0,0.55))",
+                  }}
+                >
+                  <PinIcon />
+                  <div className="overflow-hidden text-sm font-bold leading-tight">{item.suspect_name}</div>
+                  {item.note && <div className="mt-1.5 overflow-hidden text-xs leading-snug">{item.note}</div>}
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      removeItem(item.id);
+                    }}
+                    className="absolute right-2 top-2 text-xs text-black/40 hover:text-black/70"
+                  >
+                    ✕
+                  </button>
+                  <div
+                    onMouseDown={(e) => onResizeMouseDown(e, item)}
+                    className="absolute bottom-1 right-1 h-4 w-4 cursor-nwse-resize"
+                    style={{
+                      background:
+                        "linear-gradient(135deg, transparent 0%, transparent 45%, rgba(0,0,0,0.35) 45%, rgba(0,0,0,0.35) 55%, transparent 55%, transparent 100%)",
+                    }}
+                    title="Drag to resize"
+                  />
+                </div>
+              )
             ) : (
               <div
                 className="relative rounded-sm bg-white p-1.5"
