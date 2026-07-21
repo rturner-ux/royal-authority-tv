@@ -272,11 +272,14 @@ type Stats = { totalCases: number; featuredCases: number; transcriptRows: number
 
 type AccountProps = { accountLabel?: string; accountHref?: string };
 
+const HERO_VIDEO_SEEN_KEY = "ra-hero-video-seen";
+
 export default function HomeClient({
   cases,
   featuredCases,
   stats,
   isLive,
+  spotlightCase,
   accountLabel,
   accountHref,
 }: {
@@ -284,6 +287,7 @@ export default function HomeClient({
   featuredCases: Incident[];
   stats: Stats;
   isLive?: boolean;
+  spotlightCase?: Incident | null;
 } & AccountProps) {
   const statRow = [
     { value: stats.totalCases, label: "Cases Tracked" },
@@ -296,26 +300,62 @@ export default function HomeClient({
     cases: featuredCases.filter((c) => c.category === category),
   }));
 
-  const spotlight = cases[0] ?? featuredCases[0] ?? null;
+  const spotlight = spotlightCase ?? cases[0] ?? featuredCases[0] ?? null;
   const spotlightYear = spotlight ? new Date(spotlight.published_at).getFullYear() : null;
   const spotlightIsRecent =
     spotlight && Date.now() - new Date(spotlight.published_at).getTime() < 1000 * 60 * 60 * 24 * 14;
+
+  const [showHeroVideo, setShowHeroVideo] = useState(false);
+  const [heroMuted, setHeroMuted] = useState(true);
+  const heroVideoRef = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    if (!localStorage.getItem(HERO_VIDEO_SEEN_KEY)) {
+      setShowHeroVideo(true);
+      localStorage.setItem(HERO_VIDEO_SEEN_KEY, "1");
+    }
+  }, []);
+
+  function toggleHeroSound() {
+    const video = heroVideoRef.current;
+    if (!video) return;
+    video.muted = !video.muted;
+    setHeroMuted(video.muted);
+  }
 
   return (
     <main className="relative min-h-screen overflow-hidden bg-[#020617] text-white">
       {/* Hero */}
       <section className="relative overflow-hidden">
         <div className="absolute inset-0">
-          <video
-            src="/video/hero-commercial.mp4"
-            poster={spotlight?.image_url || "/hero-wallpaper.webp"}
-            autoPlay
-            muted
-            loop
-            playsInline
-            className="h-full w-full object-cover opacity-[0.85]"
-          />
+          {showHeroVideo ? (
+            <video
+              ref={heroVideoRef}
+              src="/video/hero-commercial.mp4"
+              poster={spotlight?.image_url || "/hero-wallpaper.webp"}
+              autoPlay
+              muted
+              loop
+              playsInline
+              className="h-full w-full object-cover opacity-[0.85]"
+            />
+          ) : spotlight?.image_url ? (
+            <Image src={spotlight.image_url} alt="" fill priority unoptimized className="object-cover object-top opacity-[0.85]" />
+          ) : (
+            <Image src="/hero-wallpaper.webp" alt="" fill priority className="object-cover opacity-[0.85]" />
+          )}
         </div>
+
+        {showHeroVideo && (
+          <button
+            type="button"
+            onClick={toggleHeroSound}
+            aria-label={heroMuted ? "Unmute video" : "Mute video"}
+            className="absolute right-6 top-24 z-20 flex h-11 w-11 items-center justify-center rounded-full border border-white/30 bg-black/50 text-lg text-white backdrop-blur-sm transition hover:bg-black/70 lg:right-16"
+          >
+            {heroMuted ? "🔇" : "🔊"}
+          </button>
+        )}
         <div className="absolute inset-0 bg-gradient-to-b from-black/75 via-black/55 to-[#020617]" />
         <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/20 to-transparent" />
         <FilmGrain opacity={0.045} />

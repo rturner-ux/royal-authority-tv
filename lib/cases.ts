@@ -61,6 +61,22 @@ export async function getTrendingCases(): Promise<Incident[]> {
   return (data ?? []) as Incident[]
 }
 
+// Picks a random case for the homepage hero spotlight -- pulls from every
+// visible, linkable case in the database (not just featured/trending), so
+// the same handful of cases don't dominate every page load.
+export async function getRandomSpotlightCase(): Promise<Incident | null> {
+  const db = supabase()
+  const { data, error } = await db
+    .from('incidents')
+    .select('*')
+    .eq('is_hidden', false)
+    .not('slug', 'is', null)
+
+  if (error) throw error
+  if (!data || data.length === 0) return null
+  return data[Math.floor(Math.random() * data.length)] as Incident
+}
+
 // Unlike getFeaturedCases/getTrendingCases, this deliberately includes cases
 // without a slug (most automated-ingestion cases never get one) since the
 // pattern intelligence tool correlates against the full map, not just cases
