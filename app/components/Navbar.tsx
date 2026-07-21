@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { getRole } from "@/lib/roles";
 
 export type Crumb = { label: string; href?: string };
 
@@ -43,13 +44,21 @@ export default function Navbar({
 }: NavbarProps) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [isActive, setIsActive] = useState(false);
+  const [roleKey, setRoleKey] = useState<string | null>(null);
+  const [callsign, setCallsign] = useState<string | null>(null);
 
   useEffect(() => {
     fetch("/api/subscriber-status")
       .then((r) => r.json())
-      .then((d) => setIsActive(Boolean(d.isActive)))
+      .then((d) => {
+        setIsActive(Boolean(d.isActive));
+        setRoleKey(d.role ?? null);
+        setCallsign(d.callsign ?? null);
+      })
       .catch(() => setIsActive(false));
   }, []);
+
+  const role = getRole(roleKey);
 
   return (
     <div
@@ -154,11 +163,22 @@ export default function Navbar({
             href={accountHref}
             className="hidden flex-shrink-0 items-center gap-1.5 text-xs font-semibold uppercase tracking-[0.1em] text-[#C9A24A] transition hover:text-[#E8D19A] sm:flex"
           >
-            {accountLabel}
-            {isActive && (
-              <span className="rounded-full border border-[#C9A24A]/40 bg-[#C9A24A]/10 px-1.5 py-0.5 text-[9px] font-bold tracking-wide text-[#E8D19A]">
-                PREMIUM
-              </span>
+            {role ? (
+              <>
+                <span className="relative h-6 w-6 flex-shrink-0">
+                  <Image src={role.badge} alt="" fill unoptimized className="object-contain" />
+                </span>
+                <span>{callsign || role.title}</span>
+              </>
+            ) : (
+              <>
+                {accountLabel}
+                {isActive && (
+                  <span className="rounded-full border border-[#C9A24A]/40 bg-[#C9A24A]/10 px-1.5 py-0.5 text-[9px] font-bold tracking-wide text-[#E8D19A]">
+                    PREMIUM
+                  </span>
+                )}
+              </>
             )}
           </Link>
         )}

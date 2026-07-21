@@ -10,6 +10,7 @@ import Navbar from "./Navbar";
 import FilmGrain from "./FilmGrain";
 import CaseRow from "./CaseRow";
 import CaseHoverCard, { COLLAPSED_WIDTH, COLLAPSED_HEIGHT } from "./CaseHoverCard";
+import { getRole } from "@/lib/roles";
 
 const EASE = [0.16, 1, 0.3, 1] as [number, number, number, number];
 
@@ -313,6 +314,18 @@ export default function HomeClient({
     setHeroMuted(video.muted);
   }
 
+  const [welcome, setWelcome] = useState<{ role: string; callsign: string | null } | null>(null);
+
+  useEffect(() => {
+    fetch("/api/subscriber-status")
+      .then((r) => r.json())
+      .then((d) => {
+        const role = getRole(d.role);
+        if (role) setWelcome({ role: role.title, callsign: d.callsign ?? null });
+      })
+      .catch(() => {});
+  }, []);
+
   return (
     <main className="relative min-h-screen overflow-hidden bg-[#020617] text-white">
       {/* Hero */}
@@ -354,6 +367,20 @@ export default function HomeClient({
         <div className="relative z-10 mx-auto max-w-6xl px-6 pt-6 lg:px-16">
           <Navbar accountLabel={accountLabel} accountHref={accountHref} />
         </div>
+
+        {welcome && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            className="relative z-10 mx-auto max-w-6xl px-6 lg:px-16"
+          >
+            <div className="mt-4 inline-flex items-center gap-2 rounded-full border border-[#C9A24A]/40 bg-black/50 px-4 py-2 text-sm font-semibold text-[#E8D19A] backdrop-blur-sm">
+              Welcome back, {welcome.role}
+              {welcome.callsign ? ` ${welcome.callsign}` : ""}
+            </div>
+          </motion.div>
+        )}
 
         {spotlight ? (
           <div className="relative z-10 mx-auto flex max-w-3xl flex-col px-6 pb-28 pt-16 lg:pb-36 lg:pt-24">
