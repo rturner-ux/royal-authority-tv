@@ -20,21 +20,30 @@ export default function InvestigatorProfile({
   const [picking, setPicking] = useState(!initialRole);
   const [draftCallsign, setDraftCallsign] = useState(initialCallsign ?? "");
   const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
 
   const role = getRole(roleKey);
 
   async function saveRole(key: string) {
     setSaving(true);
+    setSaveError(null);
     const db = supabaseBrowser();
-    await db.from("subscriber_profiles").upsert({
+    const { error } = await db.from("subscriber_profiles").upsert({
       user_id: userId,
       role: key,
       callsign: draftCallsign.trim() || null,
     });
+    setSaving(false);
+
+    if (error) {
+      console.error("Failed to save investigator profile:", error);
+      setSaveError("Couldn't save that. Please try again.");
+      return;
+    }
+
     setRoleKey(key);
     setCallsign(draftCallsign.trim());
     setPicking(false);
-    setSaving(false);
     playSfx("pin");
   }
 
@@ -47,6 +56,12 @@ export default function InvestigatorProfile({
         <p className="mt-2 text-sm leading-6 text-slate-400">
           Pick a role, or skip this entirely. It's just for you.
         </p>
+
+        {saveError && (
+          <p className="mt-3 rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-xs text-red-300">
+            {saveError}
+          </p>
+        )}
 
         <input
           value={draftCallsign}
