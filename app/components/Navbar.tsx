@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export type Crumb = { label: string; href?: string };
 
@@ -28,15 +28,37 @@ const MENU_LINKS = [
   { label: "My Account", href: "/account" },
 ];
 
+// Only shown to active subscribers -- both in the primary link row and the
+// hamburger menu, so these tools are actually reachable instead of only
+// linked from deep inside the Member Room page.
+const SUBSCRIBER_LINKS = [
+  { label: "Investigation Board", href: "/investigation-board" },
+  { label: "Pattern Intelligence", href: "/pattern-intelligence" },
+];
+
 export default function Navbar({
   breadcrumbs,
   accountLabel,
   accountHref,
 }: NavbarProps) {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [isActive, setIsActive] = useState(false);
+
+  useEffect(() => {
+    fetch("/api/subscriber-status")
+      .then((r) => r.json())
+      .then((d) => setIsActive(Boolean(d.isActive)))
+      .catch(() => setIsActive(false));
+  }, []);
 
   return (
-    <div className="sticky top-0 z-30 mb-10 border-b border-white/10 bg-[#05070b]/90 backdrop-blur-xl">
+    <div
+      className={`sticky top-0 z-30 mb-10 backdrop-blur-xl transition-colors ${
+        isActive
+          ? "border-b border-[#C9A24A]/50 bg-[#0a0704]/90"
+          : "border-b border-white/10 bg-[#05070b]/90"
+      }`}
+    >
       {/* Top row: menu / logo / search */}
       <div className="relative flex items-center justify-between gap-4 px-4 py-4">
         <div className="relative">
@@ -55,7 +77,7 @@ export default function Navbar({
                 className="fixed inset-0 z-40"
                 onClick={() => setMenuOpen(false)}
               />
-              <div className="absolute left-0 top-full z-50 mt-3 w-56 overflow-hidden rounded-2xl border border-white/10 bg-[#0a0d14] shadow-2xl">
+              <div className="absolute left-0 top-full z-50 mt-3 w-60 overflow-hidden rounded-2xl border border-white/10 bg-[#0a0d14] shadow-2xl">
                 {MENU_LINKS.map((link) => (
                   <Link
                     key={link.href}
@@ -66,6 +88,24 @@ export default function Navbar({
                     {link.label}
                   </Link>
                 ))}
+
+                {isActive && (
+                  <>
+                    <div className="border-t border-[#C9A24A]/20 px-4 pb-1 pt-3 text-[10px] font-bold uppercase tracking-[0.2em] text-[#E8D19A]">
+                      Subscriber Tools
+                    </div>
+                    {SUBSCRIBER_LINKS.map((link) => (
+                      <Link
+                        key={link.href}
+                        href={link.href}
+                        onClick={() => setMenuOpen(false)}
+                        className="block bg-[#C9A24A]/[0.06] px-4 py-3 text-sm text-[#E8D19A] transition hover:bg-[#C9A24A]/10"
+                      >
+                        {link.label}
+                      </Link>
+                    ))}
+                  </>
+                )}
               </div>
             </>
           )}
@@ -107,12 +147,28 @@ export default function Navbar({
           </Link>
         ))}
 
+        {isActive &&
+          SUBSCRIBER_LINKS.map((link) => (
+            <Link
+              key={link.href}
+              href={link.href}
+              className="text-[#E8D19A] transition hover:text-white"
+            >
+              {link.label}
+            </Link>
+          ))}
+
         {accountLabel && accountHref && (
           <Link
             href={accountHref}
-            className="text-[#C9A24A] transition hover:text-[#E8D19A]"
+            className="flex items-center gap-1.5 text-[#C9A24A] transition hover:text-[#E8D19A]"
           >
             {accountLabel}
+            {isActive && (
+              <span className="rounded-full border border-[#C9A24A]/40 bg-[#C9A24A]/10 px-1.5 py-0.5 text-[9px] font-bold tracking-wide text-[#E8D19A]">
+                PREMIUM
+              </span>
+            )}
           </Link>
         )}
       </div>
