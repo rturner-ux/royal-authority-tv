@@ -6,7 +6,7 @@ import type { Incident } from "@/lib/types";
 import { CATEGORY_LABELS } from "@/lib/labels";
 import { playSfx } from "@/lib/sfx";
 
-export default function CaseCard({ incident }: { incident: Incident }) {
+export default function FeaturedCaseCard({ incident }: { incident: Incident }) {
   return (
     <Link
       href={`/case-file/${incident.slug}`}
@@ -28,13 +28,14 @@ export default function CaseCard({ incident }: { incident: Incident }) {
       </div>
 
       <div className="space-y-3 p-5">
-        <span className="text-xs tracking-[0.2em] text-red-400">
-          {CATEGORY_LABELS[incident.category].toUpperCase()}
-        </span>
+        <span className="text-xs tracking-[0.2em] text-red-400">FEATURED CASE</span>
 
         <h3 className="text-xl font-bold text-white">{incident.title}</h3>
 
-        <p className="text-sm leading-6 text-gray-400">{incident.location_label || ""}</p>
+        <p className="text-sm leading-6 text-gray-400">
+          {CATEGORY_LABELS[incident.category]}
+          {incident.location_label ? ` · ${incident.location_label}` : ""}
+        </p>
 
         <div className="pt-2">
           <span className="text-sm font-semibold text-[#C9A24A] transition group-hover:text-white">

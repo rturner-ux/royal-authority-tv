@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, useCallback } from "react";
 import Link from "next/link";
+import { playSfx } from "@/lib/sfx";
 
 type Incident = { id: string; title: string; slug: string | null; category: string; image_url: string | null };
 type Person = { id: string; name: string; role: string; photo_url: string | null; incident_id: string };
@@ -101,7 +102,10 @@ export default function InvestigationBoard() {
       body: JSON.stringify({ itemType: "case_pin", incidentId: incident.id, posX: 60 + Math.random() * 200, posY: 60 + Math.random() * 200 }),
     });
     const d = await res.json();
-    if (d.success) setItems((prev) => [...prev, { ...d.item, incident, person: null }]);
+    if (d.success) {
+      setItems((prev) => [...prev, { ...d.item, incident, person: null }]);
+      playSfx("pin");
+    }
     setShowAdd(false);
     setQuery("");
   }
@@ -113,7 +117,10 @@ export default function InvestigationBoard() {
       body: JSON.stringify({ itemType: "person_pin", personId: person.id, posX: 60 + Math.random() * 200, posY: 60 + Math.random() * 200 }),
     });
     const d = await res.json();
-    if (d.success) setItems((prev) => [...prev, { ...d.item, incident: null, person }]);
+    if (d.success) {
+      setItems((prev) => [...prev, { ...d.item, incident: null, person }]);
+      playSfx("pin");
+    }
     setShowAdd(false);
     setQuery("");
   }
@@ -132,7 +139,10 @@ export default function InvestigationBoard() {
       }),
     });
     const d = await res.json();
-    if (d.success) setItems((prev) => [...prev, { ...d.item, incident: null, person: null }]);
+    if (d.success) {
+      setItems((prev) => [...prev, { ...d.item, incident: null, person: null }]);
+      playSfx("pin");
+    }
     setSuspectName("");
     setSuspectNote("");
     setShowAdd(false);
@@ -162,7 +172,12 @@ export default function InvestigationBoard() {
           body: JSON.stringify({ itemAId: connectFrom, itemBId: item.id }),
         })
           .then((r) => r.json())
-          .then((d) => d.success && setConnections((prev) => [...prev, d.connection]));
+          .then((d) => {
+            if (d.success) {
+              setConnections((prev) => [...prev, d.connection]);
+              playSfx("connect");
+            }
+          });
         setConnectFrom(null);
       }
       return;
@@ -184,6 +199,7 @@ export default function InvestigationBoard() {
   function openEdit(item: BoardItem) {
     setEditingId(item.id);
     setDraft({ name: item.suspect_name || "", note: item.note || "" });
+    playSfx("paper");
   }
 
   async function saveAndCloseEdit(id: string) {

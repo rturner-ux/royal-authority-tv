@@ -1,8 +1,7 @@
 import Link from "next/link";
-import Image from "next/image";
 import Navbar from "../components/Navbar";
+import FeaturedCaseCard from "../components/FeaturedCaseCard";
 import { getFeaturedCases } from "@/lib/cases";
-import { CATEGORY_LABELS } from "@/lib/labels";
 import { COLLECTIONS } from "@/lib/collections";
 
 export default async function CaseFilePage() {
@@ -52,44 +51,7 @@ export default async function CaseFilePage() {
 
         <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
           {cases.map((c) => (
-            <Link
-              key={c.id}
-              href={`/case-file/${c.slug}`}
-              className="group overflow-hidden rounded-2xl border border-white/10 bg-zinc-900/80 transition hover:scale-[1.02] hover:border-[#C9A24A]/30"
-            >
-              <div className="relative h-[280px] overflow-hidden border-b border-white/10 bg-gradient-to-b from-white/[0.02] to-white/[0.01]">
-                {c.image_url ? (
-                  <Image
-                    src={c.image_url}
-                    alt={c.title}
-                    fill
-                    unoptimized
-                    className="object-cover transition duration-300 group-hover:scale-105"
-                  />
-                ) : (
-                  <div className="flex h-full items-center justify-center text-6xl text-white/10">?</div>
-                )}
-              </div>
-
-              <div className="space-y-3 p-5">
-                <span className="text-xs tracking-[0.2em] text-red-400">
-                  FEATURED CASE
-                </span>
-
-                <h3 className="text-xl font-bold text-white">{c.title}</h3>
-
-                <p className="text-sm leading-6 text-gray-400">
-                  {CATEGORY_LABELS[c.category]}
-                  {c.location_label ? ` · ${c.location_label}` : ""}
-                </p>
-
-                <div className="pt-2">
-                  <span className="text-sm font-semibold text-[#C9A24A] transition group-hover:text-white">
-                    Open Case →
-                  </span>
-                </div>
-              </div>
-            </Link>
+            <FeaturedCaseCard key={c.id} incident={c} />
           ))}
 
           <div className="flex min-h-[420px] items-center justify-center rounded-2xl border border-dashed border-white/10 bg-zinc-800/30 text-center text-gray-500">
