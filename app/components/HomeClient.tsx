@@ -306,11 +306,15 @@ export default function HomeClient({
       {/* Hero */}
       <section className="relative overflow-hidden">
         <div className="absolute inset-0">
-          {spotlight?.image_url ? (
-            <Image src={spotlight.image_url} alt="" fill priority unoptimized className="object-cover object-top opacity-[0.85]" />
-          ) : (
-            <Image src="/hero-wallpaper.webp" alt="" fill priority className="object-cover opacity-[0.85]" />
-          )}
+          <video
+            src="/video/hero-commercial.mp4"
+            poster={spotlight?.image_url || "/hero-wallpaper.webp"}
+            autoPlay
+            muted
+            loop
+            playsInline
+            className="h-full w-full object-cover opacity-[0.85]"
+          />
         </div>
         <div className="absolute inset-0 bg-gradient-to-b from-black/75 via-black/55 to-[#020617]" />
         <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/20 to-transparent" />
