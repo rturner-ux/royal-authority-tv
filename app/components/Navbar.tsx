@@ -59,9 +59,9 @@ export default function Navbar({
           : "border-b border-white/10 bg-[#05070b]/90"
       }`}
     >
-      {/* Top row: menu / logo / search */}
-      <div className="relative flex items-center justify-between gap-1 px-2 py-3 sm:gap-4 sm:px-4 sm:py-4">
-        <div className="relative">
+      {/* Single row: menu / logo / links (xl+) / account / search -- nothing wraps, ever */}
+      <div className="flex items-center gap-3 px-2 py-3 sm:gap-4 sm:px-4 sm:py-4">
+        <div className="relative flex-shrink-0">
           <button
             onClick={() => setMenuOpen((v) => !v)}
             className="flex items-center gap-1 text-xs font-bold tracking-widest text-white transition hover:text-[#E8D19A] sm:gap-2 sm:text-sm"
@@ -111,57 +111,48 @@ export default function Navbar({
           )}
         </div>
 
-        <Link
-          href="/"
-          className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
-        >
+        <Link href="/" className="flex-shrink-0">
           <Image
             src="/royal-authority-wordmark.png"
             alt="Royal Authority TV"
             width={65}
             height={60}
             unoptimized
-            className="h-9 w-auto sm:h-14"
+            className="h-9 w-auto sm:h-11"
           />
         </Link>
 
-        <form action="/search" className="flex items-center">
-          <input
-            type="search"
-            name="q"
-            placeholder="Search cases…"
-            className="w-16 min-w-0 rounded-full border border-white/15 bg-white/5 px-3 py-1.5 text-xs text-white outline-none placeholder:text-slate-500 transition focus:w-32 focus:border-[#C9A24A]/40 sm:w-32 sm:px-4 sm:py-2 sm:text-sm sm:focus:w-48 md:w-48 md:focus:w-64"
-          />
-        </form>
-      </div>
-
-      {/* Primary nav row */}
-      <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1.5 border-t border-white/5 px-2 py-2 text-[10px] font-semibold uppercase tracking-[0.08em] sm:gap-6 sm:px-4 sm:py-3 sm:text-xs sm:tracking-[0.15em]">
-        {PRIMARY_LINKS.map((link) => (
-          <Link
-            key={link.href}
-            href={link.href}
-            className="text-slate-300 transition hover:text-[#E8D19A]"
-          >
-            {link.label}
-          </Link>
-        ))}
-
-        {isActive &&
-          SUBSCRIBER_LINKS.map((link) => (
+        {/* Nav links: only shown once there's room for all of them in one line;
+            below that breakpoint everything still works via the hamburger menu. */}
+        <div className="hidden min-w-0 flex-1 items-center gap-4 overflow-hidden whitespace-nowrap text-[11px] font-semibold uppercase tracking-[0.1em] xl:flex">
+          {PRIMARY_LINKS.map((link) => (
             <Link
               key={link.href}
               href={link.href}
-              className="text-[#E8D19A] transition hover:text-white"
+              className="text-slate-300 transition hover:text-[#E8D19A]"
             >
               {link.label}
             </Link>
           ))}
 
+          {isActive &&
+            SUBSCRIBER_LINKS.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className="text-[#E8D19A] transition hover:text-white"
+              >
+                {link.label}
+              </Link>
+            ))}
+        </div>
+
+        <div className="min-w-0 flex-1 xl:hidden" />
+
         {accountLabel && accountHref && (
           <Link
             href={accountHref}
-            className="flex items-center gap-1.5 text-[#C9A24A] transition hover:text-[#E8D19A]"
+            className="hidden flex-shrink-0 items-center gap-1.5 text-xs font-semibold uppercase tracking-[0.1em] text-[#C9A24A] transition hover:text-[#E8D19A] sm:flex"
           >
             {accountLabel}
             {isActive && (
@@ -171,6 +162,15 @@ export default function Navbar({
             )}
           </Link>
         )}
+
+        <form action="/search" className="flex flex-shrink-0 items-center">
+          <input
+            type="search"
+            name="q"
+            placeholder="Search cases…"
+            className="w-16 min-w-0 rounded-full border border-white/15 bg-white/5 px-3 py-1.5 text-xs text-white outline-none placeholder:text-slate-500 transition focus:w-32 focus:border-[#C9A24A]/40 sm:w-32 sm:px-4 sm:py-2 sm:text-sm sm:focus:w-48 md:w-48 md:focus:w-64"
+          />
+        </form>
       </div>
 
       {/* Breadcrumbs */}
