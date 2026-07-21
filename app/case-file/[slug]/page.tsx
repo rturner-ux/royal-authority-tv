@@ -250,7 +250,15 @@ export default async function CaseFileSlugPage({
 
         {/* LOCATION MAP */}
         <section className="mt-10 overflow-hidden rounded-[32px] border border-white/10 bg-black/30 p-6 backdrop-blur-sm">
-          <LocationZoomReveal lat={incident.lat} lng={incident.lng} label={incident.location_label} />
+          <LocationZoomReveal
+            lat={incident.lat}
+            lng={incident.lng}
+            label={incident.location_label}
+            preciseLat={incident.precise_lat}
+            preciseLng={incident.precise_lng}
+            preciseLabel={incident.precise_location_label}
+            isActive={isActive}
+          />
         </section>
 
         {/* SCENE TEASER */}

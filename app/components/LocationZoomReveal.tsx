@@ -7,10 +7,18 @@ export default function LocationZoomReveal({
   lat,
   lng,
   label,
+  preciseLat,
+  preciseLng,
+  preciseLabel,
+  isActive,
 }: {
   lat: number;
   lng: number;
   label?: string | null;
+  preciseLat?: number | null;
+  preciseLng?: number | null;
+  preciseLabel?: string | null;
+  isActive?: boolean;
 }) {
   const [revealed, setRevealed] = useState(false);
 
@@ -37,7 +45,15 @@ export default function LocationZoomReveal({
 
   return (
     <div className="h-[380px] w-full overflow-hidden rounded-2xl md:h-[440px]">
-      <CaseMapClient lat={lat} lng={lng} label={label} />
+      <CaseMapClient
+        lat={lat}
+        lng={lng}
+        label={label}
+        preciseLat={preciseLat}
+        preciseLng={preciseLng}
+        preciseLabel={preciseLabel}
+        isActive={isActive}
+      />
     </div>
   );
 }

@@ -8,6 +8,10 @@ export default function CaseMapClient(props: {
   lat: number;
   lng: number;
   label?: string | null;
+  preciseLat?: number | null;
+  preciseLng?: number | null;
+  preciseLabel?: string | null;
+  isActive?: boolean;
 }) {
   return <CaseMap {...props} />;
 }
