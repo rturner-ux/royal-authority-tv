@@ -427,9 +427,10 @@ export default function InvestigationBoard() {
               isEditing ? (
                 <div
                   onBlur={(e) => onEditContainerBlur(e, item.id)}
-                  className="relative bg-contain bg-center bg-no-repeat p-4 pt-7"
+                  className="relative bg-no-repeat p-4 pt-7"
                   style={{
                     backgroundImage: "url('/board/sticky-note.png')",
+                    backgroundSize: "100% 100%",
                     color: "#3a2f10",
                     width: EDIT_WIDTH,
                     height: EDIT_HEIGHT,
@@ -456,9 +457,10 @@ export default function InvestigationBoard() {
                 </div>
               ) : (
                 <div
-                  className="relative bg-contain bg-center bg-no-repeat p-4 pt-6"
+                  className="relative bg-no-repeat p-4 pt-6"
                   style={{
                     backgroundImage: "url('/board/sticky-note.png')",
+                    backgroundSize: "100% 100%",
                     color: "#3a2f10",
                     transform: "rotate(-2deg)",
                     width: itemWidth(item) * noteScale,
