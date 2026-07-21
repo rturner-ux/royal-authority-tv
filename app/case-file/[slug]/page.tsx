@@ -9,6 +9,7 @@ import LocationZoomReveal from "../../components/LocationZoomReveal";
 import PhotoGallery from "../../components/PhotoGallery";
 import CaseLog from "../../components/CaseLog";
 import { getCaseBySlug } from "@/lib/cases";
+import { getCollection } from "@/lib/collections";
 import { getSubscriberStatus } from "@/lib/subscription";
 import {
   CATEGORY_LABELS,
@@ -42,6 +43,7 @@ export default async function CaseFileSlugPage({
   if (!result) notFound();
 
   const { incident, updates, people, transcript, courtRecords, photos, relatedIncident } = result;
+  const incidentCollection = incident.collection_slug ? getCollection(incident.collection_slug) : null;
   const { user, isActive } = await getSubscriberStatus();
   const accountProps = user
     ? { accountLabel: "My Account", accountHref: "/account" }
@@ -151,6 +153,15 @@ export default async function CaseFileSlugPage({
               <div className="text-xs uppercase tracking-[0.3em] text-red-400">
                 Featured Investigation
               </div>
+            )}
+
+            {incidentCollection && (
+              <Link
+                href={`/collections/${incidentCollection.slug}`}
+                className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-[#E8D19A] transition hover:text-white"
+              >
+                Part of: {incidentCollection.name} →
+              </Link>
             )}
 
             <h2 className="font-serif text-4xl font-bold leading-tight md:text-5xl">

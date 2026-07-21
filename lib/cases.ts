@@ -73,6 +73,20 @@ export async function getAllVisibleCases(): Promise<Incident[]> {
   return (data ?? []) as Incident[]
 }
 
+export async function getCasesByCollection(collectionSlug: string): Promise<Incident[]> {
+  const db = supabase()
+  const { data, error } = await db
+    .from('incidents')
+    .select('*')
+    .eq('collection_slug', collectionSlug)
+    .eq('is_hidden', false)
+    .not('slug', 'is', null)
+    .order('published_at', { ascending: false })
+
+  if (error) throw error
+  return (data ?? []) as Incident[]
+}
+
 export async function getSiteStats(): Promise<{
   totalCases: number
   featuredCases: number

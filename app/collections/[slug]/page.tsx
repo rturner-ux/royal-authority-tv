@@ -1,12 +1,36 @@
 import Link from "next/link";
 import Image from "next/image";
-import Navbar from "../components/Navbar";
-import { getFeaturedCases } from "@/lib/cases";
+import { notFound } from "next/navigation";
+import type { Metadata } from "next";
+import Navbar from "../../components/Navbar";
+import { getCasesByCollection } from "@/lib/cases";
+import { getCollection } from "@/lib/collections";
 import { CATEGORY_LABELS } from "@/lib/labels";
-import { COLLECTIONS } from "@/lib/collections";
 
-export default async function CaseFilePage() {
-  const cases = await getFeaturedCases();
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}): Promise<Metadata> {
+  const { slug } = await params;
+  const collection = getCollection(slug);
+  if (!collection) return { title: "Royal Authority TV" };
+  return {
+    title: `${collection.name} | Royal Authority TV`,
+    description: collection.description,
+  };
+}
+
+export default async function CollectionPage({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}) {
+  const { slug } = await params;
+  const collection = getCollection(slug);
+  if (!collection) notFound();
+
+  const cases = await getCasesByCollection(slug);
 
   return (
     <main className="relative min-h-screen bg-[#05070b] text-white overflow-hidden">
@@ -15,39 +39,20 @@ export default async function CaseFilePage() {
       <div className="absolute right-0 top-40 h-[450px] w-[450px] rounded-full bg-[#C9A24A]/10 blur-[140px]" />
 
       <div className="relative z-10 mx-auto max-w-6xl px-6 py-6">
-        <Navbar breadcrumbs={[{ label: "Home", href: "/" }, { label: "Case Files" }]} />
+        <Navbar
+          breadcrumbs={[
+            { label: "Home", href: "/" },
+            { label: "Case Files", href: "/case-file" },
+            { label: collection.name },
+          ]}
+        />
 
         <div className="mb-12">
           <div className="text-xs uppercase tracking-[0.34em] text-[#E8D19A]">
-            Royal Authority TV
+            Collection
           </div>
-          <h1 className="mt-3 text-4xl font-bold md:text-5xl">Case Files</h1>
-          <p className="mt-3 max-w-2xl text-gray-400">
-            Investigative breakdowns. Real stories. Verified sources.
-          </p>
-        </div>
-
-        <div className="mb-10 grid gap-4 sm:grid-cols-2">
-          {Object.values(COLLECTIONS).map((collection) => (
-            <Link
-              key={collection.slug}
-              href={`/collections/${collection.slug}`}
-              className="group flex items-center justify-between gap-4 rounded-2xl border border-[#C9A24A]/20 bg-gradient-to-r from-[#C9A24A]/[0.06] to-transparent p-6 transition hover:border-[#C9A24A]/40"
-            >
-              <div>
-                <div className="text-xs uppercase tracking-[0.26em] text-[#E8D19A]">
-                  Collection
-                </div>
-                <h2 className="mt-2 text-xl font-bold text-white">{collection.name}</h2>
-                <p className="mt-2 max-w-md text-sm leading-6 text-gray-400">
-                  {collection.description}
-                </p>
-              </div>
-              <span className="flex-shrink-0 text-[#E8D19A] transition group-hover:translate-x-1">
-                →
-              </span>
-            </Link>
-          ))}
+          <h1 className="mt-3 text-4xl font-bold md:text-5xl">{collection.name}</h1>
+          <p className="mt-3 max-w-2xl text-gray-400">{collection.description}</p>
         </div>
 
         <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
@@ -73,14 +78,13 @@ export default async function CaseFilePage() {
 
               <div className="space-y-3 p-5">
                 <span className="text-xs tracking-[0.2em] text-red-400">
-                  FEATURED CASE
+                  {CATEGORY_LABELS[c.category].toUpperCase()}
                 </span>
 
                 <h3 className="text-xl font-bold text-white">{c.title}</h3>
 
                 <p className="text-sm leading-6 text-gray-400">
-                  {CATEGORY_LABELS[c.category]}
-                  {c.location_label ? ` · ${c.location_label}` : ""}
+                  {c.location_label || ""}
                 </p>
 
                 <div className="pt-2">
@@ -92,16 +96,18 @@ export default async function CaseFilePage() {
             </Link>
           ))}
 
-          <div className="flex min-h-[420px] items-center justify-center rounded-2xl border border-dashed border-white/10 bg-zinc-800/30 text-center text-gray-500">
-            <div className="px-6">
-              <div className="text-sm uppercase tracking-[0.25em] text-gray-500">
-                Coming Soon
-              </div>
-              <div className="mt-3 text-lg font-semibold text-gray-400">
-                More cases will appear here
+          {cases.length === 0 && (
+            <div className="flex min-h-[420px] items-center justify-center rounded-2xl border border-dashed border-white/10 bg-zinc-800/30 text-center text-gray-500 md:col-span-2 xl:col-span-3">
+              <div className="px-6">
+                <div className="text-sm uppercase tracking-[0.25em] text-gray-500">
+                  Coming Soon
+                </div>
+                <div className="mt-3 text-lg font-semibold text-gray-400">
+                  No cases in this collection yet
+                </div>
               </div>
             </div>
-          </div>
+          )}
         </div>
       </div>
     </main>

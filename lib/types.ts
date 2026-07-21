@@ -36,6 +36,7 @@ export type Incident = {
   lat: number
   lng: number
   location_label: string | null
+  collection_slug: string | null
   precise_lat: number | null
   precise_lng: number | null
   precise_location_label: string | null
