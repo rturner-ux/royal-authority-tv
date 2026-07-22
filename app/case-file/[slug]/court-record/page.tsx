@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import Navbar from "../../../components/Navbar";
 import CourtRecordNav from "../../../components/CourtRecordNav";
+import DocumentLink from "../../../components/DocumentLink";
 import { getCaseBySlug } from "@/lib/cases";
 import { getSubscriberStatus } from "@/lib/subscription";
 import { COURT_RECORD_LABELS, COURT_RECORD_CLASSES } from "@/lib/labels";
@@ -308,16 +309,7 @@ export default async function CourtRecordPage({
                         </div>
                       )}
                       <div className="mt-2 flex flex-wrap gap-3">
-                        {r.document_url && (
-                          <a
-                            href={r.document_url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-block text-xs text-[#67e8f9]"
-                          >
-                            View Document
-                          </a>
-                        )}
+                        {r.document_url && <DocumentLink url={r.document_url} />}
                         {r.source_url && (
                           <a
                             href={r.source_url}
@@ -370,16 +362,17 @@ export default async function CourtRecordPage({
                 <div className="text-xs uppercase tracking-[0.3em] text-[#E8D19A]">Documents</div>
                 <div className="mt-5 space-y-2">
                   {uniqueDocuments.map((r) => (
-                    <a
+                    <DocumentLink
                       key={r.id}
-                      href={r.document_url!}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center justify-between gap-2 rounded-2xl border border-white/10 bg-white/[0.02] px-4 py-3 text-sm text-white transition hover:border-[#C9A24A]/40"
-                    >
-                      <span>{r.title}</span>
-                      <span className="text-xs text-[#67e8f9]">View Document</span>
-                    </a>
+                      url={r.document_url!}
+                      className="flex w-full items-center justify-between gap-2 rounded-2xl border border-white/10 bg-white/[0.02] px-4 py-3 text-left text-sm text-white transition hover:border-[#C9A24A]/40"
+                      label={
+                        <>
+                          <span>{r.title}</span>
+                          <span className="text-xs text-[#67e8f9]">View Document</span>
+                        </>
+                      }
+                    />
                   ))}
                 </div>
               </section>
