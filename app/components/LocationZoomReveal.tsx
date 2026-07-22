@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import CaseMapClient from "./CaseMapClient";
+import { playSfx } from "@/lib/sfx";
 
 export default function LocationZoomReveal({
   lat,
@@ -16,6 +17,7 @@ export default function LocationZoomReveal({
   thenCaption,
   thenSourceUrl,
   annotation,
+  sceneVideoUrl,
 }: {
   lat: number;
   lng: number;
@@ -28,9 +30,30 @@ export default function LocationZoomReveal({
   thenCaption?: string | null;
   thenSourceUrl?: string | null;
   annotation?: string | null;
+  sceneVideoUrl?: string | null;
 }) {
   const [revealed, setRevealed] = useState(false);
   const [deepZoomed, setDeepZoomed] = useState(false);
+  const [showFlyover, setShowFlyover] = useState(false);
+  const [flyoverEntered, setFlyoverEntered] = useState(false);
+
+  useEffect(() => {
+    if (deepZoomed && isActive && sceneVideoUrl) {
+      playSfx("zoom");
+      setShowFlyover(true);
+    }
+    // Only fire once per case-file visit, right as the close-up view lands
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [deepZoomed]);
+
+  useEffect(() => {
+    if (!showFlyover) {
+      setFlyoverEntered(false);
+      return;
+    }
+    const raf = requestAnimationFrame(() => setFlyoverEntered(true));
+    return () => cancelAnimationFrame(raf);
+  }, [showFlyover]);
 
   if (!revealed) {
     return (
@@ -113,6 +136,45 @@ export default function LocationZoomReveal({
                 {annotation || "This is the same location as it appears today."}
               </p>
             </div>
+          </div>
+        </div>
+      )}
+
+      {showFlyover && sceneVideoUrl && (
+        <div
+          className={`fixed inset-0 z-50 flex items-center justify-center bg-black/85 p-4 backdrop-blur-md transition-opacity duration-500 ${
+            flyoverEntered ? "opacity-100" : "opacity-0"
+          }`}
+          onClick={() => setShowFlyover(false)}
+        >
+          <div
+            className={`relative w-full max-w-4xl overflow-hidden rounded-[28px] border border-[#C9A24A]/30 bg-[#05070b] shadow-2xl shadow-black/60 transition-all duration-500 ease-out ${
+              flyoverEntered ? "scale-100 opacity-100" : "scale-90 opacity-0"
+            }`}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between border-b border-white/10 px-5 py-3">
+              <div className="text-xs uppercase tracking-[0.26em] text-[#E8D19A]">
+                Aerial Flyover, Close-Up View
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowFlyover(false)}
+                aria-label="Close"
+                className="rounded-full border border-white/15 bg-white/5 px-3 py-1 text-sm text-white transition hover:bg-white/10"
+              >
+                ✕ Close
+              </button>
+            </div>
+            <video
+              src={sceneVideoUrl}
+              autoPlay
+              muted
+              loop
+              playsInline
+              controls
+              className="w-full"
+            />
           </div>
         </div>
       )}

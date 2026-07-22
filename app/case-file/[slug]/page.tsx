@@ -287,6 +287,7 @@ export default async function CaseFileSlugPage({
             thenCaption={incident.precise_then_caption}
             thenSourceUrl={incident.precise_then_source_url}
             annotation={incident.precise_annotation}
+            sceneVideoUrl={incident.scene_video_url}
           />
         </section>
 
