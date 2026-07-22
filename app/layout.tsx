@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono, Playfair_Display } from "next/font/google";
 import "./globals.css";
 import ScrapeDeterrent from "./components/ScrapeDeterrent";
+import SubscribePrompt from "./components/SubscribePrompt";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -37,6 +38,7 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col">
         <ScrapeDeterrent />
         {children}
+        <SubscribePrompt />
       </body>
     </html>
   );
