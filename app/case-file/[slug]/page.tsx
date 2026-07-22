@@ -50,7 +50,7 @@ export default async function CaseFileSlugPage({
     ? { accountLabel: "My Account", accountHref: "/account" }
     : { accountLabel: "Sign In", accountHref: "/login" };
 
-  let hasRole = false;
+  let subscriberRole: string | null = null;
   if (user && isActive) {
     const authDb = await supabaseServerAuth();
     const { data: profile } = await authDb
@@ -58,8 +58,9 @@ export default async function CaseFileSlugPage({
       .select("role")
       .eq("user_id", user.id)
       .maybeSingle();
-    hasRole = !!profile?.role;
+    subscriberRole = profile?.role ?? null;
   }
+  const hasRole = !!subscriberRole;
 
   const earlyAccessLocked =
     !!incident.early_access_until &&
@@ -506,7 +507,7 @@ export default async function CaseFileSlugPage({
         )}
 
         {/* INVESTIGATOR TOOLKIT */}
-        <InvestigatorToolkit slug={slug} isActive={isActive} hasRole={hasRole} />
+        <InvestigatorToolkit slug={slug} isActive={isActive} hasRole={hasRole} initialRole={subscriberRole} />
 
         {/* VIDEO */}
         {incident.video_embed_url && (

@@ -81,14 +81,16 @@ export default function InvestigatorToolkit({
   slug,
   isActive,
   hasRole,
+  initialRole,
 }: {
   slug: string;
   isActive: boolean;
   hasRole: boolean;
+  initialRole: string | null;
 }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [role, setRole] = useState<string | null>(null);
+  const [role, setRole] = useState<string | null>(initialRole);
   const [content, setContent] = useState<string | null>(null);
 
   async function generate() {
