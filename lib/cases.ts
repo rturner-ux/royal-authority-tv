@@ -1,6 +1,6 @@
 import 'server-only'
 import { supabase } from './supabase/server'
-import type { Incident, IncidentUpdate, IncidentPerson, IncidentTranscriptRow, IncidentCourtRecord, IncidentPhoto, InterviewQA, PersonConnectedCase, PersonComment } from './types'
+import type { Incident, IncidentUpdate, IncidentPerson, IncidentTranscriptRow, IncidentCourtRecord, IncidentPhoto, InterviewQA, PersonConnectedCase, PersonComment, IncidentCourtCase, IncidentCharge, IncidentBondSetting, IncidentFinancialRecord } from './types'
 
 async function attachQAAndCases(db: ReturnType<typeof supabase>, people: IncidentPerson[]): Promise<IncidentPerson[]> {
   if (people.length === 0) return people
@@ -144,6 +144,10 @@ export async function getCaseBySlug(slug: string): Promise<{
   courtRecords: IncidentCourtRecord[]
   photos: IncidentPhoto[]
   relatedIncident: Pick<Incident, 'slug' | 'title' | 'category' | 'image_url'> | null
+  courtCase: IncidentCourtCase | null
+  charges: IncidentCharge[]
+  bondSettings: IncidentBondSetting[]
+  financialRecords: IncidentFinancialRecord[]
 } | null> {
   const db = supabase()
   const { data: incident, error } = await db
@@ -155,7 +159,18 @@ export async function getCaseBySlug(slug: string): Promise<{
   if (error) throw error
   if (!incident || incident.is_hidden) return null
 
-  const [{ data: updates }, { data: people }, { data: transcript }, { data: courtRecords }, { data: photos }, relatedResult] = await Promise.all([
+  const [
+    { data: updates },
+    { data: people },
+    { data: transcript },
+    { data: courtRecords },
+    { data: photos },
+    relatedResult,
+    { data: courtCase },
+    { data: charges },
+    { data: bondSettings },
+    { data: financialRecords },
+  ] = await Promise.all([
     db
       .from('incident_updates')
       .select('*')
@@ -173,6 +188,10 @@ export async function getCaseBySlug(slug: string): Promise<{
           .eq('id', incident.related_incident_id)
           .maybeSingle()
       : Promise.resolve({ data: null }),
+    db.from('incident_court_case').select('*').eq('incident_id', incident.id).maybeSingle(),
+    db.from('incident_charges').select('*').eq('incident_id', incident.id).order('sequence', { ascending: true }),
+    db.from('incident_bond_settings').select('*').eq('incident_id', incident.id).order('sequence', { ascending: true }),
+    db.from('incident_financial_records').select('*').eq('incident_id', incident.id).order('sequence', { ascending: true }),
   ])
 
   return {
@@ -183,5 +202,9 @@ export async function getCaseBySlug(slug: string): Promise<{
     courtRecords: (courtRecords ?? []) as IncidentCourtRecord[],
     photos: (photos ?? []) as IncidentPhoto[],
     relatedIncident: relatedResult.data,
+    courtCase: (courtCase ?? null) as IncidentCourtCase | null,
+    charges: (charges ?? []) as IncidentCharge[],
+    bondSettings: (bondSettings ?? []) as IncidentBondSetting[],
+    financialRecords: (financialRecords ?? []) as IncidentFinancialRecord[],
   }
 }

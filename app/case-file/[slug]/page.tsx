@@ -18,8 +18,6 @@ import {
   CATEGORY_LABELS,
   PERSON_ROLE_LABELS,
   PERSON_ROLE_CLASSES,
-  COURT_RECORD_LABELS,
-  COURT_RECORD_CLASSES,
 } from "@/lib/labels";
 
 export async function generateMetadata({
@@ -45,7 +43,7 @@ export default async function CaseFileSlugPage({
   const result = await getCaseBySlug(slug);
   if (!result) notFound();
 
-  const { incident, updates, people, transcript, courtRecords, photos, relatedIncident } = result;
+  const { incident, updates, people, transcript, courtRecords, photos, relatedIncident, courtCase, charges } = result;
   const incidentCollection = incident.collection_slug ? getCollection(incident.collection_slug) : null;
   const { user, isActive } = await getSubscriberStatus();
   const accountProps = user
@@ -529,7 +527,7 @@ export default async function CaseFileSlugPage({
         )}
 
         {/* COURT & ARREST RECORDS */}
-        {courtRecords.length > 0 && (
+        {(courtCase || charges.length > 0 || courtRecords.length > 0) && (
           <section className="mt-10 rounded-[32px] border border-[#C9A24A]/30 bg-gradient-to-br from-[#C9A24A]/[0.1] to-transparent p-7 backdrop-blur-sm">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <div className="flex items-center gap-2">
@@ -542,73 +540,29 @@ export default async function CaseFileSlugPage({
               </div>
             </div>
 
-            {isActive ? (
-              <div className="mt-6 space-y-5">
-                {courtRecords.map((r) => (
-                  <div key={r.id} className="border-l border-[#C9A24A]/30 pl-4">
-                    <div className="mb-1 flex flex-wrap items-center gap-2">
-                      <span
-                        className={`rounded-full border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide ${COURT_RECORD_CLASSES[r.record_type]}`}
-                      >
-                        {COURT_RECORD_LABELS[r.record_type]}
-                      </span>
-                      {r.event_date && (
-                        <span className="text-xs text-slate-500">
-                          {new Date(r.event_date + "T12:00:00").toLocaleDateString("en-US", { dateStyle: "medium" })}
-                        </span>
-                      )}
-                    </div>
-                    <div className="text-sm font-semibold text-white">{r.title}</div>
-                    {r.description && (
-                      <div className="mt-1 text-sm leading-7 text-slate-400">{r.description}</div>
-                    )}
-                    <div className="mt-1 flex flex-wrap gap-3">
-                      {r.document_url && (
-                        <a
-                          href={r.document_url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-block text-xs text-[#67e8f9]"
-                        >
-                          View Document
-                        </a>
-                      )}
-                      {r.source_url && (
-                        <a
-                          href={r.source_url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-block text-xs text-[#67e8f9]"
-                        >
-                          Source
-                        </a>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="relative mt-4">
-                <div className="select-none space-y-4 blur-sm">
-                  {courtRecords.slice(0, 3).map((r) => (
-                    <div key={r.id} className="border-l border-[#C9A24A]/30 pl-4">
-                      <div className="text-sm font-semibold text-white">{r.title}</div>
-                      {r.description && (
-                        <div className="mt-1 text-sm leading-7 text-slate-400">{r.description}</div>
-                      )}
-                    </div>
-                  ))}
+            <div className="mt-5 grid gap-3 sm:grid-cols-2">
+              {charges.length > 0 && (
+                <div className="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-4 text-sm text-slate-300">
+                  <span className="font-semibold text-white">{charges.length}</span> charge
+                  {charges.length === 1 ? "" : "s"} filed
                 </div>
-                <div className="absolute inset-0 flex items-end">
-                  <Link
-                    href="/subscribe"
-                    className="inline-flex rounded-2xl bg-[#C9A24A] px-5 py-3 text-sm font-semibold text-black transition hover:opacity-90"
-                  >
-                    Subscribe to View Court &amp; Arrest Records
-                  </Link>
+              )}
+              {courtRecords.length > 0 && (
+                <div className="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-4 text-sm text-slate-300">
+                  <span className="font-semibold text-white">{courtRecords.length}</span> docket event
+                  {courtRecords.length === 1 ? "" : "s"} on record
                 </div>
-              </div>
-            )}
+              )}
+            </div>
+
+            <div className="mt-6">
+              <Link
+                href={`/case-file/${slug}/court-record`}
+                className="inline-flex rounded-2xl bg-[#C9A24A] px-5 py-3 text-sm font-semibold text-black transition hover:opacity-90"
+              >
+                View Full Court Record →
+              </Link>
+            </div>
           </section>
         )}
 

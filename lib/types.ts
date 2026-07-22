@@ -89,6 +89,11 @@ export type IncidentPerson = {
   photo_url: string | null
   photo_fit: 'cover' | 'contain'
   sequence: number
+  dob: string | null
+  race: string | null
+  home_address: string | null
+  attorney_name: string | null
+  attorney_status: string | null
   qa: InterviewQA[]
   connectedCases: PersonConnectedCase[]
   comments: PersonComment[]
@@ -138,6 +143,50 @@ export type IncidentCourtRecord = {
   event_date: string | null
   document_url: string | null
   source_url: string | null
+  sequence: number
+  judicial_officer: string | null
+  hearing_time: string | null
+  result: string | null
+}
+
+export type IncidentCourtCase = {
+  id: string
+  incident_id: string
+  case_number: string | null
+  court_name: string | null
+  division: string | null
+  judicial_officer: string | null
+  file_date: string | null
+  case_type: string | null
+  case_status: string | null
+}
+
+export type IncidentCharge = {
+  id: string
+  incident_id: string
+  person_id: string | null
+  description: string
+  statute: string | null
+  level: string | null
+  charge_date: string | null
+  sequence: number
+}
+
+export type IncidentBondSetting = {
+  id: string
+  incident_id: string
+  setting_date: string
+  amount: string | null
+  notes: string | null
+  sequence: number
+}
+
+export type IncidentFinancialRecord = {
+  id: string
+  incident_id: string
+  description: string
+  amount: string | null
+  event_date: string | null
   sequence: number
 }
 
