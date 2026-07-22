@@ -91,6 +91,7 @@ export type IncidentPerson = {
   sequence: number
   qa: InterviewQA[]
   connectedCases: PersonConnectedCase[]
+  comments: PersonComment[]
 }
 
 export type PersonConnectedCase = {
@@ -101,6 +102,19 @@ export type PersonConnectedCase = {
   case_year: number | null
   source_url: string | null
   sequence: number
+}
+
+export type CommentStatus = 'pending' | 'approved' | 'rejected'
+
+export type PersonComment = {
+  id: string
+  person_id: string
+  incident_id: string
+  display_name: string | null
+  body: string
+  status: CommentStatus
+  created_at: string
+  reviewed_at: string | null
 }
 
 export type InterviewQA = {

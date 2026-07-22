@@ -3,8 +3,9 @@
 import { useState } from "react";
 import type { IncidentPerson } from "@/lib/types";
 import PersonQA from "./PersonQA";
+import WitnessComments from "./WitnessComments";
 
-type Tab = "overview" | "bio" | "cases";
+type Tab = "overview" | "bio" | "cases" | "comments";
 
 function TabButton({
   active,
@@ -32,10 +33,11 @@ export default function PersonProfileTabs({ person }: { person: IncidentPerson }
   const hasBio = !!person.bio;
   const hasCases = person.connectedCases.length > 0;
   const hasOverview = !!person.summary || person.qa.length > 0;
-  const showTabs = hasBio || hasCases;
-  const [tab, setTab] = useState<Tab>("overview");
+  const isWitness = person.role === "witness";
+  const showTabs = hasBio || hasCases || isWitness;
+  const [tab, setTab] = useState<Tab>(hasOverview || !isWitness ? "overview" : "comments");
 
-  if (!hasOverview && !hasBio && !hasCases) return null;
+  if (!hasOverview && !hasBio && !hasCases && !isWitness) return null;
 
   return (
     <div className="rounded-[28px] border border-white/10 bg-black/30 p-6">
@@ -52,6 +54,11 @@ export default function PersonProfileTabs({ person }: { person: IncidentPerson }
           {hasCases && (
             <TabButton active={tab === "cases"} onClick={() => setTab("cases")}>
               Connected Cases
+            </TabButton>
+          )}
+          {isWitness && (
+            <TabButton active={tab === "comments"} onClick={() => setTab("comments")}>
+              Public Insight
             </TabButton>
           )}
         </div>
@@ -94,6 +101,10 @@ export default function PersonProfileTabs({ person }: { person: IncidentPerson }
             </div>
           ))}
         </div>
+      )}
+
+      {showTabs && tab === "comments" && isWitness && (
+        <WitnessComments personId={person.id} comments={person.comments} />
       )}
     </div>
   );

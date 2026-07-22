@@ -1,14 +1,20 @@
 import 'server-only'
 import { supabase } from './supabase/server'
-import type { Incident, IncidentUpdate, IncidentPerson, IncidentTranscriptRow, IncidentCourtRecord, IncidentPhoto, InterviewQA, PersonConnectedCase } from './types'
+import type { Incident, IncidentUpdate, IncidentPerson, IncidentTranscriptRow, IncidentCourtRecord, IncidentPhoto, InterviewQA, PersonConnectedCase, PersonComment } from './types'
 
 async function attachQAAndCases(db: ReturnType<typeof supabase>, people: IncidentPerson[]): Promise<IncidentPerson[]> {
   if (people.length === 0) return people
 
   const personIds = people.map((p) => p.id)
-  const [{ data: qa }, { data: connectedCases }] = await Promise.all([
+  const [{ data: qa }, { data: connectedCases }, { data: comments }] = await Promise.all([
     db.from('interview_qa').select('*').in('person_id', personIds).order('sequence', { ascending: true }),
     db.from('person_connected_cases').select('*').in('person_id', personIds).order('sequence', { ascending: true }),
+    db
+      .from('person_comments')
+      .select('*')
+      .in('person_id', personIds)
+      .eq('status', 'approved')
+      .order('created_at', { ascending: false }),
   ])
 
   const qaByPerson = new Map<string, InterviewQA[]>()
@@ -25,10 +31,18 @@ async function attachQAAndCases(db: ReturnType<typeof supabase>, people: Inciden
     casesByPerson.set(item.person_id, list)
   }
 
+  const commentsByPerson = new Map<string, PersonComment[]>()
+  for (const item of (comments ?? []) as PersonComment[]) {
+    const list = commentsByPerson.get(item.person_id) ?? []
+    list.push(item)
+    commentsByPerson.set(item.person_id, list)
+  }
+
   return people.map((person) => ({
     ...person,
     qa: qaByPerson.get(person.id) ?? [],
     connectedCases: casesByPerson.get(person.id) ?? [],
+    comments: commentsByPerson.get(person.id) ?? [],
   }))
 }
 
