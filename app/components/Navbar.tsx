@@ -158,6 +158,18 @@ export default function Navbar({
 
         <div className="min-w-0 flex-1 xl:hidden" />
 
+        {/* The full link row above (including Subscribe) only shows at xl+;
+            below that it's otherwise reachable only inside the hamburger
+            menu, which is easy to miss on mobile. Surface it directly. */}
+        {!isActive && (
+          <Link
+            href="/subscribe"
+            className="flex-shrink-0 rounded-full bg-[#C9A24A] px-3 py-1.5 text-[10px] font-bold uppercase tracking-wide text-black transition hover:opacity-90 sm:px-4 sm:text-xs xl:hidden"
+          >
+            Subscribe
+          </Link>
+        )}
+
         {accountLabel && accountHref && (
           <Link
             href={accountHref}
