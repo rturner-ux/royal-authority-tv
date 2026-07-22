@@ -54,7 +54,7 @@ ${SHARED_RULES}
 
 ## Output format
 
-Return exactly these four labeled sections, in this order, nothing else:
+Return exactly these five labeled sections, in this order, nothing else:
 
 HEADLINES:
 - three different headline/caption options, each on its own line starting with a dash, punchy but accurate, no clickbait that overstates what's confirmed
@@ -65,10 +65,13 @@ SCRIPT:
 QUOTES:
 - 2 to 3 real pull quotes lifted directly from the case log (do not paraphrase), each on its own line as: "quote" -- attribution and claim type, e.g. "quote" -- Sheriff, official statement
 
+QUESTIONS:
+- 5 to 8 pointed interview prep questions a journalist could bring to an interview about this case, each on its own line starting with a dash. Address them to whoever would actually answer them, not generically: e.g. "For the sheriff's office:", "For the family's attorney:", "For the defense:". Base every question on an actual gap, contradiction, or unresolved thread already visible in the case log, not generic questions that could apply to any case. If a claim in the log is disputed or unconfirmed, write a question that presses on that specifically.
+
 HASHTAGS:
 - one line of 5 to 8 relevant hashtags, space separated, starting with #
 
-Do not add any preamble, explanation, or extra commentary outside these four sections.`
+Do not add any preamble, explanation, or extra commentary outside these five sections.`
 
 const DETECTIVE_SYSTEM = `You are a case analyst helping a subscriber who thinks like a detective work a true-crime case file methodically. You are given the case's claim-typed Case Log.
 
@@ -140,7 +143,7 @@ export async function generateToolkitContent(role: string | null, input: Toolkit
   const text = await callClaude({
     system,
     userMessage: buildUserMessage(input, instruction),
-    maxTokens: 900,
+    maxTokens: 1700,
     temperature: 0.4,
   })
 

@@ -16,6 +16,7 @@ type JournalistBlocks = {
   headlines: string;
   script: string;
   quotes: string;
+  questions: string;
   hashtags: string;
 };
 
@@ -32,13 +33,14 @@ function parseJournalistContent(text: string): JournalistBlocks | null {
     return text.slice(from, end).trim();
   };
 
-  const headlines = grab("HEADLINES", ["SCRIPT", "QUOTES", "HASHTAGS"]);
-  const script = grab("SCRIPT", ["QUOTES", "HASHTAGS"]);
-  const quotes = grab("QUOTES", ["HASHTAGS"]);
+  const headlines = grab("HEADLINES", ["SCRIPT", "QUOTES", "QUESTIONS", "HASHTAGS"]);
+  const script = grab("SCRIPT", ["QUOTES", "QUESTIONS", "HASHTAGS"]);
+  const quotes = grab("QUOTES", ["QUESTIONS", "HASHTAGS"]);
+  const questions = grab("QUESTIONS", ["HASHTAGS"]);
   const hashtags = grab("HASHTAGS", []);
 
-  if (!headlines && !script && !quotes && !hashtags) return null;
-  return { headlines, script, quotes, hashtags };
+  if (!headlines && !script && !quotes && !questions && !hashtags) return null;
+  return { headlines, script, quotes, questions, hashtags };
 }
 
 function CopyBlock({ label, text }: { label: string; text: string }) {
@@ -126,8 +128,9 @@ export default function InvestigatorToolkit({
         </div>
         <p className="mt-4 max-w-2xl text-sm leading-7 text-slate-300">
           Generate content tailored to your Investigator Role: journalists get a ready-to-use Content Kit
-          (headlines, a livestream script, pull quotes, hashtags), detectives get a Case Workup, lawyers get
-          an Evidentiary Review, profilers get Pattern Notes, and field agents get a Ground Truth Brief.
+          (headlines, a livestream script, pull quotes, interview prep questions, hashtags), detectives get
+          a Case Workup, lawyers get an Evidentiary Review, profilers get Pattern Notes, and field agents
+          get a Ground Truth Brief.
         </p>
         <Link
           href="/subscribe"
@@ -186,6 +189,7 @@ export default function InvestigatorToolkit({
               <CopyBlock label="Headlines" text={journalistBlocks.headlines} />
               <CopyBlock label="Livestream Script" text={journalistBlocks.script} />
               <CopyBlock label="Pull Quotes" text={journalistBlocks.quotes} />
+              <CopyBlock label="Interview Prep Questions" text={journalistBlocks.questions} />
               <CopyBlock label="Hashtags" text={journalistBlocks.hashtags} />
             </>
           ) : (

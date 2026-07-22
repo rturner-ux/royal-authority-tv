@@ -50,6 +50,10 @@ export const COURT_RECORD_LABELS: Record<CourtRecordType, string> = {
   bond_hearing: 'Bond Hearing',
   docket_event: 'Docket Event',
   court_filing: 'Court Filing',
+  search_warrant: 'Search Warrant',
+  autopsy_report: 'Autopsy Report',
+  indictment: 'Indictment',
+  civil_filing: 'Civil Filing',
 }
 
 export const COURT_RECORD_CLASSES: Record<CourtRecordType, string> = {
@@ -58,6 +62,10 @@ export const COURT_RECORD_CLASSES: Record<CourtRecordType, string> = {
   bond_hearing: 'border-sky-400/30 bg-sky-400/10 text-sky-300',
   docket_event: 'border-slate-400/30 bg-slate-400/10 text-slate-300',
   court_filing: 'border-indigo-400/30 bg-indigo-400/10 text-indigo-300',
+  search_warrant: 'border-purple-400/30 bg-purple-400/10 text-purple-300',
+  autopsy_report: 'border-rose-400/30 bg-rose-400/10 text-rose-300',
+  indictment: 'border-amber-400/30 bg-amber-400/10 text-amber-300',
+  civil_filing: 'border-teal-400/30 bg-teal-400/10 text-teal-300',
 }
 
 export const PERSON_ROLE_LABELS: Record<PersonRole, string> = {
