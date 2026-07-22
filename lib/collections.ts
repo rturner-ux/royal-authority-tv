@@ -23,3 +23,7 @@ export function getCollection(slug: string): Collection | null {
 export function citySlug(city: string, state: string): string {
   return `${city}-${state}`.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '')
 }
+
+export function genreSlug(genre: string): string {
+  return genre.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '')
+}

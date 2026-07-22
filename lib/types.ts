@@ -38,6 +38,7 @@ export type Incident = {
   location_label: string | null
   city: string | null
   state: string | null
+  genre: string | null
   collection_slug: string | null
   precise_lat: number | null
   precise_lng: number | null

@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import Navbar from "../../components/Navbar";
 import { getCasesByCollection } from "@/lib/cases";
-import { getCollection, citySlug } from "@/lib/collections";
+import { getCollection, genreSlug } from "@/lib/collections";
 
 export async function generateMetadata({
   params,
@@ -30,21 +30,21 @@ export default async function CollectionPage({
 
   const cases = await getCasesByCollection(slug);
 
-  const cityGroups = new Map<string, { city: string; state: string; count: number }>();
+  const genreGroups = new Map<string, { genre: string; count: number }>();
   const uncategorized: typeof cases = [];
 
   for (const c of cases) {
-    if (!c.city || !c.state) {
+    if (!c.genre) {
       uncategorized.push(c);
       continue;
     }
-    const key = citySlug(c.city, c.state);
-    const existing = cityGroups.get(key);
+    const key = genreSlug(c.genre);
+    const existing = genreGroups.get(key);
     if (existing) existing.count += 1;
-    else cityGroups.set(key, { city: c.city, state: c.state, count: 1 });
+    else genreGroups.set(key, { genre: c.genre, count: 1 });
   }
 
-  const cities = Array.from(cityGroups.entries()).sort((a, b) => b[1].count - a[1].count);
+  const genres = Array.from(genreGroups.entries()).sort((a, b) => b[1].count - a[1].count);
 
   return (
     <main className="relative min-h-screen bg-[#05070b] text-white overflow-hidden">
@@ -70,20 +70,18 @@ export default async function CollectionPage({
         </div>
 
         <div className="mb-4 text-xs uppercase tracking-[0.25em] text-gray-500">
-          Browse by City
+          Browse by Genre
         </div>
 
         <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-          {cities.map(([key, group]) => (
+          {genres.map(([key, group]) => (
             <Link
               key={key}
               href={`/collections/${slug}/${key}`}
               className="group flex items-center justify-between gap-4 overflow-hidden rounded-2xl border border-white/10 bg-zinc-900/80 p-6 transition hover:scale-[1.02] hover:border-[#C9A24A]/30"
             >
               <div>
-                <h3 className="text-xl font-bold text-white">
-                  {group.city}, {group.state}
-                </h3>
+                <h3 className="text-xl font-bold text-white">{group.genre}</h3>
                 <p className="mt-2 text-sm text-gray-400">
                   {group.count} {group.count === 1 ? "case" : "cases"}
                 </p>
@@ -94,7 +92,7 @@ export default async function CollectionPage({
             </Link>
           ))}
 
-          {cities.length === 0 && uncategorized.length === 0 && (
+          {genres.length === 0 && uncategorized.length === 0 && (
             <div className="flex min-h-[280px] items-center justify-center rounded-2xl border border-dashed border-white/10 bg-zinc-800/30 text-center text-gray-500 md:col-span-2 xl:col-span-3">
               <div className="px-6">
                 <div className="text-sm uppercase tracking-[0.25em] text-gray-500">
@@ -110,7 +108,7 @@ export default async function CollectionPage({
 
         {uncategorized.length > 0 && (
           <div className="mt-6 rounded-2xl border border-dashed border-white/10 bg-zinc-800/20 p-6 text-sm text-gray-500">
-            {uncategorized.length} {uncategorized.length === 1 ? "case hasn't" : "cases haven't"} been assigned a city yet.
+            {uncategorized.length} {uncategorized.length === 1 ? "case hasn't" : "cases haven't"} been assigned a genre yet.
           </div>
         )}
       </div>
