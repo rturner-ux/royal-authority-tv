@@ -45,6 +45,20 @@ export default async function SceneAnalysisPage({
           </p>
         </div>
 
+        {incident.scene_video_url && (
+          <section className="mb-10 overflow-hidden rounded-[32px] border border-white/10 bg-black/30 backdrop-blur-sm">
+            <div className="p-6 pb-0 text-xs uppercase tracking-[0.26em] text-[#E8D19A]">
+              Aerial Flyover
+            </div>
+            <video
+              src={incident.scene_video_url}
+              controls
+              playsInline
+              className="mt-4 w-full"
+            />
+          </section>
+        )}
+
         {slug === "ashlee-robinson" ? (
           <AshleeSceneReconstruction />
         ) : slug === "nolan-wells" ? (
