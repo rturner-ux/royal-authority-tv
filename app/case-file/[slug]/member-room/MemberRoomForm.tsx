@@ -1,12 +1,35 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState, useCallback } from "react";
+
+type MemberRequest = {
+  id: string;
+  topic: string;
+  message: string;
+  created_at: string;
+  callsign: string;
+  isMine: boolean;
+};
 
 export default function MemberRoomForm({ incidentId }: { incidentId: string }) {
   const [form, setForm] = useState({ topic: "", message: "" });
-  const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [requests, setRequests] = useState<MemberRequest[]>([]);
+  const [loadingRequests, setLoadingRequests] = useState(true);
+
+  const loadRequests = useCallback(async () => {
+    const res = await fetch(`/api/member-questions?incidentId=${incidentId}`);
+    if (res.ok) {
+      const data = await res.json();
+      setRequests(data.requests ?? []);
+    }
+    setLoadingRequests(false);
+  }, [incidentId]);
+
+  useEffect(() => {
+    loadRequests();
+  }, [loadRequests]);
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -30,27 +53,28 @@ export default function MemberRoomForm({ incidentId }: { incidentId: string }) {
       return;
     }
 
-    setSubmitted(true);
+    setForm({ topic: "", message: "" });
+    await loadRequests();
   }
 
   return (
-    <div className="rounded-[30px] border border-white/10 bg-black/30 p-6 backdrop-blur-sm">
-      <div className="mb-5 flex items-center justify-between">
-        <div>
-          <div className="text-xs uppercase tracking-[0.26em] text-[#E8D19A]">
-            Member Question Form
+    <div className="space-y-6">
+      <div className="rounded-[30px] border border-white/10 bg-black/30 p-6 backdrop-blur-sm">
+        <div className="mb-5 flex items-center justify-between">
+          <div>
+            <div className="text-xs uppercase tracking-[0.26em] text-[#E8D19A]">
+              Member Question Form
+            </div>
+            <h2 className="mt-2 font-serif text-2xl text-white">
+              Submit a Case Request
+            </h2>
           </div>
-          <h2 className="mt-2 font-serif text-2xl text-white">
-            Submit a Case Request
-          </h2>
+
+          <div className="rounded-full border border-[#C9A24A]/30 bg-[#C9A24A]/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-[#E8D19A]">
+            Premium
+          </div>
         </div>
 
-        <div className="rounded-full border border-[#C9A24A]/30 bg-[#C9A24A]/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-[#E8D19A]">
-          Premium
-        </div>
-      </div>
-
-      {!submitted ? (
         <form onSubmit={handleSubmit} className="space-y-4">
           <input
             name="topic"
@@ -87,14 +111,56 @@ export default function MemberRoomForm({ incidentId }: { incidentId: string }) {
             </button>
           </div>
         </form>
-      ) : (
-        <div className="rounded-2xl border border-green-500/20 bg-green-500/10 p-5">
-          <div className="text-sm font-semibold text-green-300">Request submitted</div>
-          <p className="mt-2 text-sm leading-7 text-slate-300">
-            Your subscriber question has been recorded for review.
-          </p>
+      </div>
+
+      <div className="rounded-[30px] border border-white/10 bg-black/30 p-6 backdrop-blur-sm">
+        <div className="mb-5 flex items-center justify-between">
+          <div className="text-xs uppercase tracking-[0.26em] text-[#E8D19A]">
+            Member Case Requests
+          </div>
+          {requests.length > 0 && (
+            <div className="text-xs text-slate-500">
+              {requests.length} {requests.length === 1 ? "request" : "requests"}
+            </div>
+          )}
         </div>
-      )}
+
+        {loadingRequests ? (
+          <p className="text-sm text-slate-500">Loading requests…</p>
+        ) : requests.length === 0 ? (
+          <p className="text-sm text-slate-500">
+            No case requests yet. Be the first to submit one above.
+          </p>
+        ) : (
+          <div className="space-y-4">
+            {requests.map((r) => (
+              <div
+                key={r.id}
+                className={`rounded-2xl border p-4 ${
+                  r.isMine
+                    ? "border-[#C9A24A]/30 bg-[#C9A24A]/[0.05]"
+                    : "border-white/10 bg-white/[0.03]"
+                }`}
+              >
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <h3 className="font-semibold text-white">{r.topic}</h3>
+                  <span className="text-xs text-slate-500">
+                    {new Date(r.created_at).toLocaleDateString(undefined, {
+                      month: "short",
+                      day: "numeric",
+                      year: "numeric",
+                    })}
+                  </span>
+                </div>
+                <p className="mt-2 text-sm leading-7 text-slate-300">{r.message}</p>
+                <div className="mt-3 text-xs uppercase tracking-[0.15em] text-[#E8D19A]">
+                  {r.isMine ? "You" : r.callsign}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
