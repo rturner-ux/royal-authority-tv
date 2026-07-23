@@ -17,14 +17,24 @@ export default function MemberRoomForm({ incidentId }: { incidentId: string }) {
   const [submitting, setSubmitting] = useState(false);
   const [requests, setRequests] = useState<MemberRequest[]>([]);
   const [loadingRequests, setLoadingRequests] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   const loadRequests = useCallback(async () => {
-    const res = await fetch(`/api/member-questions?incidentId=${incidentId}`);
-    if (res.ok) {
+    setLoadError(null);
+    try {
+      const res = await fetch(`/api/member-questions?incidentId=${incidentId}`);
+      if (!res.ok) {
+        const body = await res.json().catch(() => null);
+        setLoadError(body?.error || `Couldn't load requests (${res.status}).`);
+        return;
+      }
       const data = await res.json();
       setRequests(data.requests ?? []);
+    } catch {
+      setLoadError("Couldn't load requests. Check your connection and try again.");
+    } finally {
+      setLoadingRequests(false);
     }
-    setLoadingRequests(false);
   }, [incidentId]);
 
   useEffect(() => {
@@ -127,6 +137,10 @@ export default function MemberRoomForm({ incidentId }: { incidentId: string }) {
 
         {loadingRequests ? (
           <p className="text-sm text-slate-500">Loading requests…</p>
+        ) : loadError ? (
+          <div className="rounded-2xl border border-red-500/20 bg-red-500/10 p-3 text-sm text-red-300">
+            {loadError}
+          </div>
         ) : requests.length === 0 ? (
           <p className="text-sm text-slate-500">
             No case requests yet. Be the first to submit one above.
