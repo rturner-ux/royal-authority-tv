@@ -62,7 +62,7 @@ export default function Navbar({
 
   return (
     <div
-      className={`sticky top-0 z-[999] relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen mb-10 backdrop-blur-xl transition-colors ${
+      className={`sticky top-0 z-[999] w-screen ml-[calc(50%-50vw)] mb-10 backdrop-blur-xl transition-colors ${
         isActive
           ? "border-b border-[#C9A24A]/50 bg-[#0a0704]/90"
           : "border-b border-white/10 bg-[#05070b]/90"
