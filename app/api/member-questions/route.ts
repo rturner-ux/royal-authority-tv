@@ -2,9 +2,10 @@ import { NextRequest, NextResponse } from 'next/server'
 import { supabase } from '@/lib/supabase/server'
 import { getSubscriberStatus } from '@/lib/subscription'
 
-// Members can see every subscriber's case requests for a given incident, not
-// just their own -- the Member Room is a shared space, not a private inbox.
-export async function GET(req: NextRequest) {
+// Every member can see every case request from every case, regardless of
+// which case's Member Room it was filed from -- this is a shared, sitewide
+// board, not something scoped to whatever page happened to host the form.
+export async function GET() {
   const { user, isActive } = await getSubscriberStatus()
 
   if (!user) {
@@ -14,17 +15,11 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'Subscription required' }, { status: 403 })
   }
 
-  const incidentId = req.nextUrl.searchParams.get('incidentId')
-  if (!incidentId) {
-    return NextResponse.json({ error: 'Missing incidentId' }, { status: 400 })
-  }
-
   const db = supabase()
 
   const { data: questions, error } = await db
     .from('member_questions')
-    .select('id, user_id, topic, message, created_at')
-    .eq('incident_id', incidentId)
+    .select('id, user_id, incident_id, topic, message, created_at')
     .order('created_at', { ascending: false })
 
   if (error) {
@@ -33,20 +28,33 @@ export async function GET(req: NextRequest) {
   }
 
   const userIds = [...new Set((questions ?? []).map((q) => q.user_id))]
-  const { data: profiles } = userIds.length
-    ? await db.from('subscriber_profiles').select('user_id, callsign, role').in('user_id', userIds)
-    : { data: [] }
+  const incidentIds = [...new Set((questions ?? []).map((q) => q.incident_id))]
+
+  const [{ data: profiles }, { data: incidents }] = await Promise.all([
+    userIds.length
+      ? db.from('subscriber_profiles').select('user_id, callsign, role').in('user_id', userIds)
+      : Promise.resolve({ data: [] }),
+    incidentIds.length
+      ? db.from('incidents').select('id, slug, title').in('id', incidentIds)
+      : Promise.resolve({ data: [] }),
+  ])
 
   const callsignByUser = new Map((profiles ?? []).map((p) => [p.user_id, p.callsign || p.role]))
+  const incidentById = new Map((incidents ?? []).map((i) => [i.id, i]))
 
-  const results = (questions ?? []).map((q) => ({
-    id: q.id,
-    topic: q.topic,
-    message: q.message,
-    created_at: q.created_at,
-    callsign: callsignByUser.get(q.user_id) || 'A Member',
-    isMine: q.user_id === user.id,
-  }))
+  const results = (questions ?? []).map((q) => {
+    const incident = incidentById.get(q.incident_id)
+    return {
+      id: q.id,
+      topic: q.topic,
+      message: q.message,
+      created_at: q.created_at,
+      callsign: callsignByUser.get(q.user_id) || 'A Member',
+      isMine: q.user_id === user.id,
+      caseSlug: incident?.slug ?? null,
+      caseTitle: incident?.title ?? null,
+    }
+  })
 
   return NextResponse.json({ requests: results })
 }

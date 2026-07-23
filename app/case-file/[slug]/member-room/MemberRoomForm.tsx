@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState, useCallback } from "react";
 
 type MemberRequest = {
@@ -9,6 +10,8 @@ type MemberRequest = {
   created_at: string;
   callsign: string;
   isMine: boolean;
+  caseSlug: string | null;
+  caseTitle: string | null;
 };
 
 export default function MemberRoomForm({ incidentId }: { incidentId: string }) {
@@ -22,7 +25,7 @@ export default function MemberRoomForm({ incidentId }: { incidentId: string }) {
   const loadRequests = useCallback(async () => {
     setLoadError(null);
     try {
-      const res = await fetch(`/api/member-questions?incidentId=${incidentId}`);
+      const res = await fetch("/api/member-questions");
       if (!res.ok) {
         const body = await res.json().catch(() => null);
         setLoadError(body?.error || `Couldn't load requests (${res.status}).`);
@@ -35,7 +38,7 @@ export default function MemberRoomForm({ incidentId }: { incidentId: string }) {
     } finally {
       setLoadingRequests(false);
     }
-  }, [incidentId]);
+  }, []);
 
   useEffect(() => {
     loadRequests();
@@ -126,7 +129,7 @@ export default function MemberRoomForm({ incidentId }: { incidentId: string }) {
       <div className="rounded-[30px] border border-white/10 bg-black/30 p-6 backdrop-blur-sm">
         <div className="mb-5 flex items-center justify-between">
           <div className="text-xs uppercase tracking-[0.26em] text-[#E8D19A]">
-            Member Case Requests
+            Member Case Requests (All Cases)
           </div>
           {requests.length > 0 && (
             <div className="text-xs text-slate-500">
@@ -167,8 +170,19 @@ export default function MemberRoomForm({ incidentId }: { incidentId: string }) {
                   </span>
                 </div>
                 <p className="mt-2 text-sm leading-7 text-slate-300">{r.message}</p>
-                <div className="mt-3 text-xs uppercase tracking-[0.15em] text-[#E8D19A]">
-                  {r.isMine ? "You" : r.callsign}
+                <div className="mt-3 flex flex-wrap items-center gap-2 text-xs uppercase tracking-[0.15em]">
+                  <span className="text-[#E8D19A]">{r.isMine ? "You" : r.callsign}</span>
+                  {r.caseSlug && (
+                    <>
+                      <span className="text-slate-600">•</span>
+                      <Link
+                        href={`/case-file/${r.caseSlug}`}
+                        className="normal-case tracking-normal text-slate-400 hover:text-white"
+                      >
+                        {r.caseTitle}
+                      </Link>
+                    </>
+                  )}
                 </div>
               </div>
             ))}
