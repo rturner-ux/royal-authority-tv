@@ -6,6 +6,11 @@ import CaseCard from "../../components/CaseCard";
 import { getCasesByCollection } from "@/lib/cases";
 import { getCollection, genreSlug } from "@/lib/collections";
 
+// No auth/cookie call on this page to otherwise force per-request rendering,
+// so without this it gets fully cached by Vercel and never reflects later
+// collection_slug/genre changes until the next deploy.
+export const dynamic = "force-dynamic";
+
 export async function generateMetadata({
   params,
 }: {

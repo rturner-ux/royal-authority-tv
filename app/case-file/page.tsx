@@ -4,6 +4,11 @@ import FeaturedCaseCard from "../components/FeaturedCaseCard";
 import { getFeaturedCases } from "@/lib/cases";
 import { COLLECTIONS } from "@/lib/collections";
 
+// No auth/cookie call on this page to otherwise force per-request rendering,
+// so without this it gets fully cached by Vercel at build/first-hit and
+// never reflects later is_featured/is_hidden changes until the next deploy.
+export const dynamic = "force-dynamic";
+
 export default async function CaseFilePage() {
   const cases = await getFeaturedCases();
 
