@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import Navbar from "../../components/Navbar";
+import CaseCard from "../../components/CaseCard";
 import { getCasesByCollection } from "@/lib/cases";
 import { getCollection, genreSlug } from "@/lib/collections";
 
@@ -69,46 +70,54 @@ export default async function CollectionPage({
           <p className="mt-3 max-w-2xl text-gray-400">{collection.description}</p>
         </div>
 
-        <div className="mb-4 text-xs uppercase tracking-[0.25em] text-gray-500">
-          Browse by Genre
-        </div>
+        {genres.length > 0 ? (
+          <>
+            <div className="mb-4 text-xs uppercase tracking-[0.25em] text-gray-500">
+              Browse by Genre
+            </div>
 
-        <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-          {genres.map(([key, group]) => (
-            <Link
-              key={key}
-              href={`/collections/${slug}/${key}`}
-              className="group flex items-center justify-between gap-4 overflow-hidden rounded-2xl border border-white/10 bg-zinc-900/80 p-6 transition hover:scale-[1.02] hover:border-[#C9A24A]/30"
-            >
-              <div>
-                <h3 className="text-xl font-bold text-white">{group.genre}</h3>
-                <p className="mt-2 text-sm text-gray-400">
-                  {group.count} {group.count === 1 ? "case" : "cases"}
-                </p>
+            <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+              {genres.map(([key, group]) => (
+                <Link
+                  key={key}
+                  href={`/collections/${slug}/${key}`}
+                  className="group flex items-center justify-between gap-4 overflow-hidden rounded-2xl border border-white/10 bg-zinc-900/80 p-6 transition hover:scale-[1.02] hover:border-[#C9A24A]/30"
+                >
+                  <div>
+                    <h3 className="text-xl font-bold text-white">{group.genre}</h3>
+                    <p className="mt-2 text-sm text-gray-400">
+                      {group.count} {group.count === 1 ? "case" : "cases"}
+                    </p>
+                  </div>
+                  <span className="flex-shrink-0 text-[#E8D19A] transition group-hover:translate-x-1">
+                    →
+                  </span>
+                </Link>
+              ))}
+            </div>
+
+            {uncategorized.length > 0 && (
+              <div className="mt-6 rounded-2xl border border-dashed border-white/10 bg-zinc-800/20 p-6 text-sm text-gray-500">
+                {uncategorized.length} {uncategorized.length === 1 ? "case hasn't" : "cases haven't"} been assigned a genre yet.
               </div>
-              <span className="flex-shrink-0 text-[#E8D19A] transition group-hover:translate-x-1">
-                →
-              </span>
-            </Link>
-          ))}
-
-          {genres.length === 0 && uncategorized.length === 0 && (
-            <div className="flex min-h-[280px] items-center justify-center rounded-2xl border border-dashed border-white/10 bg-zinc-800/30 text-center text-gray-500 md:col-span-2 xl:col-span-3">
-              <div className="px-6">
-                <div className="text-sm uppercase tracking-[0.25em] text-gray-500">
-                  Coming Soon
-                </div>
-                <div className="mt-3 text-lg font-semibold text-gray-400">
-                  No cases in this collection yet
-                </div>
+            )}
+          </>
+        ) : cases.length > 0 ? (
+          <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+            {cases.map((c) => (
+              <CaseCard key={c.id} incident={c} />
+            ))}
+          </div>
+        ) : (
+          <div className="flex min-h-[280px] items-center justify-center rounded-2xl border border-dashed border-white/10 bg-zinc-800/30 text-center text-gray-500">
+            <div className="px-6">
+              <div className="text-sm uppercase tracking-[0.25em] text-gray-500">
+                Coming Soon
+              </div>
+              <div className="mt-3 text-lg font-semibold text-gray-400">
+                No cases in this collection yet
               </div>
             </div>
-          )}
-        </div>
-
-        {uncategorized.length > 0 && (
-          <div className="mt-6 rounded-2xl border border-dashed border-white/10 bg-zinc-800/20 p-6 text-sm text-gray-500">
-            {uncategorized.length} {uncategorized.length === 1 ? "case hasn't" : "cases haven't"} been assigned a genre yet.
           </div>
         )}
       </div>
