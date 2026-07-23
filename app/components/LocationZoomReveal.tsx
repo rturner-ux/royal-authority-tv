@@ -36,6 +36,7 @@ export default function LocationZoomReveal({
   const [deepZoomed, setDeepZoomed] = useState(false);
   const [showFlyover, setShowFlyover] = useState(false);
   const [flyoverEntered, setFlyoverEntered] = useState(false);
+  const [showTitle, setShowTitle] = useState(false);
 
   useEffect(() => {
     if (deepZoomed && isActive && sceneVideoUrl) {
@@ -49,10 +50,17 @@ export default function LocationZoomReveal({
   useEffect(() => {
     if (!showFlyover) {
       setFlyoverEntered(false);
+      setShowTitle(false);
       return;
     }
-    const raf = requestAnimationFrame(() => setFlyoverEntered(true));
-    return () => cancelAnimationFrame(raf);
+    const enter = requestAnimationFrame(() => setFlyoverEntered(true));
+    const titleIn = setTimeout(() => setShowTitle(true), 500);
+    const titleOut = setTimeout(() => setShowTitle(false), 3200);
+    return () => {
+      cancelAnimationFrame(enter);
+      clearTimeout(titleIn);
+      clearTimeout(titleOut);
+    };
   }, [showFlyover]);
 
   if (!revealed) {
@@ -142,40 +150,60 @@ export default function LocationZoomReveal({
 
       {showFlyover && sceneVideoUrl && (
         <div
-          className={`fixed inset-0 z-50 flex items-center justify-center bg-black/85 p-4 backdrop-blur-md transition-opacity duration-500 ${
+          className={`fixed inset-0 z-[9999] bg-black transition-opacity duration-700 ${
             flyoverEntered ? "opacity-100" : "opacity-0"
           }`}
-          onClick={() => setShowFlyover(false)}
         >
-          <div
-            className={`relative w-full max-w-4xl overflow-hidden rounded-[28px] border border-[#C9A24A]/30 bg-[#05070b] shadow-2xl shadow-black/60 transition-all duration-500 ease-out ${
-              flyoverEntered ? "scale-100 opacity-100" : "scale-90 opacity-0"
+          {/* Video fills the full viewport, scaling in from slightly zoomed
+              so the reveal reads as "arriving" at the location rather than
+              a dialog popping open. */}
+          <video
+            src={sceneVideoUrl}
+            autoPlay
+            muted
+            loop
+            playsInline
+            className={`h-full w-full object-cover transition-transform duration-[1200ms] ease-out ${
+              flyoverEntered ? "scale-100" : "scale-125"
             }`}
-            onClick={(e) => e.stopPropagation()}
+          />
+
+          {/* Cinematic letterbox bars, slide in from the edges */}
+          <div
+            className={`pointer-events-none absolute inset-x-0 top-0 h-[10vh] bg-black transition-transform duration-700 ease-out ${
+              flyoverEntered ? "translate-y-0" : "-translate-y-full"
+            }`}
+          />
+          <div
+            className={`pointer-events-none absolute inset-x-0 bottom-0 h-[10vh] bg-black transition-transform duration-700 ease-out ${
+              flyoverEntered ? "translate-y-0" : "translate-y-full"
+            }`}
+          />
+
+          {/* Title card */}
+          <div
+            className={`pointer-events-none absolute inset-x-0 top-[12vh] flex flex-col items-center text-center transition-all duration-700 ${
+              showTitle ? "translate-y-0 opacity-100" : "-translate-y-3 opacity-0"
+            }`}
           >
-            <div className="flex items-center justify-between border-b border-white/10 px-5 py-3">
-              <div className="text-xs uppercase tracking-[0.26em] text-[#E8D19A]">
-                Aerial Flyover, Close-Up View
-              </div>
-              <button
-                type="button"
-                onClick={() => setShowFlyover(false)}
-                aria-label="Close"
-                className="rounded-full border border-white/15 bg-white/5 px-3 py-1 text-sm text-white transition hover:bg-white/10"
-              >
-                ✕ Close
-              </button>
+            <div className="text-xs font-bold uppercase tracking-[0.4em] text-[#E8D19A] drop-shadow-lg">
+              Close-Up View
             </div>
-            <video
-              src={sceneVideoUrl}
-              autoPlay
-              muted
-              loop
-              playsInline
-              controls
-              className="w-full"
-            />
+            <div className="mt-2 font-serif text-2xl text-white drop-shadow-lg md:text-3xl">
+              {preciseLabel || label}
+            </div>
           </div>
+
+          <button
+            type="button"
+            onClick={() => setShowFlyover(false)}
+            aria-label="Close"
+            className={`absolute right-5 top-5 flex h-10 w-10 items-center justify-center rounded-full border border-white/20 bg-black/40 text-white backdrop-blur-sm transition hover:bg-black/60 ${
+              flyoverEntered ? "opacity-100" : "opacity-0"
+            }`}
+          >
+            ✕
+          </button>
         </div>
       )}
     </div>
