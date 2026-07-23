@@ -62,14 +62,14 @@ export default function Navbar({
 
   return (
     <div
-      className={`sticky top-0 z-30 mb-10 backdrop-blur-xl transition-colors ${
+      className={`sticky top-0 z-[999] relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen mb-10 backdrop-blur-xl transition-colors ${
         isActive
           ? "border-b border-[#C9A24A]/50 bg-[#0a0704]/90"
           : "border-b border-white/10 bg-[#05070b]/90"
       }`}
     >
       {/* Single row: menu / logo / links (xl+) / account / search -- nothing wraps, ever */}
-      <div className="flex items-center gap-3 px-2 py-3 sm:gap-4 sm:px-4 sm:py-4">
+      <div className="flex items-center gap-3 px-4 py-3 sm:gap-4 sm:px-6 sm:py-4">
         <div className="relative flex-shrink-0">
           <button
             onClick={() => setMenuOpen((v) => !v)}
@@ -83,10 +83,10 @@ export default function Navbar({
           {menuOpen && (
             <>
               <div
-                className="fixed inset-0 z-40"
+                className="fixed inset-0 z-[9998]"
                 onClick={() => setMenuOpen(false)}
               />
-              <div className="absolute left-0 top-full z-50 mt-3 w-60 overflow-hidden rounded-2xl border border-white/10 bg-[#0a0d14] shadow-2xl">
+              <div className="absolute left-0 top-full z-[9999] mt-3 w-60 overflow-hidden rounded-2xl border border-white/10 bg-[#0a0d14] shadow-2xl">
                 {MENU_LINKS.map((link) => (
                   <Link
                     key={link.href}
