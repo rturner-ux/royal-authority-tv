@@ -20,6 +20,12 @@ export const COLLECTIONS: Record<string, Collection> = {
     description:
       'Black men and a Black college student found hanging from trees across the U.S. from 2015 to 2025, each officially ruled a suicide by local, state, or federal authorities. Several have drawn public disputes from family members, civil rights attorneys, or independent forensic pathologists, against the backdrop of America\'s history of lynching Black people from trees.',
   },
+  'school-and-campus-shootings': {
+    slug: 'school-and-campus-shootings',
+    name: 'School and Campus Shootings',
+    description:
+      'Seven of the deadliest and most significant K-12 and university shootings in the U.S. since 2007, covering the law enforcement response, legal outcomes, and policy changes each one led to. Coverage centers on victims, responders, and accountability rather than the perpetrators.',
+  },
 }
 
 export function getCollection(slug: string): Collection | null {
