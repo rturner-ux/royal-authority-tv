@@ -98,6 +98,11 @@ export type IncidentPerson = {
   home_address: string | null
   attorney_name: string | null
   attorney_status: string | null
+  sex: string | null
+  jail_location: string | null
+  tank_location: string | null
+  booking_number: string | null
+  booking_date: string | null
   qa: InterviewQA[]
   connectedCases: PersonConnectedCase[]
   comments: PersonComment[]
@@ -203,6 +208,11 @@ export type IncidentCharge = {
   level: string | null
   charge_date: string | null
   sequence: number
+  bond_amount: string | null
+  warrant_number: string | null
+  magistrate: string | null
+  entry_type: 'charge' | 'hold'
+  agency_id: string | null
 }
 
 export type IncidentBondSetting = {

@@ -12,6 +12,17 @@ function formatDate(value: string | null): string | null {
   return new Date(value + "T12:00:00").toLocaleDateString("en-US", { dateStyle: "medium" });
 }
 
+function formatDateTime(value: string | null): string | null {
+  if (!value) return null;
+  return new Date(value).toLocaleString("en-US", { dateStyle: "medium", timeStyle: "short" });
+}
+
+function parseMoney(value: string | null): number {
+  if (!value) return 0;
+  const n = parseFloat(value.replace(/[^0-9.]/g, ""));
+  return Number.isNaN(n) ? 0 : n;
+}
+
 export default async function CourtRecordPage({
   params,
 }: {
@@ -71,6 +82,7 @@ export default async function CourtRecordPage({
   }
 
   const defendants = people.filter((p) => p.role === "suspect");
+  const bookedDefendants = defendants.filter((d) => d.booking_number);
   const documents = courtRecords.filter((r) => !!r.document_url);
   const seenDocUrls = new Set<string>();
   const uniqueDocuments = documents.filter((r) => {
@@ -82,6 +94,7 @@ export default async function CourtRecordPage({
   const available = [
     courtCase && "case-information",
     defendants.length > 0 && "party",
+    bookedDefendants.length > 0 && "booking-record",
     charges.length > 0 && "charge",
     bondSettings.length > 0 && "bond-settings",
     courtRecords.length > 0 && "events-and-hearings",
@@ -211,6 +224,119 @@ export default async function CourtRecordPage({
                 </div>
               </section>
             )}
+
+            {bookedDefendants.map((d, i) => {
+              const personCharges = charges.filter((c) => c.person_id === d.id);
+              const totalBond = personCharges.reduce((sum, c) => sum + parseMoney(c.bond_amount), 0);
+
+              return (
+                <section
+                  key={d.id}
+                  id={i === 0 ? "booking-record" : `booking-record-${d.id}`}
+                  className="scroll-mt-24 rounded-[32px] border border-white/10 bg-black/30 p-7 backdrop-blur-sm"
+                >
+                  <div className="text-xs uppercase tracking-[0.3em] text-[#E8D19A]">Booking Record</div>
+                  <div className="mt-5 grid gap-6 sm:grid-cols-[160px_1fr]">
+                    {d.photo_url && (
+                      <div className="h-40 w-40 overflow-hidden rounded-2xl border border-white/10 bg-white/[0.02]">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={d.photo_url} alt={d.name} className="h-full w-full object-cover" />
+                      </div>
+                    )}
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      <div>
+                        <div className="text-xs uppercase tracking-[0.15em] text-slate-500">Name</div>
+                        <div className="mt-1 text-sm font-semibold text-white">{d.name}</div>
+                      </div>
+                      {d.race && (
+                        <div>
+                          <div className="text-xs uppercase tracking-[0.15em] text-slate-500">Race</div>
+                          <div className="mt-1 text-sm font-semibold text-white">{d.race}</div>
+                        </div>
+                      )}
+                      {d.sex && (
+                        <div>
+                          <div className="text-xs uppercase tracking-[0.15em] text-slate-500">Sex</div>
+                          <div className="mt-1 text-sm font-semibold text-white">{d.sex}</div>
+                        </div>
+                      )}
+                      {d.dob && (
+                        <div>
+                          <div className="text-xs uppercase tracking-[0.15em] text-slate-500">DOB</div>
+                          <div className="mt-1 text-sm font-semibold text-white">{formatDate(d.dob)}</div>
+                        </div>
+                      )}
+                      {d.jail_location && (
+                        <div>
+                          <div className="text-xs uppercase tracking-[0.15em] text-slate-500">Jail Location</div>
+                          <div className="mt-1 text-sm font-semibold text-white">{d.jail_location}</div>
+                        </div>
+                      )}
+                      {d.tank_location && (
+                        <div>
+                          <div className="text-xs uppercase tracking-[0.15em] text-slate-500">Tank Location</div>
+                          <div className="mt-1 text-sm font-semibold text-white">{d.tank_location}</div>
+                        </div>
+                      )}
+                      {d.booking_number && (
+                        <div>
+                          <div className="text-xs uppercase tracking-[0.15em] text-slate-500">Bookin Number</div>
+                          <div className="mt-1 text-sm font-semibold text-white">{d.booking_number}</div>
+                        </div>
+                      )}
+                      {d.booking_date && (
+                        <div>
+                          <div className="text-xs uppercase tracking-[0.15em] text-slate-500">Bookin Date</div>
+                          <div className="mt-1 text-sm font-semibold text-white">{formatDateTime(d.booking_date)}</div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {personCharges.length > 0 && (
+                    <div className="mt-6 space-y-3">
+                      {personCharges.map((c) => (
+                        <div key={c.id} className="rounded-2xl border border-white/10 bg-white/[0.02] p-4">
+                          <div className="text-xs uppercase tracking-[0.15em] text-red-300">
+                            {c.entry_type === "hold" ? "Hold" : "Charge"}
+                          </div>
+                          {c.entry_type === "hold" && (
+                            <div className="mt-1 text-xs text-slate-400">Agency ID: {c.agency_id || "N/A"}</div>
+                          )}
+                          <div className="mt-1 text-sm font-semibold text-white">{c.description}</div>
+                          <div className="mt-2 grid gap-1 text-xs text-slate-400 sm:grid-cols-3">
+                            {c.bond_amount && (
+                              <div>
+                                <span className="text-slate-500">Bond Amount:</span> {c.bond_amount}
+                              </div>
+                            )}
+                            {c.warrant_number && (
+                              <div>
+                                <span className="text-slate-500">Warrant Number:</span> {c.warrant_number}
+                              </div>
+                            )}
+                            {c.magistrate && (
+                              <div>
+                                <span className="text-slate-500">Magistrate:</span> {c.magistrate}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+
+                      <div className="flex items-center justify-between rounded-2xl border border-[#C9A24A]/30 bg-[#C9A24A]/10 px-4 py-3">
+                        <span className="text-xs font-semibold uppercase tracking-[0.15em] text-[#E8D19A]">
+                          Total Bond Amount
+                        </span>
+                        <span className="text-sm font-semibold text-white">
+                          {totalBond.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        </span>
+                      </div>
+                    </div>
+                  )}
+                </section>
+              );
+            })}
 
             {charges.length > 0 && (
               <section
