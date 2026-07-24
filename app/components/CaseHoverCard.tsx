@@ -7,10 +7,12 @@ import { CATEGORY_LABELS, CATEGORY_COLORS } from "@/lib/labels";
 export const COLLAPSED_WIDTH = 165;
 export const COLLAPSED_HEIGHT = 235;
 
-// Matches the reference implementation exactly: a plain poster card with a
-// subtle scale + shadow lift on hover (pure CSS, no JS state), the case
-// title overlaid at the bottom of the photo, and a full-width category
-// strip below it -- no expanding popover, no icon row.
+// A plain poster card with a subtle scale + shadow lift on hover (pure CSS,
+// no JS state) -- no expanding popover, no icon row. Cards with generated
+// poster art render edge-to-edge with no title block or category strip
+// (the title is already baked into the art, and a strip on top of it would
+// cover the bottom of the generated text); older plain-photo cards keep the
+// overlaid title + category strip.
 export default function CaseHoverCard({ incident }: { incident: Incident }) {
   const href = `/case-file/${incident.slug}`;
 
@@ -63,12 +65,14 @@ export default function CaseHoverCard({ incident }: { incident: Incident }) {
         </div>
       )}
 
-      <div
-        className="relative z-[2] mt-auto w-full py-1 text-center text-[0.72rem] font-bold uppercase tracking-wide text-white"
-        style={{ backgroundColor: CATEGORY_COLORS[incident.category] }}
-      >
-        {CATEGORY_LABELS[incident.category]}
-      </div>
+      {!incident.poster_url && (
+        <div
+          className="relative z-[2] mt-auto w-full py-1 text-center text-[0.72rem] font-bold uppercase tracking-wide text-white"
+          style={{ backgroundColor: CATEGORY_COLORS[incident.category] }}
+        >
+          {CATEGORY_LABELS[incident.category]}
+        </div>
+      )}
     </Link>
   );
 }
