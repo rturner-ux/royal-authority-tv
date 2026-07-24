@@ -30,7 +30,7 @@ export const COLLECTIONS: Record<string, Collection> = {
     slug: 'parents-who-killed-their-children',
     name: 'Parents Who Killed Their Children',
     description:
-      'Five of the most significant, well-documented U.S. cases in the past five years of a parent or parents convicted of killing their own children, covering the investigations, prosecutions, and sentencing outcomes in each case.',
+      'Some of the most significant, well-documented U.S. cases in the past five years of a parent or parents killing their own children, covering the investigations and outcomes in each case, whether that meant a conviction or the perpetrator\'s own death.',
   },
 }
 
