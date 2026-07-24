@@ -21,7 +21,13 @@ export default function CaseHoverCard({ incident }: { incident: Incident }) {
       style={{ width: COLLAPSED_WIDTH, height: COLLAPSED_HEIGHT }}
     >
       <div className="absolute inset-0">
-        {incident.image_url ? (
+        {incident.poster_url ? (
+          // Poster art already has the case title baked in as a stylized
+          // text treatment (generated separately from, and composited onto,
+          // the real unaltered photo) -- no separate title block needed.
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={incident.poster_url} alt={incident.title} className="h-full w-full object-cover" />
+        ) : incident.image_url ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img src={incident.image_url} alt={incident.title} className="h-full w-full object-cover" />
         ) : (
@@ -46,17 +52,19 @@ export default function CaseHoverCard({ incident }: { incident: Incident }) {
         />
       </div>
 
-      <div className="relative z-[2] mt-auto px-2.5 py-3 text-center">
-        <div
-          className="line-clamp-2 text-sm font-extrabold leading-tight text-white"
-          style={{ textShadow: "0 2px 6px rgba(0,0,0,0.7)" }}
-        >
-          {incident.title}
+      {!incident.poster_url && (
+        <div className="relative z-[2] mt-auto px-2.5 py-3 text-center">
+          <div
+            className="line-clamp-2 text-sm font-extrabold leading-tight text-white"
+            style={{ textShadow: "0 2px 6px rgba(0,0,0,0.7)" }}
+          >
+            {incident.title}
+          </div>
         </div>
-      </div>
+      )}
 
       <div
-        className="relative z-[2] w-full py-1 text-center text-[0.72rem] font-bold uppercase tracking-wide text-white"
+        className="relative z-[2] mt-auto w-full py-1 text-center text-[0.72rem] font-bold uppercase tracking-wide text-white"
         style={{ backgroundColor: CATEGORY_COLORS[incident.category] }}
       >
         {CATEGORY_LABELS[incident.category]}

@@ -50,6 +50,7 @@ export type Incident = {
   source_name: string
   source_url: string | null
   image_url: string | null
+  poster_url: string | null
   scene_description: string | null
   scene_image_url: string | null
   scene_video_url: string | null

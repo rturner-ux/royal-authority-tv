@@ -70,6 +70,7 @@ export async function getTrendingCases(): Promise<Incident[]> {
     .eq('is_trending', true)
     .not('slug', 'is', null)
     .order('published_at', { ascending: false })
+    .limit(10)
 
   if (error) throw error
   return (data ?? []) as Incident[]
