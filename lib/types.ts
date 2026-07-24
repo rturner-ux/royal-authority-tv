@@ -108,6 +108,7 @@ export type PersonConnectedCase = {
   case_summary: string
   case_year: number | null
   source_url: string | null
+  case_slug: string | null
   sequence: number
 }
 

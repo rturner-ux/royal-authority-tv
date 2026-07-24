@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import type { IncidentPerson } from "@/lib/types";
 import PersonQA from "./PersonQA";
 import WitnessComments from "./WitnessComments";
@@ -82,22 +83,46 @@ export default function PersonProfileTabs({ person }: { person: IncidentPerson }
       {showTabs && tab === "cases" && (
         <div className="space-y-4">
           {person.connectedCases.map((c) => (
-            <div key={c.id} className="rounded-2xl border border-white/10 bg-white/[0.02] p-5">
+            <div
+              key={c.id}
+              className={`rounded-2xl border border-white/10 bg-white/[0.02] p-5 ${
+                c.case_slug ? "transition hover:border-[#C9A24A]/30" : ""
+              }`}
+            >
               <div className="flex flex-wrap items-baseline justify-between gap-2">
-                <h4 className="font-serif text-lg text-white">{c.case_title}</h4>
+                {c.case_slug ? (
+                  <Link
+                    href={`/case-file/${c.case_slug}`}
+                    className="font-serif text-lg text-white hover:text-[#E8D19A] hover:underline"
+                  >
+                    {c.case_title}
+                  </Link>
+                ) : (
+                  <h4 className="font-serif text-lg text-white">{c.case_title}</h4>
+                )}
                 {c.case_year && <span className="text-xs text-slate-500">{c.case_year}</span>}
               </div>
               <p className="mt-2 text-sm leading-7 text-slate-300">{c.case_summary}</p>
-              {c.source_url && (
-                <a
-                  href={c.source_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="mt-3 inline-block text-xs text-[#67e8f9] hover:underline"
-                >
-                  Source
-                </a>
-              )}
+              <div className="mt-3 flex flex-wrap items-center gap-4">
+                {c.case_slug && (
+                  <Link
+                    href={`/case-file/${c.case_slug}`}
+                    className="inline-block text-xs font-semibold text-[#E8D19A] hover:underline"
+                  >
+                    View Case File →
+                  </Link>
+                )}
+                {c.source_url && (
+                  <a
+                    href={c.source_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-block text-xs text-[#67e8f9] hover:underline"
+                  >
+                    Source
+                  </a>
+                )}
+              </div>
             </div>
           ))}
         </div>
