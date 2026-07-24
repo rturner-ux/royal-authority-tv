@@ -504,24 +504,6 @@ export default async function CaseFileSlugPage({
         {/* INVESTIGATOR TOOLKIT */}
         <InvestigatorToolkit slug={slug} isActive={isActive} hasRole={hasRole} initialRole={subscriberRole} />
 
-        {/* VIDEO */}
-        {incident.video_embed_url && (
-          <section className="mt-10 rounded-[32px] border border-white/10 bg-black/30 p-4 backdrop-blur-sm">
-            <div className="mb-3 px-3 text-xs uppercase tracking-[0.3em] text-[#E8D19A]">
-              News Coverage
-            </div>
-            <div className="relative w-full overflow-hidden rounded-2xl" style={{ aspectRatio: "16 / 9" }}>
-              <iframe
-                src={incident.video_embed_url}
-                className="absolute inset-0 h-full w-full"
-                allow="autoplay; fullscreen"
-                allowFullScreen
-                loading="lazy"
-              />
-            </div>
-          </section>
-        )}
-
         {/* COURT & ARREST RECORDS */}
         {(courtCase || charges.length > 0 || courtRecords.length > 0) && (
           <section className="mt-10 rounded-[32px] border border-[#C9A24A]/30 bg-gradient-to-br from-[#C9A24A]/[0.1] to-transparent p-7 backdrop-blur-sm">
