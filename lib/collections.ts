@@ -26,6 +26,12 @@ export const COLLECTIONS: Record<string, Collection> = {
     description:
       'Seven of the deadliest and most significant K-12 and university shootings in the U.S. since 2007, covering the law enforcement response, legal outcomes, and policy changes each one led to. Coverage centers on victims, responders, and accountability rather than the perpetrators.',
   },
+  'parents-who-killed-their-children': {
+    slug: 'parents-who-killed-their-children',
+    name: 'Parents Who Killed Their Children',
+    description:
+      'Five of the most significant, well-documented U.S. cases in the past five years of a parent or parents convicted of killing their own children, covering the investigations, prosecutions, and sentencing outcomes in each case.',
+  },
 }
 
 export function getCollection(slug: string): Collection | null {
