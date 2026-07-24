@@ -37,6 +37,7 @@ const MENU_LINKS = [
 // linked from deep inside the Member Room page.
 const SUBSCRIBER_LINKS = [
   { label: "Investigation Board", href: "/investigation-board" },
+  { label: "My Playlists", href: "/account/playlists" },
   { label: "Pattern Intelligence", href: "/pattern-intelligence" },
 ];
 

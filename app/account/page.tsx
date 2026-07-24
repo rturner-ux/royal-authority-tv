@@ -96,6 +96,23 @@ export default async function AccountPage() {
           </div>
 
           {isActive && (
+            <div className="mt-8 flex items-center justify-between rounded-[30px] border border-white/10 bg-black/30 p-6 backdrop-blur-sm">
+              <div>
+                <div className="text-xs uppercase tracking-[0.26em] text-[#E8D19A]">My Playlists</div>
+                <p className="mt-2 text-sm leading-7 text-slate-300">
+                  Build named, sortable lists of cases you&apos;re following.
+                </p>
+              </div>
+              <a
+                href="/account/playlists"
+                className="shrink-0 rounded-2xl bg-[#C9A24A] px-5 py-3 text-sm font-semibold text-black transition hover:opacity-90"
+              >
+                Open →
+              </a>
+            </div>
+          )}
+
+          {isActive && (
             <InvestigatorProfile
               userId={user.id}
               initialRole={profile?.role ?? null}

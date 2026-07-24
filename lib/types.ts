@@ -114,6 +114,25 @@ export type PersonConnectedCase = {
   sequence: number
 }
 
+export type SubscriberPlaylist = {
+  id: string
+  user_id: string
+  name: string
+  sequence: number
+  created_at: string
+  updated_at: string
+  cases: PlaylistCase[]
+}
+
+export type PlaylistCase = {
+  id: string
+  playlist_id: string
+  incident_id: string
+  sequence: number
+  created_at: string
+  incident: Pick<Incident, 'id' | 'title' | 'slug' | 'category' | 'image_url'> | null
+}
+
 export type CommentStatus = 'pending' | 'approved' | 'rejected'
 
 export type PersonComment = {
