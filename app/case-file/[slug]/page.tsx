@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import Navbar from "../../components/Navbar";
 import PersonProfileTabs from "../../components/PersonProfileTabs";
+import PersonPhotoVideo from "../../components/PersonPhotoVideo";
 import ShareButton from "../../components/ShareButton";
 import LocationZoomReveal from "../../components/LocationZoomReveal";
 import PhotoGallery from "../../components/PhotoGallery";
@@ -383,19 +384,12 @@ export default async function CaseFileSlugPage({
                     </div>
 
                     {person.photo_url ? (
-                      <div
-                        className={`relative mt-5 w-full overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] ${
-                          person.photo_fit === "contain" ? "aspect-square p-8" : "aspect-[4/5]"
-                        }`}
-                      >
-                        <Image
-                          src={person.photo_url}
-                          alt={person.name}
-                          fill
-                          unoptimized
-                          className={person.photo_fit === "contain" ? "object-contain" : "object-cover"}
-                        />
-                      </div>
+                      <PersonPhotoVideo
+                        photoUrl={person.photo_url}
+                        videoUrl={person.video_url}
+                        name={person.name}
+                        photoFit={person.photo_fit}
+                      />
                     ) : (
                       <div className="mt-5 flex flex-col items-center gap-3 rounded-2xl border border-dashed border-white/10 bg-white/[0.02] py-10">
                         <div className="grid h-14 w-14 place-items-center rounded-full border border-white/10 bg-white/[0.04] text-lg font-bold text-white/40">

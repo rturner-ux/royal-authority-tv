@@ -90,6 +90,7 @@ export type IncidentPerson = {
   bio: string | null
   photo_url: string | null
   photo_fit: 'cover' | 'contain'
+  video_url: string | null
   sequence: number
   dob: string | null
   race: string | null
