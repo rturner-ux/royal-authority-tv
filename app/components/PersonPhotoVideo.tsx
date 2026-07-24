@@ -15,17 +15,28 @@ export default function PersonPhotoVideo({
   photoFit: "cover" | "contain";
 }) {
   const [playing, setPlaying] = useState(false);
+  const isYouTube = videoUrl ? /youtube\.com\/embed|youtu\.be\//.test(videoUrl) : false;
 
   if (playing && videoUrl) {
     return (
       <div className="relative mt-5 w-full overflow-hidden rounded-2xl border border-white/10 bg-black aspect-[4/5]">
-        <video
-          src={videoUrl}
-          controls
-          autoPlay
-          playsInline
-          className="absolute inset-0 h-full w-full object-cover"
-        />
+        {isYouTube ? (
+          <iframe
+            src={`${videoUrl}${videoUrl.includes("?") ? "&" : "?"}autoplay=1`}
+            title={`Video of ${name}`}
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            allowFullScreen
+            className="absolute inset-0 h-full w-full"
+          />
+        ) : (
+          <video
+            src={videoUrl}
+            controls
+            autoPlay
+            playsInline
+            className="absolute inset-0 h-full w-full object-cover"
+          />
+        )}
       </div>
     );
   }
