@@ -62,36 +62,32 @@ export default function AccountTabs({
               </Link>
             </p>
           ) : (
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
               {playlists.map((p) => (
                 <Link
                   key={p.id}
                   href="/account/playlists"
-                  className="rounded-2xl border border-white/10 bg-white/[0.03] p-4 transition hover:border-white/25"
+                  className="flex items-center gap-4 rounded-2xl border border-white/10 bg-white/[0.03] p-4 transition hover:border-white/25 hover:bg-white/[0.05]"
                 >
-                  <div className="flex gap-1">
-                    {p.thumbnails.length > 0 ? (
-                      p.thumbnails.slice(0, 3).map((url, i) => (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img
-                          key={i}
-                          src={url}
-                          alt=""
-                          className="h-12 w-12 rounded-lg object-cover"
-                          style={{ marginLeft: i > 0 ? "-0.5rem" : 0 }}
-                        />
-                      ))
-                    ) : (
-                      <div className="grid h-12 w-12 place-items-center rounded-lg bg-[#181818] text-white/20">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="h-5 w-5">
-                          <path d="M4 4h11l5 5v11a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1Z" strokeLinejoin="round" />
-                        </svg>
-                      </div>
-                    )}
-                  </div>
-                  <div className="mt-3 truncate font-serif text-base text-white">{p.name}</div>
-                  <div className="text-xs text-slate-500">
-                    {p.caseCount} {p.caseCount === 1 ? "case" : "cases"}
+                  {p.thumbnails.length > 0 ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={p.thumbnails[0]}
+                      alt=""
+                      className="h-20 w-20 flex-shrink-0 rounded-xl object-cover"
+                    />
+                  ) : (
+                    <div className="grid h-20 w-20 flex-shrink-0 place-items-center rounded-xl bg-[#181818] text-white/20">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="h-8 w-8">
+                        <path d="M4 4h11l5 5v11a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1Z" strokeLinejoin="round" />
+                      </svg>
+                    </div>
+                  )}
+                  <div className="min-w-0">
+                    <div className="truncate font-serif text-xl text-white">{p.name}</div>
+                    <div className="mt-1 text-sm text-slate-500">
+                      {p.caseCount} {p.caseCount === 1 ? "case" : "cases"}
+                    </div>
                   </div>
                 </Link>
               ))}
