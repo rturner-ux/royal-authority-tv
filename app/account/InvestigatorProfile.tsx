@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import { supabaseBrowser } from "@/lib/supabase/browser";
-import { INVESTIGATOR_ROLES, getRole } from "@/lib/roles";
+import { INVESTIGATOR_ROLES } from "@/lib/roles";
 import { playSfx } from "@/lib/sfx";
 
 export default function InvestigatorProfile({
@@ -21,8 +21,6 @@ export default function InvestigatorProfile({
   const [draftCallsign, setDraftCallsign] = useState(initialCallsign ?? "");
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
-
-  const role = getRole(roleKey);
 
   async function saveRole(key: string) {
     setSaving(true);
@@ -102,28 +100,19 @@ export default function InvestigatorProfile({
     );
   }
 
+  // Full identity (badge, callsign, tagline) already shows in the profile
+  // header above -- this stays a slim trigger for re-entering edit mode
+  // rather than repeating that same card again.
   return (
-    <div className="mt-8 rounded-[30px] border border-[#C9A24A]/30 bg-gradient-to-br from-[#C9A24A]/[0.08] to-transparent p-6 backdrop-blur-sm">
-      <div className="flex items-center gap-4">
-        <div className="relative h-16 w-16 flex-shrink-0 rounded-full border border-[#C9A24A]/30 bg-black/30 p-2">
-          <Image src={role!.badge} alt="" fill unoptimized className="object-contain p-2" />
-        </div>
-        <div className="min-w-0">
-          <div className="text-xs uppercase tracking-[0.2em] text-[#E8D19A]">{role!.title}</div>
-          <div className="mt-1 truncate text-lg font-bold text-white">
-            {callsign || "Unnamed Investigator"}
-          </div>
-        </div>
-      </div>
-      <p className="mt-4 text-sm leading-6 text-slate-400">{role!.tagline}</p>
+    <div className="mt-4">
       <button
         onClick={() => {
           setDraftCallsign(callsign);
           setPicking(true);
         }}
-        className="mt-4 text-xs font-semibold text-[#E8D19A] hover:underline"
+        className="rounded-2xl border border-white/15 bg-white/5 px-4 py-2 text-xs font-semibold text-white transition hover:bg-white/10"
       >
-        Change Role
+        Edit Investigator Profile
       </button>
     </div>
   );
