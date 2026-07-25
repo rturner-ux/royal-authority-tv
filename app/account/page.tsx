@@ -128,7 +128,6 @@ export default async function AccountPage() {
                     </span>
                   )}
                 </div>
-                <p className="mt-1 text-sm text-slate-500">{user.email}</p>
                 {role && <p className="mt-3 max-w-lg text-sm leading-6 text-slate-400">{role.tagline}</p>}
                 {memberSince && <p className="mt-2 text-xs text-slate-600">Member since {memberSince}</p>}
               </div>
