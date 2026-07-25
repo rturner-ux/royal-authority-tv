@@ -15,7 +15,7 @@ export default function Footer() {
           <div className="flex flex-wrap gap-x-12 gap-y-6">
             <div>
               <div className="text-xs font-semibold uppercase tracking-[0.15em] text-[#E8D19A]">Site</div>
-              <ul className="mt-3 space-y-2 text-sm text-slate-300">
+              <ul className="mt-3 space-y-2 text-sm text-slate-400">
                 <li><Link href="/case-file" className="hover:text-white">Case Files</Link></li>
                 <li><Link href="/map" className="hover:text-white">Investigation Map</Link></li>
                 <li><Link href="/transcript" className="hover:text-white">Transcript Archive</Link></li>
@@ -25,7 +25,7 @@ export default function Footer() {
 
             <div>
               <div className="text-xs font-semibold uppercase tracking-[0.15em] text-[#E8D19A]">Legal</div>
-              <ul className="mt-3 space-y-2 text-sm text-slate-300">
+              <ul className="mt-3 space-y-2 text-sm text-slate-400">
                 <li><Link href="/privacy" className="hover:text-white">Privacy Policy</Link></li>
                 <li><Link href="/terms" className="hover:text-white">Terms of Service</Link></li>
               </ul>
@@ -33,7 +33,7 @@ export default function Footer() {
 
             <div>
               <div className="text-xs font-semibold uppercase tracking-[0.15em] text-[#E8D19A]">Contact</div>
-              <ul className="mt-3 space-y-2 text-sm text-slate-300">
+              <ul className="mt-3 space-y-2 text-sm text-slate-400">
                 <li>
                   <a href="mailto:submissions@royalauthorityofficial.com" className="hover:text-white">
                     submissions@royalauthorityofficial.com
