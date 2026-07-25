@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import Navbar from "../components/Navbar";
 import { getSubscriberStatus } from "@/lib/subscription";
-import { getAllVisibleCases } from "@/lib/cases";
+import { getAllVisibleCasesForPatternIntelligence } from "@/lib/cases";
 import { findCaseClusters } from "@/lib/patternIntelligence";
 import { CATEGORY_LABELS, CATEGORY_COLORS } from "@/lib/labels";
 
@@ -19,7 +19,7 @@ export default async function PatternIntelligencePage() {
     redirect("/login?next=/pattern-intelligence");
   }
 
-  const clusters = isActive ? findCaseClusters(await getAllVisibleCases()) : [];
+  const clusters = isActive ? findCaseClusters(await getAllVisibleCasesForPatternIntelligence()) : [];
 
   return (
     <main className="relative min-h-screen bg-[#05070b] text-white overflow-hidden">
@@ -103,7 +103,7 @@ export default async function PatternIntelligencePage() {
                         <div className="mt-1.5 text-xs text-slate-500">
                           {c.location_label || "Location unavailable"}
                           {" · "}
-                          {new Date(c.published_at).toLocaleDateString("en-US", { dateStyle: "medium" })}
+                          {new Date(c.occurred_at).toLocaleDateString("en-US", { dateStyle: "medium" })}
                         </div>
                       </div>
                     );

@@ -1,5 +1,6 @@
 import 'server-only'
-import type { Incident, IncidentCategory } from './types'
+import type { IncidentCategory } from './types'
+import type { IncidentWithOccurredAt } from './cases'
 
 // Groups categories into broad pattern buckets -- a missing-person case and a
 // later murder case can plausibly be part of the same underlying pattern,
@@ -43,7 +44,7 @@ function monthsBetween(a: string, b: string): number {
 
 export type CaseCluster = {
   bucket: string
-  cases: Incident[]
+  cases: IncidentWithOccurredAt[]
   maxDistanceMiles: number
   spanMonths: number
 }
@@ -52,8 +53,13 @@ export type CaseCluster = {
 // name or accuse any individual, and does not claim cases are actually
 // connected. Two unrelated cases can share these traits by coincidence; this
 // only surfaces the overlap for a subscriber to weigh themselves.
-export function findCaseClusters(incidents: Incident[]): CaseCluster[] {
-  const eligible = incidents.filter((i) => CATEGORY_BUCKETS[i.category] && i.lat && i.lng && i.published_at)
+//
+// Timing is based on `occurred_at` (the actual reported event date), not
+// `published_at` (when the case was added to this site) -- otherwise a
+// decades-old case and a brand-new one entered the same week would look like
+// they happened days apart.
+export function findCaseClusters(incidents: IncidentWithOccurredAt[]): CaseCluster[] {
+  const eligible = incidents.filter((i) => CATEGORY_BUCKETS[i.category] && i.lat && i.lng && i.occurred_at)
 
   const n = eligible.length
   const parent = Array.from({ length: n }, (_, i) => i)
@@ -77,7 +83,7 @@ export function findCaseClusters(incidents: Incident[]): CaseCluster[] {
       if (CATEGORY_BUCKETS[a.category] !== CATEGORY_BUCKETS[b.category]) continue
       const distance = haversineMiles(a.lat, a.lng, b.lat, b.lng)
       if (distance > MAX_DISTANCE_MILES) continue
-      const months = monthsBetween(a.published_at, b.published_at)
+      const months = monthsBetween(a.occurred_at, b.occurred_at)
       if (months > MAX_MONTHS_APART) continue
       union(i, j)
     }
@@ -104,13 +110,13 @@ export function findCaseClusters(incidents: Incident[]): CaseCluster[] {
     for (let i = 0; i < cases.length; i++) {
       for (let j = i + 1; j < cases.length; j++) {
         maxDistance = Math.max(maxDistance, haversineMiles(cases[i].lat, cases[i].lng, cases[j].lat, cases[j].lng))
-        maxSpan = Math.max(maxSpan, monthsBetween(cases[i].published_at, cases[j].published_at))
+        maxSpan = Math.max(maxSpan, monthsBetween(cases[i].occurred_at, cases[j].occurred_at))
       }
     }
 
     clusters.push({
       bucket: CATEGORY_BUCKETS[cases[0].category]!,
-      cases: cases.sort((a, b) => new Date(a.published_at).getTime() - new Date(b.published_at).getTime()),
+      cases: cases.sort((a, b) => new Date(a.occurred_at).getTime() - new Date(b.occurred_at).getTime()),
       maxDistanceMiles: Math.round(maxDistance),
       spanMonths: Math.round(maxSpan),
     })

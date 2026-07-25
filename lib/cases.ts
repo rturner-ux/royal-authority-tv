@@ -92,16 +92,37 @@ export async function getRandomSpotlightCase(): Promise<Incident | null> {
   return data[Math.floor(Math.random() * data.length)] as Incident
 }
 
-// Unlike getFeaturedCases/getTrendingCases, this deliberately includes cases
-// without a slug (most automated-ingestion cases never get one) since the
-// pattern intelligence tool correlates against the full map, not just cases
-// with a dedicated case-file page.
-export async function getAllVisibleCases(): Promise<Incident[]> {
-  const db = supabase()
-  const { data, error } = await db.from('incidents').select('*').eq('is_hidden', false)
+export type IncidentWithOccurredAt = Incident & { occurred_at: string }
 
-  if (error) throw error
-  return (data ?? []) as Incident[]
+// `published_at` is when a case was added to this site, not when the
+// underlying event happened -- a 1976 case entered this week and a 2018 case
+// entered the same week would otherwise look like they "span 0 months," which
+// is meaningless for pattern correlation. This attaches the earliest dated
+// incident_update (the actual reported event date) as `occurred_at`, falling
+// back to published_at only for the rare case with no dated updates at all.
+// Deliberately includes cases without a slug (most automated-ingestion cases
+// never get one) since pattern intelligence correlates against the full map,
+// not just cases with a dedicated case-file page.
+export async function getAllVisibleCasesForPatternIntelligence(): Promise<IncidentWithOccurredAt[]> {
+  const db = supabase()
+  const [{ data: incidents, error: incidentsError }, { data: updates, error: updatesError }] = await Promise.all([
+    db.from('incidents').select('*').eq('is_hidden', false),
+    db.from('incident_updates').select('incident_id, event_date').not('event_date', 'is', null),
+  ])
+
+  if (incidentsError) throw incidentsError
+  if (updatesError) throw updatesError
+
+  const earliestByIncident = new Map<string, string>()
+  for (const u of updates ?? []) {
+    const existing = earliestByIncident.get(u.incident_id)
+    if (!existing || u.event_date < existing) earliestByIncident.set(u.incident_id, u.event_date)
+  }
+
+  return ((incidents ?? []) as Incident[]).map((incident) => ({
+    ...incident,
+    occurred_at: earliestByIncident.get(incident.id) ?? incident.published_at,
+  }))
 }
 
 export async function getCasesByCollection(collectionSlug: string): Promise<Incident[]> {
