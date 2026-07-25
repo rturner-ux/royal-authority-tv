@@ -11,7 +11,7 @@ import PhotoGallery from "../../components/PhotoGallery";
 import CaseLog from "../../components/CaseLog";
 import RecordLastCase from "../../components/RecordLastCase";
 import InvestigatorToolkit from "../../components/InvestigatorToolkit";
-import { getCaseBySlug } from "@/lib/cases";
+import { getCaseBySlug, getCaseTrackingCount } from "@/lib/cases";
 import { getCollection } from "@/lib/collections";
 import { getSubscriberStatus } from "@/lib/subscription";
 import { supabaseServerAuth } from "@/lib/supabase/serverAuth";
@@ -46,6 +46,7 @@ export default async function CaseFileSlugPage({
 
   const { incident, updates, people, transcript, courtRecords, photos, relatedIncident, courtCase, charges } = result;
   const incidentCollection = incident.collection_slug ? getCollection(incident.collection_slug) : null;
+  const trackingCount = await getCaseTrackingCount(incident.id);
   const { user, isActive } = await getSubscriberStatus();
   const accountProps = user
     ? { accountLabel: "My Account", accountHref: "/account" }
@@ -182,6 +183,17 @@ export default async function CaseFileSlugPage({
             <h2 className="font-serif text-4xl font-bold leading-tight md:text-5xl">
               {incident.title}
             </h2>
+
+            {trackingCount > 0 && (
+              <div className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-[0.15em] text-slate-400">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="h-3.5 w-3.5">
+                  <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" strokeLinecap="round" strokeLinejoin="round" />
+                  <circle cx="9" cy="7" r="4" />
+                  <path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+                {trackingCount} {trackingCount === 1 ? "subscriber is" : "subscribers are"} tracking this case
+              </div>
+            )}
 
             {incident.description && (
               <p className="text-lg leading-8 text-slate-300">

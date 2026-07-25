@@ -137,6 +137,31 @@ export async function getAllVisibleCasesForPatternIntelligence(): Promise<Incide
   }))
 }
 
+// Purely a social-proof count, no names surfaced -- deliberately the
+// lightest version of "who else is interested in this case": counts
+// distinct subscribers who have this case saved in any of their private
+// playlists, without exposing which subscribers or their playlists.
+export async function getCaseTrackingCount(incidentId: string): Promise<number> {
+  const db = supabase()
+  const { data, error } = await db
+    .from('playlist_cases')
+    .select('subscriber_playlists!inner(user_id)')
+    .eq('incident_id', incidentId)
+
+  if (error) throw error
+
+  const userIds = new Set(
+    (data ?? [])
+      .map((row) => {
+        const sp = Array.isArray(row.subscriber_playlists) ? row.subscriber_playlists[0] : row.subscriber_playlists
+        return (sp as { user_id: string } | null)?.user_id
+      })
+      .filter((id): id is string => !!id)
+  )
+
+  return userIds.size
+}
+
 export async function getCasesByCollection(collectionSlug: string): Promise<Incident[]> {
   const db = supabase()
   const { data, error } = await db
