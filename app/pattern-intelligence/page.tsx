@@ -3,10 +3,11 @@ import Link from "next/link";
 import Navbar from "../components/Navbar";
 import { getSubscriberStatus } from "@/lib/subscription";
 import { getAllVisibleCasesForPatternIntelligence } from "@/lib/cases";
-import { findCaseClusters } from "@/lib/patternIntelligence";
+import { findCaseClusters, findDisputedRulingClusters } from "@/lib/patternIntelligence";
 import { CATEGORY_LABELS, CATEGORY_COLORS } from "@/lib/labels";
 
 const BUCKET_LABELS: Record<string, string> = {
+  disputed_ruling: "Disputed Ruling Pattern",
   homicide: "Homicide / Criminal Investigation Pattern",
   missing: "Missing Persons Pattern",
   drowning: "Drowning Report Pattern",
@@ -19,7 +20,14 @@ export default async function PatternIntelligencePage() {
     redirect("/login?next=/pattern-intelligence");
   }
 
-  const clusters = isActive ? findCaseClusters(await getAllVisibleCasesForPatternIntelligence()) : [];
+  const allCases = isActive ? await getAllVisibleCasesForPatternIntelligence() : [];
+  // Disputed-ruling clusters go first -- a family or independent account
+  // contradicting the official version of events, in more than one nearby
+  // case, is the highest-signal pattern this tool can surface with current
+  // data, so it leads rather than sorting purely by cluster size.
+  const clusters = isActive
+    ? [...findDisputedRulingClusters(allCases), ...findCaseClusters(allCases)]
+    : [];
 
   return (
     <main className="relative min-h-screen bg-[#05070b] text-white overflow-hidden">
@@ -34,8 +42,9 @@ export default async function PatternIntelligencePage() {
           <div className="text-xs uppercase tracking-[0.34em] text-[#E8D19A]">Subscriber Access</div>
           <h1 className="mt-3 font-serif text-4xl text-white md:text-5xl">Pattern Intelligence</h1>
           <p className="mt-4 max-w-3xl text-sm leading-8 text-slate-300 md:text-base">
-            Surfaces cases across the map that share location, timing, and category proximity,
-            for pattern awareness.
+            Surfaces cases across the map that share location, timing, and category proximity, and
+            separately flags cases where a family or independent account disputes the official
+            ruling, for pattern awareness.
           </p>
         </div>
 
@@ -72,13 +81,19 @@ export default async function PatternIntelligencePage() {
           </div>
         ) : (
           <div className="space-y-6">
-            {clusters.map((cluster, i) => (
+            {clusters.map((cluster, i) => {
+              const isDisputed = cluster.bucket === "disputed_ruling";
+              return (
               <section
                 key={i}
-                className="rounded-[30px] border border-white/10 bg-black/30 p-6 backdrop-blur-sm"
+                className={`rounded-[30px] border p-6 backdrop-blur-sm ${
+                  isDisputed ? "border-amber-500/40 bg-amber-500/[0.04]" : "border-white/10 bg-black/30"
+                }`}
               >
                 <div className="flex flex-wrap items-center justify-between gap-2">
-                  <div className="text-xs uppercase tracking-[0.26em] text-[#E8D19A]">
+                  <div
+                    className={`text-xs uppercase tracking-[0.26em] ${isDisputed ? "text-amber-300" : "text-[#E8D19A]"}`}
+                  >
                     {BUCKET_LABELS[cluster.bucket] || cluster.bucket}
                   </div>
                   <div className="text-xs text-slate-500">
@@ -86,6 +101,14 @@ export default async function PatternIntelligencePage() {
                     spans {cluster.spanMonths} mo
                   </div>
                 </div>
+
+                {isDisputed && (
+                  <p className="mt-2 text-xs leading-6 text-amber-100/80">
+                    Each case below has at least one update where a family member or an independent
+                    account contradicts the official version of events. These cases happen to share
+                    geography and timing, but that overlap alone does not mean they are connected.
+                  </p>
+                )}
 
                 <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                   {cluster.cases.map((c) => {
@@ -117,7 +140,8 @@ export default async function PatternIntelligencePage() {
                   })}
                 </div>
               </section>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>

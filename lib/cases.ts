@@ -92,7 +92,9 @@ export async function getRandomSpotlightCase(): Promise<Incident | null> {
   return data[Math.floor(Math.random() * data.length)] as Incident
 }
 
-export type IncidentWithOccurredAt = Incident & { occurred_at: string }
+export type IncidentWithOccurredAt = Incident & { occurred_at: string; hasDisputedRuling: boolean }
+
+const DISPUTED_CLAIM_TYPES = new Set(['disputed_allegation', 'family_claim'])
 
 // `published_at` is when a case was added to this site, not when the
 // underlying event happened -- a 1976 case entered this week and a 2018 case
@@ -100,6 +102,11 @@ export type IncidentWithOccurredAt = Incident & { occurred_at: string }
 // is meaningless for pattern correlation. This attaches the earliest dated
 // incident_update (the actual reported event date) as `occurred_at`, falling
 // back to published_at only for the rare case with no dated updates at all.
+// Also flags `hasDisputedRuling` -- true when a case has at least one update
+// where the family or an independent account (`family_claim`,
+// `disputed_allegation`) pushes back against the official version of events,
+// which is what lets Pattern Intelligence surface a "Disputed Ruling"
+// cluster: multiple such cases sharing geography, not just one in isolation.
 // Deliberately includes cases without a slug (most automated-ingestion cases
 // never get one) since pattern intelligence correlates against the full map,
 // not just cases with a dedicated case-file page.
@@ -107,21 +114,26 @@ export async function getAllVisibleCasesForPatternIntelligence(): Promise<Incide
   const db = supabase()
   const [{ data: incidents, error: incidentsError }, { data: updates, error: updatesError }] = await Promise.all([
     db.from('incidents').select('*').eq('is_hidden', false),
-    db.from('incident_updates').select('incident_id, event_date').not('event_date', 'is', null),
+    db.from('incident_updates').select('incident_id, event_date, claim_type'),
   ])
 
   if (incidentsError) throw incidentsError
   if (updatesError) throw updatesError
 
   const earliestByIncident = new Map<string, string>()
+  const disputedIncidentIds = new Set<string>()
   for (const u of updates ?? []) {
-    const existing = earliestByIncident.get(u.incident_id)
-    if (!existing || u.event_date < existing) earliestByIncident.set(u.incident_id, u.event_date)
+    if (u.event_date) {
+      const existing = earliestByIncident.get(u.incident_id)
+      if (!existing || u.event_date < existing) earliestByIncident.set(u.incident_id, u.event_date)
+    }
+    if (DISPUTED_CLAIM_TYPES.has(u.claim_type)) disputedIncidentIds.add(u.incident_id)
   }
 
   return ((incidents ?? []) as Incident[]).map((incident) => ({
     ...incident,
     occurred_at: earliestByIncident.get(incident.id) ?? incident.published_at,
+    hasDisputedRuling: disputedIncidentIds.has(incident.id),
   }))
 }
 

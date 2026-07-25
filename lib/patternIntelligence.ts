@@ -49,18 +49,15 @@ export type CaseCluster = {
   spanMonths: number
 }
 
-// Pure geographic/temporal/category correlation -- deliberately does not
-// name or accuse any individual, and does not claim cases are actually
-// connected. Two unrelated cases can share these traits by coincidence; this
-// only surfaces the overlap for a subscriber to weigh themselves.
-//
-// Timing is based on `occurred_at` (the actual reported event date), not
-// `published_at` (when the case was added to this site) -- otherwise a
-// decades-old case and a brand-new one entered the same week would look like
-// they happened days apart.
-export function findCaseClusters(incidents: IncidentWithOccurredAt[]): CaseCluster[] {
-  const eligible = incidents.filter((i) => CATEGORY_BUCKETS[i.category] && i.lat && i.lng && i.occurred_at)
-
+// Shared clustering core: groups cases by mutual proximity (distance + time)
+// among whatever `eligible` set and `sameGroup` comparator the caller passes
+// in. `findCaseClusters` uses this for same-category clustering;
+// `findDisputedRulingClusters` reuses it for a cross-category overlay.
+function clusterByProximity(
+  eligible: IncidentWithOccurredAt[],
+  sameGroup: (a: IncidentWithOccurredAt, b: IncidentWithOccurredAt) => boolean,
+  bucketFor: (cases: IncidentWithOccurredAt[]) => string
+): CaseCluster[] {
   const n = eligible.length
   const parent = Array.from({ length: n }, (_, i) => i)
   function find(x: number): number {
@@ -80,7 +77,7 @@ export function findCaseClusters(incidents: IncidentWithOccurredAt[]): CaseClust
     for (let j = i + 1; j < n; j++) {
       const a = eligible[i]
       const b = eligible[j]
-      if (CATEGORY_BUCKETS[a.category] !== CATEGORY_BUCKETS[b.category]) continue
+      if (!sameGroup(a, b)) continue
       const distance = haversineMiles(a.lat, a.lng, b.lat, b.lng)
       if (distance > MAX_DISTANCE_MILES) continue
       const months = monthsBetween(a.occurred_at, b.occurred_at)
@@ -115,7 +112,7 @@ export function findCaseClusters(incidents: IncidentWithOccurredAt[]): CaseClust
     }
 
     clusters.push({
-      bucket: CATEGORY_BUCKETS[cases[0].category]!,
+      bucket: bucketFor(cases),
       cases: cases.sort((a, b) => new Date(a.occurred_at).getTime() - new Date(b.occurred_at).getTime()),
       maxDistanceMiles: Math.round(maxDistance),
       spanMonths: Math.round(maxSpan),
@@ -123,4 +120,40 @@ export function findCaseClusters(incidents: IncidentWithOccurredAt[]): CaseClust
   }
 
   return clusters.sort((a, b) => b.cases.length - a.cases.length)
+}
+
+// Pure geographic/temporal/category correlation -- deliberately does not
+// name or accuse any individual, and does not claim cases are actually
+// connected. Two unrelated cases can share these traits by coincidence; this
+// only surfaces the overlap for a subscriber to weigh themselves.
+//
+// Timing is based on `occurred_at` (the actual reported event date), not
+// `published_at` (when the case was added to this site) -- otherwise a
+// decades-old case and a brand-new one entered the same week would look like
+// they happened days apart.
+export function findCaseClusters(incidents: IncidentWithOccurredAt[]): CaseCluster[] {
+  const eligible = incidents.filter((i) => CATEGORY_BUCKETS[i.category] && i.lat && i.lng && i.occurred_at)
+  return clusterByProximity(
+    eligible,
+    (a, b) => CATEGORY_BUCKETS[a.category] === CATEGORY_BUCKETS[b.category],
+    (cases) => CATEGORY_BUCKETS[cases[0].category]!
+  )
+}
+
+// A different lens than category-based clustering: cases where a family
+// member or independent account contradicts the official version of events
+// (`hasDisputedRuling`), regardless of category, that also share geography
+// and timing. This is deliberately cross-category -- a disputed drowning
+// ruling and a disputed hanging ruling three miles apart is exactly the kind
+// of pattern this is meant to surface, not something same-bucket clustering
+// would ever catch since drowning and homicide are different buckets there.
+// Still makes no claim of an actual connection -- see the page-level
+// disclaimer for why disputed rulings can cluster by pure coincidence too.
+export function findDisputedRulingClusters(incidents: IncidentWithOccurredAt[]): CaseCluster[] {
+  const eligible = incidents.filter((i) => i.hasDisputedRuling && i.lat && i.lng && i.occurred_at)
+  return clusterByProximity(
+    eligible,
+    () => true,
+    () => 'disputed_ruling'
+  )
 }
