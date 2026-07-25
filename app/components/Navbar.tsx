@@ -96,10 +96,22 @@ export default function Navbar({
   }
 
   async function handleSignOut() {
+    // Clear local state immediately so the dropdown/button reflect
+    // signed-out right away -- router.refresh() re-renders server
+    // components, but this Navbar instance is a client component that
+    // stays mounted across that soft navigation, so its own isActive/
+    // role/callsign state (fetched once on mount) would otherwise stay
+    // stale until a full reload.
+    setIsActive(false);
+    setRoleKey(null);
+    setCallsign(null);
+    setAccountOpen(false);
     await supabaseBrowser().auth.signOut();
     router.push("/");
     router.refresh();
   }
+
+  const isSignedIn = accountLabel !== "Sign In";
 
   return (
     <div
@@ -278,20 +290,32 @@ export default function Navbar({
                     onClick={() => setAccountOpen(false)}
                   />
                   <div className="absolute right-0 top-full z-[9999] mt-3 w-52 overflow-hidden rounded-2xl border border-white/10 bg-[#0a0d14] shadow-2xl">
-                    <Link
-                      href={accountHref}
-                      onClick={() => setAccountOpen(false)}
-                      className="block px-4 py-3 text-sm text-slate-300 transition hover:bg-white/5 hover:text-white"
-                    >
-                      My Account
-                    </Link>
-                    <button
-                      type="button"
-                      onClick={handleSignOut}
-                      className="block w-full px-4 py-3 text-left text-sm text-slate-300 transition hover:bg-white/5 hover:text-white"
-                    >
-                      Sign Out
-                    </button>
+                    {isSignedIn ? (
+                      <>
+                        <Link
+                          href={accountHref}
+                          onClick={() => setAccountOpen(false)}
+                          className="block px-4 py-3 text-sm text-slate-300 transition hover:bg-white/5 hover:text-white"
+                        >
+                          My Account
+                        </Link>
+                        <button
+                          type="button"
+                          onClick={handleSignOut}
+                          className="block w-full px-4 py-3 text-left text-sm text-slate-300 transition hover:bg-white/5 hover:text-white"
+                        >
+                          Sign Out
+                        </button>
+                      </>
+                    ) : (
+                      <Link
+                        href={accountHref}
+                        onClick={() => setAccountOpen(false)}
+                        className="block px-4 py-3 text-sm text-slate-300 transition hover:bg-white/5 hover:text-white"
+                      >
+                        Sign In
+                      </Link>
+                    )}
                   </div>
                 </>
               )}
