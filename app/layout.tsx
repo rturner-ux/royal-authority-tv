@@ -20,10 +20,34 @@ const playfairDisplay = Playfair_Display({
   subsets: ["latin"],
 });
 
+const SITE_URL = "https://royalauthorityofficial.com";
+const DEFAULT_TITLE = "Royal Authority TV | Verified Investigative Case Coverage";
+const DEFAULT_DESCRIPTION =
+  "Documentary-grade case coverage with verified sourcing, claim-type labeling, multi-language transcripts, and a real-time case map.";
+
+// Case pages set their own richer metadata (including a dynamic
+// opengraph-image per case) via generateMetadata; this is the fallback for
+// every other page (homepage, map, collections, etc.) so a link shared
+// anywhere still gets a real title, description, and preview image instead
+// of a blank card.
 export const metadata: Metadata = {
-  title: "Royal Authority TV | Verified Investigative Case Coverage",
-  description:
-    "Documentary-grade case coverage with verified sourcing, claim-type labeling, multi-language transcripts, and a real-time case map.",
+  metadataBase: new URL(SITE_URL),
+  title: DEFAULT_TITLE,
+  description: DEFAULT_DESCRIPTION,
+  openGraph: {
+    title: DEFAULT_TITLE,
+    description: DEFAULT_DESCRIPTION,
+    url: SITE_URL,
+    siteName: "Royal Authority TV",
+    images: ["/hero-wallpaper.webp"],
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: DEFAULT_TITLE,
+    description: DEFAULT_DESCRIPTION,
+    images: ["/hero-wallpaper.webp"],
+  },
 };
 
 export default function RootLayout({
