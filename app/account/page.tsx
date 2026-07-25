@@ -91,7 +91,7 @@ export default async function AccountPage() {
       <div className="relative z-10 mx-auto max-w-7xl px-6 py-6 lg:px-10">
         <Navbar breadcrumbs={[{ label: "Home", href: "/" }, { label: "Account" }]} />
 
-        <div className="mx-auto max-w-3xl">
+        <div className="mx-auto max-w-3xl lg:max-w-5xl">
           {/* Profile header: banner + avatar + identity, social-profile style */}
           <div className="overflow-hidden rounded-[30px] border border-white/10 bg-black/30 backdrop-blur-sm">
             <div className="h-24 bg-gradient-to-r from-[#C9A24A]/25 via-red-700/15 to-transparent" />
