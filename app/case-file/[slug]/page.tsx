@@ -383,23 +383,12 @@ export default async function CaseFileSlugPage({
                       Profile
                     </div>
 
-                    {person.photo_url ? (
-                      <PersonPhotoVideo
-                        photoUrl={person.photo_url}
-                        videoUrl={person.video_url}
-                        name={person.name}
-                        photoFit={person.photo_fit}
-                      />
-                    ) : (
-                      <div className="mt-5 flex flex-col items-center gap-3 rounded-2xl border border-dashed border-white/10 bg-white/[0.02] py-10">
-                        <div className="grid h-14 w-14 place-items-center rounded-full border border-white/10 bg-white/[0.04] text-lg font-bold text-white/40">
-                          {person.name.charAt(0)}
-                        </div>
-                        <span className="text-xs uppercase tracking-[0.15em] text-white/30">
-                          No Public Photo Available
-                        </span>
-                      </div>
-                    )}
+                    <PersonPhotoVideo
+                      photoUrl={person.photo_url}
+                      videoUrl={person.video_url}
+                      name={person.name}
+                      photoFit={person.photo_fit}
+                    />
 
                     <div className="mt-5 grid gap-3">
                       <div className="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-slate-300">
