@@ -91,9 +91,12 @@ export default async function AccountPage() {
       <div className="relative z-10 mx-auto max-w-7xl px-6 py-6 lg:px-10">
         <Navbar breadcrumbs={[{ label: "Home", href: "/" }, { label: "Account" }]} />
 
-        <div className="mx-auto max-w-3xl lg:max-w-5xl">
-          {/* Profile header: banner + avatar + identity, social-profile style */}
-          <div className="overflow-hidden rounded-[30px] border border-white/10 bg-black/30 backdrop-blur-sm">
+        {/* Two-column social-profile layout: a compact left profile card,
+            a wider right content area -- fills the screen on desktop
+            instead of one narrow centered card, and stacks to a single
+            column on mobile. */}
+        <div className="grid gap-6 lg:grid-cols-[340px_1fr] lg:items-start">
+          <div className="overflow-hidden rounded-[30px] border border-white/10 bg-black/30 backdrop-blur-sm lg:sticky lg:top-24">
             <div className="h-24 bg-gradient-to-r from-[#C9A24A]/25 via-red-700/15 to-transparent" />
             <div className="px-6 pb-6">
               <div className="-mt-12 flex items-end gap-4">
@@ -128,7 +131,7 @@ export default async function AccountPage() {
                     </span>
                   )}
                 </div>
-                {role && <p className="mt-3 max-w-lg text-sm leading-6 text-slate-400">{role.tagline}</p>}
+                {role && <p className="mt-3 text-sm leading-6 text-slate-400">{role.tagline}</p>}
                 {memberSince && <p className="mt-2 text-xs text-slate-600">Member since {memberSince}</p>}
               </div>
 
@@ -165,18 +168,22 @@ export default async function AccountPage() {
                   Renews {new Date(subscriber.current_period_end).toLocaleDateString()}.
                 </p>
               )}
+
+              {isActive && (
+                <InvestigatorProfile
+                  userId={user.id}
+                  initialRole={profile?.role ?? null}
+                  initialCallsign={profile?.callsign ?? null}
+                />
+              )}
             </div>
           </div>
 
           {isActive && (
-            <InvestigatorProfile
-              userId={user.id}
-              initialRole={profile?.role ?? null}
-              initialCallsign={profile?.callsign ?? null}
-            />
+            <div className="min-w-0">
+              <AccountTabs playlists={playlistPreviews} caseRequests={myRequests} />
+            </div>
           )}
-
-          {isActive && <AccountTabs playlists={playlistPreviews} caseRequests={myRequests} />}
         </div>
       </div>
     </main>
