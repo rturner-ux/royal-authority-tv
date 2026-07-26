@@ -28,7 +28,9 @@ export default function FeaturedCaseCard({ incident }: { incident: Incident }) {
       </div>
 
       <div className="space-y-3 p-5">
-        <span className="text-xs tracking-[0.2em] text-red-400">FEATURED CASE</span>
+        {incident.is_featured && (
+          <span className="text-xs tracking-[0.2em] text-red-400">FEATURED CASE</span>
+        )}
 
         <h3 className="text-xl font-bold text-white">{incident.title}</h3>
 

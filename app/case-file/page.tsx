@@ -1,7 +1,7 @@
 import Link from "next/link";
 import Navbar from "../components/Navbar";
 import FeaturedCaseCard from "../components/FeaturedCaseCard";
-import { getFeaturedCases } from "@/lib/cases";
+import { getAllCaseFiles } from "@/lib/cases";
 import { COLLECTIONS } from "@/lib/collections";
 
 // No auth/cookie call on this page to otherwise force per-request rendering,
@@ -10,7 +10,7 @@ import { COLLECTIONS } from "@/lib/collections";
 export const dynamic = "force-dynamic";
 
 export default async function CaseFilePage() {
-  const cases = await getFeaturedCases();
+  const cases = await getAllCaseFiles();
 
   return (
     <main className="relative min-h-screen bg-[#05070b] text-white overflow-hidden">
@@ -58,17 +58,6 @@ export default async function CaseFilePage() {
           {cases.map((c) => (
             <FeaturedCaseCard key={c.id} incident={c} />
           ))}
-
-          <div className="flex min-h-[420px] items-center justify-center rounded-2xl border border-dashed border-white/10 bg-zinc-800/30 text-center text-gray-500">
-            <div className="px-6">
-              <div className="text-sm uppercase tracking-[0.25em] text-gray-500">
-                Coming Soon
-              </div>
-              <div className="mt-3 text-lg font-semibold text-gray-400">
-                More cases will appear here
-              </div>
-            </div>
-          </div>
         </div>
       </div>
     </main>

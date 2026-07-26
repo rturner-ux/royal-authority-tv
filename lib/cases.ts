@@ -60,6 +60,25 @@ export async function getFeaturedCases(): Promise<Incident[]> {
   return (data ?? []) as Incident[]
 }
 
+// Every case with a dedicated case-file page, not just is_featured ones --
+// this is what the "Case Files" index page actually needs. Featured cases
+// were the only ones shown there for a while, which meant a fully built-out
+// case (photos, people, sourced updates, all of it) was invisible on the
+// site's own case index unless someone separately remembered to flip
+// is_featured, silently hiding real work.
+export async function getAllCaseFiles(): Promise<Incident[]> {
+  const db = supabase()
+  const { data, error } = await db
+    .from('incidents')
+    .select('*')
+    .eq('is_hidden', false)
+    .not('slug', 'is', null)
+    .order('published_at', { ascending: false })
+
+  if (error) throw error
+  return (data ?? []) as Incident[]
+}
+
 export async function getTrendingCases(): Promise<Incident[]> {
   const db = supabase()
   const { data, error } = await db
