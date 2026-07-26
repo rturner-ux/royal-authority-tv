@@ -29,9 +29,25 @@ export async function generateMetadata({
   const { slug } = await params;
   const result = await getCaseBySlug(slug);
   if (!result) return { title: "Royal Authority TV" };
+
+  const title = `${result.incident.title} | Royal Authority TV`;
+  const description = result.incident.description || undefined;
+  // The root layout sets a site-wide default openGraph/twitter block for
+  // pages with no metadata of their own. Next.js does not deep-merge that
+  // across parent/child segments -- a page that only sets top-level
+  // title/description (as this used to) silently inherits the parent's
+  // entire openGraph and twitter objects, generic image included, instead
+  // of this case's own. Setting them explicitly here (and pointing
+  // twitter's image at the same per-case opengraph-image route Next
+  // already generates for og:image) is what makes a shared case link
+  // actually preview as that case rather than the homepage.
+  const imageUrl = `/case-file/${slug}/opengraph-image`;
+
   return {
-    title: `${result.incident.title} | Royal Authority TV`,
-    description: result.incident.description || undefined,
+    title,
+    description,
+    openGraph: { title, description, images: [imageUrl] },
+    twitter: { card: "summary_large_image", title, description, images: [imageUrl] },
   };
 }
 
