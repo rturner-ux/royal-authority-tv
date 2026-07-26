@@ -315,7 +315,6 @@ export default function HomeClient({
   }
 
   const [welcome, setWelcome] = useState<{ role: string; callsign: string | null } | null>(null);
-  const [subscriberCount, setSubscriberCount] = useState<number | null>(null);
   const [lastCase, setLastCase] = useState<{ slug: string; title: string } | null>(null);
 
   useEffect(() => {
@@ -324,7 +323,6 @@ export default function HomeClient({
       .then((d) => {
         const role = getRole(d.role);
         if (role) setWelcome({ role: role.title, callsign: d.callsign ?? null });
-        if (typeof d.subscriberCount === "number") setSubscriberCount(d.subscriberCount);
       })
       .catch(() => {});
 
@@ -393,12 +391,10 @@ export default function HomeClient({
                 Welcome back, {welcome.role}
                 {welcome.callsign ? ` ${welcome.callsign}` : ""}. What case are we working on today?
               </div>
-              {subscriberCount !== null && (
-                <div className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-black/40 px-3 py-1.5 text-xs font-semibold text-white/70 backdrop-blur-sm">
-                  <span className="h-1.5 w-1.5 rounded-full bg-[#C9A24A]" />
-                  {subscriberCount.toLocaleString()} subscribers on the case
-                </div>
-              )}
+              <div className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-black/40 px-3 py-1.5 text-xs font-semibold text-white/70 backdrop-blur-sm">
+                <span className="h-1.5 w-1.5 rounded-full bg-[#C9A24A]" />
+                {stats.totalCases.toLocaleString()} cases tracked
+              </div>
             </div>
             {lastCase && (
               <Link
