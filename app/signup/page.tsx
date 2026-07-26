@@ -15,6 +15,10 @@ function SignupForm() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [checkEmail, setCheckEmail] = useState(false);
+  // Defaults to the subscribe pitch (the common case: someone signing up to
+  // pay), but respects an explicit next param -- e.g. signing up just to
+  // comment shouldn't force a detour through the paywall pitch first.
+  const next = searchParams.get("next") || "/subscribe";
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -25,7 +29,7 @@ function SignupForm() {
       email,
       password,
       options: {
-        emailRedirectTo: `${window.location.origin}/login`,
+        emailRedirectTo: `${window.location.origin}/login?next=${encodeURIComponent(next)}`,
       },
     });
 
@@ -40,7 +44,7 @@ function SignupForm() {
     // returns a live session -- go straight to checkout. Otherwise wait for
     // the user to confirm via email first.
     if (data.session) {
-      router.push("/subscribe");
+      router.push(next);
       router.refresh();
     } else {
       setCheckEmail(true);
