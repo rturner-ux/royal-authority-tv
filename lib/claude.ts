@@ -6,7 +6,6 @@ export async function callClaude({
   system,
   userMessage,
   maxTokens = 2048,
-  temperature = 0.4,
 }: {
   system: string
   userMessage: string
@@ -24,7 +23,6 @@ export async function callClaude({
     body: JSON.stringify({
       model: 'claude-sonnet-5',
       max_tokens: maxTokens,
-      temperature,
       system: [{ type: 'text', text: system, cache_control: { type: 'ephemeral' } }],
       messages: [{ role: 'user', content: userMessage }],
     }),
