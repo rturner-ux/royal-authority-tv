@@ -30,7 +30,8 @@ export async function callClaude({
 
   const data = await response.json()
   if (!response.ok || !data.content?.[0]?.text) {
-    throw new Error(data?.error?.message || 'Claude API failed')
+    console.error('CLAUDE API RAW ERROR:', response.status, JSON.stringify(data))
+    throw new Error(data?.error?.message || `Claude API failed (${response.status})`)
   }
   return data.content[0].text
 }
