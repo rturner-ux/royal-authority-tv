@@ -262,25 +262,48 @@ export default async function CaseFileSlugPage({
         </section>
 
         {/* LIVE / EMBEDDED VIDEO */}
-        {incident.video_embed_url && (
-          <section className="mb-12 overflow-hidden rounded-[32px] border border-red-500/30 bg-black/30 backdrop-blur-sm">
-            <div className="flex items-center gap-2 px-6 pt-6">
-              <span className="h-2 w-2 animate-pulse rounded-full bg-red-500" />
-              <div className="text-xs font-bold uppercase tracking-[0.3em] text-red-400">
-                Watch
+        {incident.video_embed_url && (() => {
+          // Facebook's video plugin embeds (Reels, posts) are portrait and
+          // come with their own width/height query params -- stretching
+          // those into a 16:9 landscape box distorts and oversizes them.
+          // Everything else (YouTube, etc.) is assumed landscape.
+          const isFacebookPlugin = incident.video_embed_url.includes("facebook.com/plugins/video");
+
+          return (
+            <section className="mb-12 overflow-hidden rounded-[32px] border border-red-500/30 bg-black/30 backdrop-blur-sm">
+              <div className="flex items-center gap-2 px-6 pt-6">
+                <span className="h-2 w-2 animate-pulse rounded-full bg-red-500" />
+                <div className="text-xs font-bold uppercase tracking-[0.3em] text-red-400">
+                  Watch
+                </div>
               </div>
-            </div>
-            <div className="relative mt-4 aspect-video w-full">
-              <iframe
-                src={incident.video_embed_url}
-                title={`${incident.title} video`}
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                allowFullScreen
-                className="absolute inset-0 h-full w-full"
-              />
-            </div>
-          </section>
-        )}
+              {isFacebookPlugin ? (
+                <div className="mt-4 flex justify-center px-6 pb-6">
+                  <iframe
+                    src={incident.video_embed_url}
+                    title={`${incident.title} video`}
+                    width="350"
+                    height="622"
+                    style={{ border: "none", overflow: "hidden", maxWidth: "100%" }}
+                    scrolling="no"
+                    allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
+                    allowFullScreen
+                  />
+                </div>
+              ) : (
+                <div className="relative mt-4 aspect-video w-full">
+                  <iframe
+                    src={incident.video_embed_url}
+                    title={`${incident.title} video`}
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    allowFullScreen
+                    className="absolute inset-0 h-full w-full"
+                  />
+                </div>
+              )}
+            </section>
+          );
+        })()}
 
         {/* QUIZ */}
         <CaseQuiz slug={slug} caseTitle={incident.title} />
