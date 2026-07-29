@@ -29,9 +29,13 @@ export async function callClaude({
   })
 
   const data = await response.json()
-  if (!response.ok || !data.content?.[0]?.text) {
+  // Extended thinking responses put the reasoning in content[0] (type
+  // "thinking") and the actual answer in a later block (type "text") --
+  // find it by type rather than assuming index 0.
+  const textBlock = data.content?.find((block: { type: string; text?: string }) => block.type === 'text')
+  if (!response.ok || !textBlock?.text) {
     console.error('CLAUDE API RAW ERROR:', response.status, JSON.stringify(data))
     throw new Error(data?.error?.message || `Claude API failed (${response.status})`)
   }
-  return data.content[0].text
+  return textBlock.text
 }
