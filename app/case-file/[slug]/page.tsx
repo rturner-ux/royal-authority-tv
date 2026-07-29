@@ -247,6 +247,27 @@ export default async function CaseFileSlugPage({
           </div>
         </section>
 
+        {/* LIVE / EMBEDDED VIDEO */}
+        {incident.video_embed_url && (
+          <section className="mb-12 overflow-hidden rounded-[32px] border border-red-500/30 bg-black/30 backdrop-blur-sm">
+            <div className="flex items-center gap-2 px-6 pt-6">
+              <span className="h-2 w-2 animate-pulse rounded-full bg-red-500" />
+              <div className="text-xs font-bold uppercase tracking-[0.3em] text-red-400">
+                Watch
+              </div>
+            </div>
+            <div className="relative mt-4 aspect-video w-full">
+              <iframe
+                src={incident.video_embed_url}
+                title={`${incident.title} video`}
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowFullScreen
+                className="absolute inset-0 h-full w-full"
+              />
+            </div>
+          </section>
+        )}
+
         {/* QUIZ */}
         <CaseQuiz slug={slug} caseTitle={incident.title} />
 
