@@ -1,6 +1,6 @@
 import 'server-only'
 import { supabase } from './supabase/server'
-import type { Incident, IncidentUpdate, IncidentPerson, IncidentTranscriptRow, IncidentCourtRecord, IncidentPhoto, InterviewQA, PersonConnectedCase, PersonComment, IncidentCourtCase, IncidentCharge, IncidentBondSetting, IncidentFinancialRecord } from './types'
+import type { Incident, IncidentUpdate, IncidentPerson, IncidentTranscriptRow, IncidentCourtRecord, IncidentPhoto, InterviewQA, PersonConnectedCase, PersonComment, IncidentCourtCase, IncidentCharge, IncidentBondSetting, IncidentFinancialRecord, CaseConnectionNode, CaseConnectionEdge } from './types'
 
 async function attachQAAndCases(db: ReturnType<typeof supabase>, people: IncidentPerson[]): Promise<IncidentPerson[]> {
   if (people.length === 0) return people
@@ -179,6 +179,25 @@ export async function getCaseTrackingCount(incidentId: string): Promise<number> 
   )
 
   return userIds.size
+}
+
+export async function getCaseConnections(incidentId: string): Promise<{
+  nodes: CaseConnectionNode[]
+  edges: CaseConnectionEdge[]
+}> {
+  const db = supabase()
+  const [{ data: nodes, error: nodesError }, { data: edges, error: edgesError }] = await Promise.all([
+    db.from('case_connection_nodes').select('*').eq('incident_id', incidentId).order('sequence', { ascending: true }),
+    db.from('case_connection_edges').select('*').eq('incident_id', incidentId),
+  ])
+
+  if (nodesError) throw nodesError
+  if (edgesError) throw edgesError
+
+  return {
+    nodes: (nodes ?? []) as CaseConnectionNode[],
+    edges: (edges ?? []) as CaseConnectionEdge[],
+  }
 }
 
 export async function getCasesByCollection(collectionSlug: string): Promise<Incident[]> {

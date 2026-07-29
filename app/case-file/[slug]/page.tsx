@@ -10,9 +10,10 @@ import LocationZoomReveal from "../../components/LocationZoomReveal";
 import PhotoGallery from "../../components/PhotoGallery";
 import CaseLog from "../../components/CaseLog";
 import CaseQuiz from "../../components/CaseQuiz";
+import CaseConnectionsMap from "../../components/CaseConnectionsMap";
 import RecordLastCase from "../../components/RecordLastCase";
 import InvestigatorToolkit from "../../components/InvestigatorToolkit";
-import { getCaseBySlug, getCaseTrackingCount } from "@/lib/cases";
+import { getCaseBySlug, getCaseTrackingCount, getCaseConnections } from "@/lib/cases";
 import { getCollection } from "@/lib/collections";
 import { getSubscriberStatus } from "@/lib/subscription";
 import { supabaseServerAuth } from "@/lib/supabase/serverAuth";
@@ -76,6 +77,7 @@ export default async function CaseFileSlugPage({
   const { incident, updates, people, transcript, courtRecords, photos, relatedIncident, courtCase, charges } = result;
   const incidentCollection = incident.collection_slug ? getCollection(incident.collection_slug) : null;
   const trackingCount = await getCaseTrackingCount(incident.id);
+  const connections = await getCaseConnections(incident.id);
   const { user, isActive } = await getSubscriberStatus();
   const accountProps = user
     ? { accountLabel: "My Account", accountHref: "/account" }
@@ -475,6 +477,9 @@ export default async function CaseFileSlugPage({
             ))}
           </section>
         )}
+
+        {/* CONNECTIONS MAP */}
+        <CaseConnectionsMap nodes={connections.nodes} edges={connections.edges} />
 
         {/* FUNERAL */}
         {photos.length > 0 && (

@@ -241,6 +241,30 @@ export type IncidentPhoto = {
   sequence: number
 }
 
+export type ConnectionRelationshipType = 'parent' | 'grandparent' | 'sibling' | 'spouse' | 'possible'
+
+export type CaseConnectionNode = {
+  id: string
+  incident_id: string
+  name: string
+  subtitle: string | null
+  group_label: string | null
+  details: string[]
+  photo_url: string | null
+  is_unidentified: boolean
+  position_x: number
+  position_y: number
+  sequence: number
+}
+
+export type CaseConnectionEdge = {
+  id: string
+  incident_id: string
+  from_node_id: string
+  to_node_id: string
+  relationship_type: ConnectionRelationshipType
+}
+
 export type IncidentQuizQuestion = {
   id: string
   incident_id: string
