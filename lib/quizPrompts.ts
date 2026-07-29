@@ -56,7 +56,9 @@ Return ONLY a JSON array of exactly 5 objects, nothing else, no markdown code fe
   "sourceUrl": "the exact source_url string of that case log entry, copied exactly as given, or null if that entry has no source_url"
 }
 
-Vary the question types across the 5: mix up dates, locations, people's roles, and what happened, so it doesn't feel repetitive. Make the 3 wrong options plausible but clearly wrong to someone who read the case, not absurd. Never make two options both defensibly correct.`
+Vary the question types across the 5: mix up dates, locations, people's roles, and what happened, so it doesn't feel repetitive. Make the 3 wrong options plausible but clearly wrong to someone who read the case, not absurd. Never make two options both defensibly correct.
+
+Your entire reply must be valid, parseable JSON. If any question, option, or excerpt needs to include a direct quote, use single quotation marks around it (') instead of double quotation marks ("), since double quotes inside a JSON string value break parsing. Never use an unescaped double quote character anywhere inside a string value.`
 
 function cleanJson(text: string): string {
   return text
@@ -84,7 +86,13 @@ Write the 5-question quiz now.`
     temperature: 0.5,
   })
 
-  const parsed = JSON.parse(cleanJson(text))
+  let parsed: unknown
+  try {
+    parsed = JSON.parse(cleanJson(text))
+  } catch (err) {
+    console.error('QUIZ JSON PARSE ERROR, raw text was:', text)
+    throw err
+  }
   if (!Array.isArray(parsed)) throw new Error('Quiz generation did not return an array')
 
   return parsed.map((q) => ({
