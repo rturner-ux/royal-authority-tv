@@ -9,6 +9,7 @@ import ShareButton from "../../components/ShareButton";
 import LocationZoomReveal from "../../components/LocationZoomReveal";
 import PhotoGallery from "../../components/PhotoGallery";
 import CaseLog from "../../components/CaseLog";
+import CaseQuiz from "../../components/CaseQuiz";
 import RecordLastCase from "../../components/RecordLastCase";
 import InvestigatorToolkit from "../../components/InvestigatorToolkit";
 import { getCaseBySlug, getCaseTrackingCount } from "@/lib/cases";
@@ -245,6 +246,9 @@ export default async function CaseFileSlugPage({
             </div>
           </div>
         </section>
+
+        {/* QUIZ */}
+        <CaseQuiz slug={slug} caseTitle={incident.title} />
 
         {/* SUMMARY */}
         <section className="grid gap-6 lg:grid-cols-[1fr_1fr]">

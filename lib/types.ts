@@ -241,6 +241,17 @@ export type IncidentPhoto = {
   sequence: number
 }
 
+export type IncidentQuizQuestion = {
+  id: string
+  incident_id: string
+  question: string
+  options: string[]
+  correct_index: number
+  source_excerpt: string | null
+  source_url: string | null
+  sequence: number
+}
+
 export type IncidentTranscriptRow = {
   id: string
   incident_id: string
