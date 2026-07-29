@@ -43,11 +43,23 @@ export async function generateMetadata({
   // already generates for og:image) is what makes a shared case link
   // actually preview as that case rather than the homepage.
   const imageUrl = `/case-file/${slug}/opengraph-image`;
+  // og:video lets Facebook render the share as an actual playable video
+  // card in the feed (using this embed URL as the player), while the link
+  // itself (og:url, set automatically from the page's own canonical URL)
+  // still points back to this page, not to YouTube directly.
+  const videoEmbedUrl = result.incident.video_embed_url;
 
   return {
     title,
     description,
-    openGraph: { title, description, images: [imageUrl] },
+    openGraph: {
+      title,
+      description,
+      images: [imageUrl],
+      ...(videoEmbedUrl && {
+        videos: [{ url: videoEmbedUrl, width: 1280, height: 720, type: "text/html" }],
+      }),
+    },
     twitter: { card: "summary_large_image", title, description, images: [imageUrl] },
   };
 }
