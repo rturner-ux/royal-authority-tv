@@ -82,7 +82,11 @@ Write the 5-question quiz now.`
   const text = await callClaude({
     system: SYSTEM,
     userMessage,
-    maxTokens: 2048,
+    // Extended thinking eats into this budget before the actual JSON text
+    // is written, and longer/heavier cases (more updates, longer quotes)
+    // need more room -- 2048 was cutting the response off mid-JSON on
+    // cases with a lot of content.
+    maxTokens: 4096,
     temperature: 0.5,
   })
 
