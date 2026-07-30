@@ -11,6 +11,7 @@ import PhotoGallery from "../../components/PhotoGallery";
 import CaseLog from "../../components/CaseLog";
 import CaseQuiz from "../../components/CaseQuiz";
 import CaseConnectionsMap from "../../components/CaseConnectionsMap";
+import CaseFactChecker from "../../components/CaseFactChecker";
 import RecordLastCase from "../../components/RecordLastCase";
 import InvestigatorToolkit from "../../components/InvestigatorToolkit";
 import { getCaseBySlug, getCaseTrackingCount, getCaseConnections } from "@/lib/cases";
@@ -307,6 +308,9 @@ export default async function CaseFileSlugPage({
 
         {/* QUIZ */}
         <CaseQuiz slug={slug} caseTitle={incident.title} />
+
+        {/* FACT CHECKER */}
+        <CaseFactChecker slug={slug} />
 
         {/* SUMMARY */}
         <section className="grid gap-6 lg:grid-cols-[1fr_1fr]">

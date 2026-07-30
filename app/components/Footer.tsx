@@ -19,6 +19,7 @@ export default function Footer() {
                 <li><Link href="/case-file" className="hover:text-white">Case Files</Link></li>
                 <li><Link href="/map" className="hover:text-white">Investigation Map</Link></li>
                 <li><Link href="/transcript" className="hover:text-white">Transcript Archive</Link></li>
+                <li><Link href="/picture-scan" className="hover:text-white">AI Picture Scan</Link></li>
                 <li><Link href="/subscribe" className="hover:text-white">Subscribe</Link></li>
               </ul>
             </div>
