@@ -426,6 +426,46 @@ export default async function CaseFileSlugPage({
           <InvestigatorToolkit slug={slug} isActive={isActive} hasRole={hasRole} initialRole={subscriberRole} />
         </div>
 
+        {/* COURT & ARREST RECORDS */}
+        {(courtCase || charges.length > 0 || courtRecords.length > 0) && (
+          <section className="mb-6 rounded-[32px] border border-[#C9A24A]/30 bg-gradient-to-br from-[#C9A24A]/[0.1] to-transparent p-7 backdrop-blur-sm">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <div className="text-xs uppercase tracking-[0.3em] text-[#E8D19A]">
+                  Court &amp; Arrest Records
+                </div>
+                <span className="rounded-full border border-[#C9A24A]/30 bg-[#C9A24A]/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-[#E8D19A]">
+                  Premium
+                </span>
+              </div>
+            </div>
+
+            <div className="mt-5 grid gap-3 sm:grid-cols-2">
+              {charges.length > 0 && (
+                <div className="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-4 text-sm text-slate-300">
+                  <span className="font-semibold text-white">{charges.length}</span> charge
+                  {charges.length === 1 ? "" : "s"} filed
+                </div>
+              )}
+              {courtRecords.length > 0 && (
+                <div className="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-4 text-sm text-slate-300">
+                  <span className="font-semibold text-white">{courtRecords.length}</span> docket event
+                  {courtRecords.length === 1 ? "" : "s"} on record
+                </div>
+              )}
+            </div>
+
+            <div className="mt-6">
+              <Link
+                href={`/case-file/${slug}/court-record`}
+                className="inline-flex rounded-2xl bg-[#C9A24A] px-5 py-3 text-sm font-semibold text-black transition hover:opacity-90"
+              >
+                View Full Court Record →
+              </Link>
+            </div>
+          </section>
+        )}
+
         {/* MEMBER ANALYSIS */}
         {incident.member_analysis && (
           <section className="mb-12 rounded-[32px] border border-[#C9A24A]/30 bg-gradient-to-br from-[#C9A24A]/[0.1] to-transparent p-7 backdrop-blur-sm">
@@ -671,46 +711,6 @@ export default async function CaseFileSlugPage({
         {/* FUNERAL */}
         {photos.length > 0 && (
           <PhotoGallery photos={photos} title="Funeral" altFallback={incident.title} />
-        )}
-
-        {/* COURT & ARREST RECORDS */}
-        {(courtCase || charges.length > 0 || courtRecords.length > 0) && (
-          <section className="mt-10 rounded-[32px] border border-[#C9A24A]/30 bg-gradient-to-br from-[#C9A24A]/[0.1] to-transparent p-7 backdrop-blur-sm">
-            <div className="flex flex-wrap items-center justify-between gap-2">
-              <div className="flex items-center gap-2">
-                <div className="text-xs uppercase tracking-[0.3em] text-[#E8D19A]">
-                  Court &amp; Arrest Records
-                </div>
-                <span className="rounded-full border border-[#C9A24A]/30 bg-[#C9A24A]/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-[#E8D19A]">
-                  Premium
-                </span>
-              </div>
-            </div>
-
-            <div className="mt-5 grid gap-3 sm:grid-cols-2">
-              {charges.length > 0 && (
-                <div className="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-4 text-sm text-slate-300">
-                  <span className="font-semibold text-white">{charges.length}</span> charge
-                  {charges.length === 1 ? "" : "s"} filed
-                </div>
-              )}
-              {courtRecords.length > 0 && (
-                <div className="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-4 text-sm text-slate-300">
-                  <span className="font-semibold text-white">{courtRecords.length}</span> docket event
-                  {courtRecords.length === 1 ? "" : "s"} on record
-                </div>
-              )}
-            </div>
-
-            <div className="mt-6">
-              <Link
-                href={`/case-file/${slug}/court-record`}
-                className="inline-flex rounded-2xl bg-[#C9A24A] px-5 py-3 text-sm font-semibold text-black transition hover:opacity-90"
-              >
-                View Full Court Record →
-              </Link>
-            </div>
-          </section>
         )}
 
         {/* TIMELINE + TRANSCRIPT PREVIEW */}
