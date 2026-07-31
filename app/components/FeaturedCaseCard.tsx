@@ -3,15 +3,19 @@
 import Link from "next/link";
 import Image from "next/image";
 import type { Incident } from "@/lib/types";
-import { CATEGORY_LABELS } from "@/lib/labels";
+import { CATEGORY_LABELS, isActiveAlert } from "@/lib/labels";
 import { playSfx } from "@/lib/sfx";
 
 export default function FeaturedCaseCard({ incident }: { incident: Incident }) {
+  const alert = isActiveAlert(incident);
+
   return (
     <Link
       href={`/case-file/${incident.slug}`}
       onClick={() => playSfx("shutter")}
-      className="group overflow-hidden rounded-2xl border border-white/10 bg-zinc-900/80 transition hover:scale-[1.02] hover:border-[#C9A24A]/30"
+      className={`group overflow-hidden rounded-2xl border border-white/10 bg-zinc-900/80 transition hover:scale-[1.02] hover:border-[#C9A24A]/30 ${
+        alert ? "ra-alert-card" : ""
+      }`}
     >
       <div className="relative h-[280px] overflow-hidden border-b border-white/10 bg-gradient-to-b from-white/[0.02] to-white/[0.01]">
         {incident.image_url ? (

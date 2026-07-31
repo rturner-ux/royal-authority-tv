@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import type { Incident } from "@/lib/types";
-import { CATEGORY_LABELS, CATEGORY_COLORS } from "@/lib/labels";
+import { CATEGORY_LABELS, CATEGORY_COLORS, isActiveAlert } from "@/lib/labels";
 
 export const COLLAPSED_WIDTH = 165;
 export const COLLAPSED_HEIGHT = 235;
@@ -15,11 +15,14 @@ export const COLLAPSED_HEIGHT = 235;
 // overlaid title + category strip.
 export default function CaseHoverCard({ incident }: { incident: Incident }) {
   const href = `/case-file/${incident.slug}`;
+  const alert = isActiveAlert(incident);
 
   return (
     <Link
       href={href}
-      className="group relative flex flex-shrink-0 flex-col overflow-hidden rounded-md shadow-[0_4px_14px_rgba(0,0,0,0.55)] transition-transform duration-[250ms] ease-out hover:z-10 hover:scale-[1.06] hover:shadow-[0_8px_26px_rgba(0,0,0,0.8)]"
+      className={`group relative flex flex-shrink-0 flex-col overflow-hidden rounded-md shadow-[0_4px_14px_rgba(0,0,0,0.55)] transition-transform duration-[250ms] ease-out hover:z-10 hover:scale-[1.06] hover:shadow-[0_8px_26px_rgba(0,0,0,0.8)] ${
+        alert ? "ra-alert-card" : ""
+      }`}
       style={{ width: COLLAPSED_WIDTH, height: COLLAPSED_HEIGHT }}
     >
       <div className="absolute inset-0">

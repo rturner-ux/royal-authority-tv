@@ -1,4 +1,20 @@
-import type { IncidentCategory, ClaimType, PersonRole, CourtRecordType } from './types'
+import type { IncidentCategory, ClaimType, PersonRole, CourtRecordType, Incident } from './types'
+
+const ALERT_CATEGORIES: IncidentCategory[] = [
+  'amber_alert',
+  'silver_alert',
+  'blue_alert',
+  'endangered_missing_person',
+  'camo_alert',
+  'missing_person',
+]
+
+// Drives the pulsing red-alert card treatment (home page, case-file index,
+// and the person profile card) -- an active, still-unresolved missing-person
+// case, not just any case tagged with an alert category.
+export function isActiveAlert(incident: Pick<Incident, 'status' | 'category'>): boolean {
+  return incident.status === 'active' && ALERT_CATEGORIES.includes(incident.category)
+}
 
 export const CATEGORY_LABELS: Record<IncidentCategory, string> = {
   amber_alert: 'Amber Alert',

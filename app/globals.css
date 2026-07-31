@@ -52,5 +52,6 @@ body {
 }
 
 .ra-alert-card {
+  border-width: 3px;
   animation: ra-alert-flash 1.6s ease-in-out infinite;
 }

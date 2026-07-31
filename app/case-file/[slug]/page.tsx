@@ -25,6 +25,7 @@ import {
   CATEGORY_LABELS,
   PERSON_ROLE_LABELS,
   PERSON_ROLE_CLASSES,
+  isActiveAlert,
 } from "@/lib/labels";
 
 export async function generateMetadata({
@@ -674,8 +675,7 @@ export default async function CaseFileSlugPage({
         {people.length > 0 && (
           <section className="mt-10 space-y-6">
             {people.map((person) => {
-              const isMissingAlert =
-                incident.status === "active" && person.status?.toLowerCase() === "missing";
+              const isMissingAlert = isActiveAlert(incident);
 
               return (
               <div
