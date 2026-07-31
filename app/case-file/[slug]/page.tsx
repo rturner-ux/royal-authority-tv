@@ -13,6 +13,7 @@ import CaseQuiz from "../../components/CaseQuiz";
 import CaseConnectionsMap from "../../components/CaseConnectionsMap";
 import CaseFactChecker from "../../components/CaseFactChecker";
 import CaseVideoLibrary from "../../components/CaseVideoLibrary";
+import CasePictureScan from "../../components/CasePictureScan";
 import RecordLastCase from "../../components/RecordLastCase";
 import InvestigatorToolkit from "../../components/InvestigatorToolkit";
 import { getCaseBySlug, getCaseTrackingCount, getCaseConnections } from "@/lib/cases";
@@ -322,6 +323,9 @@ export default async function CaseFileSlugPage({
 
         {/* FACT CHECKER */}
         <CaseFactChecker slug={slug} />
+
+        {/* AI PICTURE SCAN */}
+        <CasePictureScan isActive={isActive} />
 
         {/* SUMMARY */}
         <section className="grid gap-6 lg:grid-cols-[1fr_1fr]">
