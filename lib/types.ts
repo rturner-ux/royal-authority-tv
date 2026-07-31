@@ -241,6 +241,15 @@ export type IncidentPhoto = {
   sequence: number
 }
 
+export type IncidentVideo = {
+  id: string
+  incident_id: string
+  title: string
+  source_label: string | null
+  youtube_url: string
+  sequence: number
+}
+
 export type ConnectionRelationshipType = 'parent' | 'grandparent' | 'sibling' | 'spouse' | 'possible'
 
 export type CaseConnectionNode = {

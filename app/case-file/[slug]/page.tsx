@@ -12,6 +12,7 @@ import CaseLog from "../../components/CaseLog";
 import CaseQuiz from "../../components/CaseQuiz";
 import CaseConnectionsMap from "../../components/CaseConnectionsMap";
 import CaseFactChecker from "../../components/CaseFactChecker";
+import CaseVideoLibrary from "../../components/CaseVideoLibrary";
 import RecordLastCase from "../../components/RecordLastCase";
 import InvestigatorToolkit from "../../components/InvestigatorToolkit";
 import { getCaseBySlug, getCaseTrackingCount, getCaseConnections } from "@/lib/cases";
@@ -305,6 +306,16 @@ export default async function CaseFileSlugPage({
             </section>
           );
         })()}
+
+        {/* VIDEO LIBRARY */}
+        {result.videos.length > 0 && (
+          <section className="mb-12">
+            <div className="mb-4 text-xs font-bold uppercase tracking-[0.3em] text-[#E8D19A]">
+              Video Library
+            </div>
+            <CaseVideoLibrary videos={result.videos} />
+          </section>
+        )}
 
         {/* QUIZ */}
         <CaseQuiz slug={slug} caseTitle={incident.title} />

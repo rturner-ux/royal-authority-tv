@@ -350,7 +350,7 @@ export default function HomeClient({
             muted
             loop
             playsInline
-            className="h-full w-full object-cover opacity-[0.85]"
+            className="h-full w-full object-cover opacity-[0.85] will-change-transform"
           />
         </div>
 
