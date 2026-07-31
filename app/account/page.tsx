@@ -3,6 +3,7 @@ import Image from "next/image";
 import Navbar from "../components/Navbar";
 import AccountActions from "./AccountActions";
 import InvestigatorProfile from "./InvestigatorProfile";
+import EmailAlertsToggle from "./EmailAlertsToggle";
 import AccountTabs from "./AccountTabs";
 import { supabaseServerAuth } from "@/lib/supabase/serverAuth";
 import { supabase } from "@/lib/supabase/server";
@@ -20,7 +21,7 @@ export default async function AccountPage() {
 
   const [{ data: subscriber }, { data: profile }] = await Promise.all([
     db.from("subscribers").select("status, current_period_end").eq("user_id", user.id).maybeSingle(),
-    db.from("subscriber_profiles").select("role, callsign").eq("user_id", user.id).maybeSingle(),
+    db.from("subscriber_profiles").select("role, callsign, email_alerts_enabled").eq("user_id", user.id).maybeSingle(),
   ]);
 
   const isActive = subscriber?.status === "active";
@@ -174,6 +175,13 @@ export default async function AccountPage() {
                   userId={user.id}
                   initialRole={profile?.role ?? null}
                   initialCallsign={profile?.callsign ?? null}
+                />
+              )}
+
+              {isActive && (
+                <EmailAlertsToggle
+                  userId={user.id}
+                  initialEnabled={profile?.email_alerts_enabled ?? true}
                 />
               )}
             </div>
