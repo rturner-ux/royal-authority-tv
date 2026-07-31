@@ -673,10 +673,16 @@ export default async function CaseFileSlugPage({
         {/* PEOPLE */}
         {people.length > 0 && (
           <section className="mt-10 space-y-6">
-            {people.map((person) => (
+            {people.map((person) => {
+              const isMissingAlert =
+                incident.status === "active" && person.status?.toLowerCase() === "missing";
+
+              return (
               <div
                 key={person.id}
-                className="rounded-[32px] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.04),rgba(255,255,255,0.02))] p-7 backdrop-blur-sm"
+                className={`rounded-[32px] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.04),rgba(255,255,255,0.02))] p-7 backdrop-blur-sm ${
+                  isMissingAlert ? "ra-alert-card" : ""
+                }`}
               >
                 <div className="mb-6 flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
                   <div className="min-w-0">
@@ -727,7 +733,8 @@ export default async function CaseFileSlugPage({
                   <PersonProfileTabs person={person} />
                 </div>
               </div>
-            ))}
+              );
+            })}
           </section>
         )}
 
