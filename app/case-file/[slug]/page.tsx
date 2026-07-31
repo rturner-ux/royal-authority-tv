@@ -235,6 +235,23 @@ export default async function CaseFileSlugPage({
               </p>
             )}
 
+            {incident.tip_line_phone && (
+              <a
+                href={`tel:${incident.tip_line_phone.replace(/[^0-9+]/g, "")}`}
+                className="flex items-center gap-3 rounded-2xl border border-red-500/30 bg-red-500/[0.07] px-5 py-4 transition hover:border-red-500/50 hover:bg-red-500/[0.1]"
+              >
+                <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-red-500/15 text-lg">
+                  📞
+                </span>
+                <span>
+                  <span className="block text-xs font-bold uppercase tracking-[0.2em] text-red-400">
+                    {incident.tip_line_label || "Tip Line"}
+                  </span>
+                  <span className="block text-lg font-bold text-white">{incident.tip_line_phone}</span>
+                </span>
+              </a>
+            )}
+
             <div className="flex flex-wrap gap-3">
               {transcript.length > 0 && (
                 <Link
