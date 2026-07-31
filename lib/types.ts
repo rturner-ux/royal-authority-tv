@@ -55,6 +55,7 @@ export type Incident = {
   scene_image_url: string | null
   scene_video_url: string | null
   video_embed_url: string | null
+  intro_video_url: string | null
   tip_line_label: string | null
   tip_line_phone: string | null
   location_history: string | null

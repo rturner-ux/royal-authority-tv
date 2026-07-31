@@ -14,6 +14,7 @@ import CaseConnectionsMap from "../../components/CaseConnectionsMap";
 import CaseFactChecker from "../../components/CaseFactChecker";
 import CaseVideoLibrary from "../../components/CaseVideoLibrary";
 import CasePictureScan from "../../components/CasePictureScan";
+import CaseIntroVideo from "../../components/CaseIntroVideo";
 import RecordLastCase from "../../components/RecordLastCase";
 import InvestigatorToolkit from "../../components/InvestigatorToolkit";
 import { getCaseBySlug, getCaseTrackingCount, getCaseConnections } from "@/lib/cases";
@@ -280,6 +281,11 @@ export default async function CaseFileSlugPage({
             </div>
           </div>
         </section>
+
+        {/* AI CASE INTRO VIDEO */}
+        {incident.intro_video_url && (
+          <CaseIntroVideo url={incident.intro_video_url} title={incident.title} />
+        )}
 
         {/* LIVE / EMBEDDED VIDEO */}
         {incident.video_embed_url && (() => {
