@@ -13,7 +13,15 @@ type QuizQuestion = {
   source_url: string | null;
 };
 
-export default function CaseQuiz({ slug, caseTitle }: { slug: string; caseTitle: string }) {
+export default function CaseQuiz({
+  slug,
+  caseTitle,
+  isActive,
+}: {
+  slug: string;
+  caseTitle: string;
+  isActive: boolean;
+}) {
   const [status, setStatus] = useState<"idle" | "loading" | "error" | "active" | "done">("idle");
   const [error, setError] = useState<string | null>(null);
   const [questions, setQuestions] = useState<QuizQuestion[]>([]);
@@ -75,6 +83,31 @@ export default function CaseQuiz({ slug, caseTitle }: { slug: string; caseTitle:
   }
 
   const current = questions[index];
+
+  if (!isActive) {
+    return (
+      <section className="mt-10 rounded-[32px] border border-[#C9A24A]/30 bg-gradient-to-br from-[#C9A24A]/[0.1] to-transparent p-7 backdrop-blur-sm">
+        <div className="flex items-center gap-2">
+          <div className="text-xs uppercase tracking-[0.3em] text-[#E8D19A]">
+            Test Your Knowledge
+          </div>
+          <span className="rounded-full border border-[#C9A24A]/30 bg-[#C9A24A]/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-[#E8D19A]">
+            Premium
+          </span>
+        </div>
+        <p className="mt-4 max-w-2xl text-sm leading-7 text-slate-300">
+          Think you know this case? Take a short quiz built from the sourced facts on this page.
+          Get one wrong and we&apos;ll show you exactly where the real answer comes from.
+        </p>
+        <Link
+          href="/subscribe"
+          className="mt-6 inline-flex rounded-2xl bg-[#C9A24A] px-5 py-3 text-sm font-semibold text-black transition hover:opacity-90"
+        >
+          Subscribe to Unlock Test Your Knowledge
+        </Link>
+      </section>
+    );
+  }
 
   return (
     <section className="mt-10 rounded-[32px] border border-[#C9A24A]/20 bg-gradient-to-br from-[#C9A24A]/[0.07] to-transparent p-7 backdrop-blur-sm">

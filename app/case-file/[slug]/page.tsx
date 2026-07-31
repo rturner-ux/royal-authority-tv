@@ -318,14 +318,162 @@ export default async function CaseFileSlugPage({
           </section>
         )}
 
+        {/* PREMIUM TOOLS */}
+        <section className="mb-4">
+          <div className="text-xs font-bold uppercase tracking-[0.3em] text-[#E8D19A]">
+            Premium Tools
+          </div>
+          <p className="mt-1 text-sm text-slate-400">
+            Everything below is built directly from this case&apos;s sourced Case Log.
+          </p>
+        </section>
+
+        {/* AI CASE BRIEF */}
+        {incident.ai_summary && (
+          <section className="mb-6 rounded-[32px] border border-[#C9A24A]/30 bg-gradient-to-br from-[#C9A24A]/[0.1] to-transparent p-7 backdrop-blur-sm">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <div className="text-xs uppercase tracking-[0.3em] text-[#E8D19A]">
+                  AI Case Brief
+                </div>
+                <span className="rounded-full border border-[#C9A24A]/30 bg-[#C9A24A]/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-[#E8D19A]">
+                  Premium
+                </span>
+              </div>
+              {incident.ai_summary_updated_at && (
+                <div className="text-xs text-slate-500">
+                  Updated{" "}
+                  {new Date(incident.ai_summary_updated_at).toLocaleDateString("en-US", {
+                    dateStyle: "medium",
+                  })}
+                </div>
+              )}
+            </div>
+
+            {isActive ? (
+              <>
+                <p className="mt-4 max-w-3xl whitespace-pre-line text-sm leading-8 text-slate-200 md:text-base">
+                  {incident.ai_summary}
+                </p>
+                <p className="mt-4 text-xs text-slate-500">
+                  Auto-generated from the sourced Case Log below. Full timeline and sources always available underneath.
+                </p>
+              </>
+            ) : (
+              <div className="relative mt-4">
+                <p className="max-w-3xl select-none whitespace-pre-line text-sm leading-8 text-slate-400 blur-sm">
+                  {incident.ai_summary}
+                </p>
+                <div className="absolute inset-0 flex items-end">
+                  <Link
+                    href="/subscribe"
+                    className="inline-flex rounded-2xl bg-[#C9A24A] px-5 py-3 text-sm font-semibold text-black transition hover:opacity-90"
+                  >
+                    Subscribe to Read the AI Case Brief
+                  </Link>
+                </div>
+              </div>
+            )}
+          </section>
+        )}
+
+        {/* CONNECTIONS MAP */}
+        {isActive ? (
+          <div className="mb-6">
+            <CaseConnectionsMap nodes={connections.nodes} edges={connections.edges} />
+          </div>
+        ) : (
+          (connections.nodes.length > 0) && (
+            <section className="mb-6 rounded-[32px] border border-[#C9A24A]/30 bg-gradient-to-br from-[#C9A24A]/[0.1] to-transparent p-7 backdrop-blur-sm">
+              <div className="flex items-center gap-2">
+                <div className="text-xs uppercase tracking-[0.3em] text-[#E8D19A]">
+                  Connections Map
+                </div>
+                <span className="rounded-full border border-[#C9A24A]/30 bg-[#C9A24A]/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-[#E8D19A]">
+                  Premium
+                </span>
+              </div>
+              <p className="mt-4 max-w-2xl text-sm leading-7 text-slate-300">
+                See how everyone in this case connects, in an interactive relationship diagram.
+              </p>
+              <Link
+                href="/subscribe"
+                className="mt-6 inline-flex rounded-2xl bg-[#C9A24A] px-5 py-3 text-sm font-semibold text-black transition hover:opacity-90"
+              >
+                Subscribe to Unlock the Connections Map
+              </Link>
+            </section>
+          )
+        )}
+
         {/* QUIZ */}
-        <CaseQuiz slug={slug} caseTitle={incident.title} />
+        <div className="mb-6">
+          <CaseQuiz slug={slug} caseTitle={incident.title} isActive={isActive} />
+        </div>
 
         {/* FACT CHECKER */}
-        <CaseFactChecker slug={slug} />
+        <div className="mb-6">
+          <CaseFactChecker slug={slug} isActive={isActive} />
+        </div>
 
         {/* AI PICTURE SCAN */}
-        <CasePictureScan isActive={isActive} />
+        <div className="mb-6">
+          <CasePictureScan isActive={isActive} />
+        </div>
+
+        {/* INVESTIGATOR TOOLKIT */}
+        <div className="mb-6">
+          <InvestigatorToolkit slug={slug} isActive={isActive} hasRole={hasRole} initialRole={subscriberRole} />
+        </div>
+
+        {/* MEMBER ANALYSIS */}
+        {incident.member_analysis && (
+          <section className="mb-12 rounded-[32px] border border-[#C9A24A]/30 bg-gradient-to-br from-[#C9A24A]/[0.1] to-transparent p-7 backdrop-blur-sm">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <div className="text-xs uppercase tracking-[0.3em] text-[#E8D19A]">
+                  Member Analysis
+                </div>
+                <span className="rounded-full border border-[#C9A24A]/30 bg-[#C9A24A]/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-[#E8D19A]">
+                  Premium
+                </span>
+              </div>
+              {incident.member_analysis_updated_at && (
+                <div className="text-xs text-slate-500">
+                  Updated{" "}
+                  {new Date(incident.member_analysis_updated_at).toLocaleDateString("en-US", {
+                    dateStyle: "medium",
+                  })}
+                </div>
+              )}
+            </div>
+
+            {isActive ? (
+              <>
+                <p className="mt-4 max-w-3xl whitespace-pre-line text-sm leading-8 text-slate-200 md:text-base">
+                  {incident.member_analysis}
+                </p>
+                <p className="mt-4 text-xs text-slate-500">
+                  Editorial commentary on open questions in the case log above, not new reporting.
+                </p>
+              </>
+            ) : (
+              <div className="relative mt-4">
+                <p className="max-w-3xl select-none whitespace-pre-line text-sm leading-8 text-slate-400 blur-sm">
+                  {incident.member_analysis}
+                </p>
+                <div className="absolute inset-0 flex items-end">
+                  <Link
+                    href="/subscribe"
+                    className="inline-flex rounded-2xl bg-[#C9A24A] px-5 py-3 text-sm font-semibold text-black transition hover:opacity-90"
+                  >
+                    Subscribe to Read the Member Analysis
+                  </Link>
+                </div>
+              </div>
+            )}
+          </section>
+        )}
 
         {/* SUMMARY */}
         <section className="grid gap-6 lg:grid-cols-[1fr_1fr]">
@@ -520,90 +668,10 @@ export default async function CaseFileSlugPage({
           </section>
         )}
 
-        {/* CONNECTIONS MAP */}
-        <CaseConnectionsMap nodes={connections.nodes} edges={connections.edges} />
-
         {/* FUNERAL */}
         {photos.length > 0 && (
           <PhotoGallery photos={photos} title="Funeral" altFallback={incident.title} />
         )}
-
-        {/* AI CASE BRIEF */}
-        {incident.ai_summary && (
-          <section className="mt-10 rounded-[32px] border border-[#C9A24A]/20 bg-gradient-to-br from-[#C9A24A]/[0.07] to-transparent p-7 backdrop-blur-sm">
-            <div className="flex flex-wrap items-center justify-between gap-2">
-              <div className="text-xs uppercase tracking-[0.3em] text-[#E8D19A]">
-                AI Case Brief
-              </div>
-              {incident.ai_summary_updated_at && (
-                <div className="text-xs text-slate-500">
-                  Updated{" "}
-                  {new Date(incident.ai_summary_updated_at).toLocaleDateString("en-US", {
-                    dateStyle: "medium",
-                  })}
-                </div>
-              )}
-            </div>
-            <p className="mt-4 max-w-3xl whitespace-pre-line text-sm leading-8 text-slate-200 md:text-base">
-              {incident.ai_summary}
-            </p>
-            <p className="mt-4 text-xs text-slate-500">
-              Auto-generated from the sourced Case Log below. Full timeline and sources always available underneath.
-            </p>
-          </section>
-        )}
-
-        {/* MEMBER ANALYSIS */}
-        {incident.member_analysis && (
-          <section className="mt-6 rounded-[32px] border border-[#C9A24A]/30 bg-gradient-to-br from-[#C9A24A]/[0.1] to-transparent p-7 backdrop-blur-sm">
-            <div className="flex flex-wrap items-center justify-between gap-2">
-              <div className="flex items-center gap-2">
-                <div className="text-xs uppercase tracking-[0.3em] text-[#E8D19A]">
-                  Member Analysis
-                </div>
-                <span className="rounded-full border border-[#C9A24A]/30 bg-[#C9A24A]/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-[#E8D19A]">
-                  Premium
-                </span>
-              </div>
-              {incident.member_analysis_updated_at && (
-                <div className="text-xs text-slate-500">
-                  Updated{" "}
-                  {new Date(incident.member_analysis_updated_at).toLocaleDateString("en-US", {
-                    dateStyle: "medium",
-                  })}
-                </div>
-              )}
-            </div>
-
-            {isActive ? (
-              <>
-                <p className="mt-4 max-w-3xl whitespace-pre-line text-sm leading-8 text-slate-200 md:text-base">
-                  {incident.member_analysis}
-                </p>
-                <p className="mt-4 text-xs text-slate-500">
-                  Editorial commentary on open questions in the case log above, not new reporting.
-                </p>
-              </>
-            ) : (
-              <div className="relative mt-4">
-                <p className="max-w-3xl select-none whitespace-pre-line text-sm leading-8 text-slate-400 blur-sm">
-                  {incident.member_analysis}
-                </p>
-                <div className="absolute inset-0 flex items-end">
-                  <Link
-                    href="/subscribe"
-                    className="inline-flex rounded-2xl bg-[#C9A24A] px-5 py-3 text-sm font-semibold text-black transition hover:opacity-90"
-                  >
-                    Subscribe to Read the Member Analysis
-                  </Link>
-                </div>
-              </div>
-            )}
-          </section>
-        )}
-
-        {/* INVESTIGATOR TOOLKIT */}
-        <InvestigatorToolkit slug={slug} isActive={isActive} hasRole={hasRole} initialRole={subscriberRole} />
 
         {/* COURT & ARREST RECORDS */}
         {(courtCase || charges.length > 0 || courtRecords.length > 0) && (

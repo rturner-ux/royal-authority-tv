@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { playSfx } from "@/lib/sfx";
 
 type Verdict = "confirmed" | "disputed" | "unconfirmed" | "not_supported";
@@ -19,7 +20,7 @@ const VERDICT_STYLE: Record<Verdict, { label: string; classes: string }> = {
   not_supported: { label: "Not Supported by This Case Log", classes: "border-red-500/40 bg-red-500/10 text-red-300" },
 };
 
-export default function CaseFactChecker({ slug }: { slug: string }) {
+export default function CaseFactChecker({ slug, isActive }: { slug: string; isActive: boolean }) {
   const [claim, setClaim] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -48,6 +49,29 @@ export default function CaseFactChecker({ slug }: { slug: string }) {
     } finally {
       setLoading(false);
     }
+  }
+
+  if (!isActive) {
+    return (
+      <section className="mt-10 rounded-[32px] border border-[#C9A24A]/30 bg-gradient-to-br from-[#C9A24A]/[0.1] to-transparent p-7 backdrop-blur-sm">
+        <div className="flex items-center gap-2">
+          <div className="text-xs uppercase tracking-[0.3em] text-[#E8D19A]">Fact Checker</div>
+          <span className="rounded-full border border-[#C9A24A]/30 bg-[#C9A24A]/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-[#E8D19A]">
+            Premium
+          </span>
+        </div>
+        <p className="mt-4 max-w-2xl text-sm leading-7 text-slate-300">
+          Seen a claim about this case online? Paste it in and we&apos;ll check it against the sourced
+          Case Log on this page.
+        </p>
+        <Link
+          href="/subscribe"
+          className="mt-6 inline-flex rounded-2xl bg-[#C9A24A] px-5 py-3 text-sm font-semibold text-black transition hover:opacity-90"
+        >
+          Subscribe to Unlock the Fact Checker
+        </Link>
+      </section>
+    );
   }
 
   return (
