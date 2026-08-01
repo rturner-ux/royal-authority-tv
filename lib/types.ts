@@ -241,6 +241,7 @@ export type IncidentPhoto = {
   incident_id: string
   url: string
   caption: string | null
+  category: string | null
   sequence: number
 }
 

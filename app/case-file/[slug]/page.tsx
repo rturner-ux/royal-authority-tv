@@ -739,8 +739,21 @@ export default async function CaseFileSlugPage({
         )}
 
         {/* FUNERAL */}
-        {photos.length > 0 && (
-          <PhotoGallery photos={photos} title="Funeral" altFallback={incident.title} />
+        {photos.filter((p) => p.category !== "evidence").length > 0 && (
+          <PhotoGallery
+            photos={photos.filter((p) => p.category !== "evidence")}
+            title="Funeral"
+            altFallback={incident.title}
+          />
+        )}
+
+        {/* FAMILY-SHARED EVIDENCE */}
+        {photos.filter((p) => p.category === "evidence").length > 0 && (
+          <PhotoGallery
+            photos={photos.filter((p) => p.category === "evidence")}
+            title="Family-Shared Evidence"
+            altFallback={incident.title}
+          />
         )}
 
         {/* TIMELINE + TRANSCRIPT PREVIEW */}
