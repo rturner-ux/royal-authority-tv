@@ -112,6 +112,44 @@ function TraffickingHotspotsToggle({
           not identify any specific city, neighborhood, business, or individual along the route.
         </div>
       )}
+      {showHotspots && isActive && (
+        <div
+          style={{
+            marginTop: 8,
+            background: "rgba(122,35,35,0.25)",
+            border: "1px solid rgba(255,77,61,0.4)",
+            borderRadius: 8,
+            padding: "10px 12px",
+            fontSize: 11,
+            lineHeight: 1.6,
+            color: "#f1f5f9",
+          }}
+        >
+          <div style={{ fontWeight: 700, color: "#ff8a7a", marginBottom: 4, textTransform: "uppercase", letterSpacing: 0.05 }}>
+            If You Suspect Trafficking
+          </div>
+          <p style={{ margin: "0 0 6px" }}>
+            Common warning signs: someone who seems fearful, coached, or unable to speak for
+            themselves; who doesn't control their own ID or travel documents; who shows signs of
+            malnourishment or fatigue; or who can't say where they are or where they're headed.
+          </p>
+          <p style={{ margin: "0 0 6px" }}>
+            Don't approach directly, it can endanger the victim and you. Note details safely if you
+            can (location, vehicle, description) and report them.
+          </p>
+          <div style={{ fontWeight: 700 }}>
+            Call{" "}
+            <a href="tel:18883737888" style={{ color: "#ff8a7a" }}>
+              1-888-373-7888
+            </a>{" "}
+            or text{" "}
+            <a href="sms:233733" style={{ color: "#ff8a7a" }}>
+              233733
+            </a>{" "}
+            (National Human Trafficking Hotline). Call 911 for immediate danger.
+          </div>
+        </div>
+      )}
     </div>
   );
 }
