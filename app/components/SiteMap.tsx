@@ -229,7 +229,9 @@ function clusterIcon(cluster: { getChildCount: () => number }): L.DivIcon {
 
 export default function SiteMap({ isActive = false }: { isActive?: boolean }) {
   const [incidents, setIncidents] = useState<Incident[]>([]);
-  const [hidden, setHidden] = useState<Set<IncidentCategory>>(new Set());
+  const [hidden, setHidden] = useState<Set<IncidentCategory>>(
+    new Set(Object.keys(CATEGORY_COLORS) as IncidentCategory[])
+  );
   const [showHotspots, setShowHotspots] = useState(false);
   const [sundownTowns, setSundownTowns] = useState<SundownTown[]>([]);
   const [showSundownTowns, setShowSundownTowns] = useState(false);
