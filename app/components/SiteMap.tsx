@@ -12,7 +12,6 @@ import { CATEGORY_LABELS, CATEGORY_COLORS, SUNDOWN_CONFIDENCE_COLORS, SUNDOWN_CO
 import { CATEGORY_SHAPES, shapeSvg } from "@/lib/mapShapes";
 import MapLegend from "./MapLegend";
 import TraffickingHotspotsLayer from "./TraffickingHotspotsLayer";
-import { TRAFFICKING_HOTLINE_DATA_YEAR } from "@/lib/traffickingHotspots";
 
 const DFW_CENTER: [number, number] = [32.85, -97.05];
 
@@ -73,7 +72,7 @@ function TraffickingHotspotsToggle({
             width: "100%",
           }}
         >
-          {showHotspots ? "Hide" : "Show"} Trafficking Hot Spots
+          {showHotspots ? "Hide" : "Show"} Trafficking Corridors
         </button>
       ) : (
         <a
@@ -91,7 +90,7 @@ function TraffickingHotspotsToggle({
             textAlign: "center",
           }}
         >
-          🔒 Trafficking Hot Spots (Subscribe)
+          🔒 Trafficking Corridors (Subscribe)
         </a>
       )}
       {showHotspots && isActive && (
@@ -107,10 +106,10 @@ function TraffickingHotspotsToggle({
             color: "#cbd5e1",
           }}
         >
-          <strong style={{ color: "#ff8a7a" }}>Not a claim of trafficking activity.</strong> Shading
-          reflects {TRAFFICKING_HOTLINE_DATA_YEAR} reported cases per 100,000 residents from the
-          National Human Trafficking Hotline, by state. It does not identify any city,
-          neighborhood, or individual.
+          <strong style={{ color: "#ff8a7a" }}>Not a claim of activity at any specific point.</strong>{" "}
+          Highlighted routes are interstate highways publicly identified by federal data and
+          multiple independent news reports as documented human trafficking corridors. It does
+          not identify any specific city, neighborhood, business, or individual along the route.
         </div>
       )}
     </div>
