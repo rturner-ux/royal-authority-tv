@@ -312,3 +312,20 @@ export type IncidentTranscriptRow = {
   translated_language: string | null
   source_url: string | null
 }
+
+export type LiveStream = {
+  id: string
+  title: string
+  status: 'idle' | 'active' | 'ended'
+  mux_playback_id: string
+  started_at: string | null
+}
+
+export type LiveChatMessage = {
+  id: string
+  live_stream_id: string
+  user_id: string
+  display_name: string
+  body: string
+  created_at: string
+}

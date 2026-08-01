@@ -18,6 +18,7 @@ type NavbarProps = {
 const PRIMARY_LINKS = [
   { label: "Home", href: "/" },
   { label: "Case Files", href: "/case-file" },
+  { label: "Live", href: "/live" },
   { label: "Transcript Archive", href: "/transcript" },
   { label: "Investigation Map", href: "/map" },
   { label: "Subscribe", href: "/subscribe" },
@@ -26,6 +27,7 @@ const PRIMARY_LINKS = [
 const MENU_LINKS = [
   { label: "Home", href: "/" },
   { label: "Case Files", href: "/case-file" },
+  { label: "Live", href: "/live" },
   { label: "Transcript Archive", href: "/transcript" },
   { label: "Investigation Map", href: "/map" },
   { label: "Subscribe", href: "/subscribe" },
