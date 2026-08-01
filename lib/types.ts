@@ -289,6 +289,18 @@ export type IncidentQuizQuestion = {
   sequence: number
 }
 
+export type SundownTown = {
+  id: string
+  name: string
+  state: string
+  lat: number
+  lng: number
+  confidence: 'confirmed' | 'probable' | 'unconfirmed'
+  notes: string | null
+  source_url: string | null
+  source_name: string | null
+}
+
 export type IncidentTranscriptRow = {
   id: string
   incident_id: string

@@ -44,6 +44,18 @@ export const CATEGORY_COLORS: Record<IncidentCategory, string> = {
   sex_trafficking: '#BE185D',
 }
 
+export const SUNDOWN_CONFIDENCE_LABELS: Record<string, string> = {
+  confirmed: 'Confirmed',
+  probable: 'Probable',
+  unconfirmed: 'Unconfirmed',
+}
+
+export const SUNDOWN_CONFIDENCE_COLORS: Record<string, string> = {
+  confirmed: '#7C2D12',
+  probable: '#EA580C',
+  unconfirmed: '#EAB308',
+}
+
 export const CLAIM_TYPE_LABELS: Record<ClaimType, string> = {
   confirmed_fact: 'Confirmed',
   official_statement: 'Official Statement',

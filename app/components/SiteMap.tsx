@@ -7,8 +7,8 @@ import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
 import MarkerClusterGroup from "react-leaflet-cluster";
 import L from "leaflet";
 import Link from "next/link";
-import type { Incident, IncidentCategory } from "@/lib/types";
-import { CATEGORY_LABELS, CATEGORY_COLORS } from "@/lib/labels";
+import type { Incident, IncidentCategory, SundownTown } from "@/lib/types";
+import { CATEGORY_LABELS, CATEGORY_COLORS, SUNDOWN_CONFIDENCE_COLORS, SUNDOWN_CONFIDENCE_LABELS } from "@/lib/labels";
 import { CATEGORY_SHAPES, shapeSvg } from "@/lib/mapShapes";
 import MapLegend from "./MapLegend";
 import TraffickingHotspotsLayer from "./TraffickingHotspotsLayer";
@@ -140,6 +140,78 @@ function markerIcon(incident: Incident): L.DivIcon {
   return L.divIcon({ html, className: "", iconSize: [size, size], iconAnchor: [size / 2, size / 2] });
 }
 
+function sundownTownIcon(town: SundownTown): L.DivIcon {
+  const color = SUNDOWN_CONFIDENCE_COLORS[town.confidence] || "#EAB308";
+  const html = `
+    <div style="position:relative;width:14px;height:14px;">
+      <div style="width:14px;height:14px;background:${color};transform:rotate(45deg);border:2px solid rgba(255,255,255,0.85);position:absolute;top:0;left:0;"></div>
+    </div>
+  `;
+  return L.divIcon({ html, className: "", iconSize: [14, 14], iconAnchor: [7, 7] });
+}
+
+function SundownTownsToggle({
+  showSundownTowns,
+  onToggle,
+}: {
+  showSundownTowns: boolean;
+  onToggle: () => void;
+}) {
+  return (
+    <div style={{ position: "absolute", top: 102, right: 10, zIndex: 1000, maxWidth: 260 }}>
+      <button
+        onClick={onToggle}
+        style={{
+          background: showSundownTowns ? "#7C2D12" : "#0f172a",
+          color: "#fff",
+          border: "1px solid rgba(234,88,12,0.5)",
+          borderRadius: 8,
+          padding: "8px 14px",
+          fontSize: 13,
+          fontWeight: 600,
+          cursor: "pointer",
+          width: "100%",
+        }}
+      >
+        {showSundownTowns ? "Hide" : "Show"} Sundown Towns
+      </button>
+      {showSundownTowns && (
+        <div
+          style={{
+            marginTop: 8,
+            background: "rgba(10,12,18,0.92)",
+            border: "1px solid rgba(234,88,12,0.3)",
+            borderRadius: 8,
+            padding: "10px 12px",
+            fontSize: 11,
+            lineHeight: 1.5,
+            color: "#cbd5e1",
+          }}
+        >
+          <div style={{ marginBottom: 6 }}>
+            US towns with documented histories of excluding Black residents after dark.
+          </div>
+          {(["confirmed", "probable", "unconfirmed"] as const).map((c) => (
+            <div key={c} style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 2 }}>
+              <span
+                style={{
+                  width: 8,
+                  height: 8,
+                  background: SUNDOWN_CONFIDENCE_COLORS[c],
+                  transform: "rotate(45deg)",
+                  display: "inline-block",
+                  flexShrink: 0,
+                }}
+              />
+              <span>{SUNDOWN_CONFIDENCE_LABELS[c]}</span>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function clusterIcon(cluster: { getChildCount: () => number }): L.DivIcon {
   const count = cluster.getChildCount();
   const size = count >= 20 ? 52 : count >= 8 ? 44 : 36;
@@ -159,12 +231,25 @@ export default function SiteMap({ isActive = false }: { isActive?: boolean }) {
   const [incidents, setIncidents] = useState<Incident[]>([]);
   const [hidden, setHidden] = useState<Set<IncidentCategory>>(new Set());
   const [showHotspots, setShowHotspots] = useState(false);
+  const [sundownTowns, setSundownTowns] = useState<SundownTown[]>([]);
+  const [showSundownTowns, setShowSundownTowns] = useState(false);
 
   useEffect(() => {
     fetch("/api/incidents", { cache: "no-store" })
       .then((r) => r.json())
       .then((d) => {
         if (d.success) setIncidents(d.incidents);
+      });
+  }, []);
+
+  useEffect(() => {
+    fetch("https://map.royalauthorityofficial.com/api/sundown-towns", { cache: "no-store" })
+      .then((r) => r.json())
+      .then((d) => {
+        if (d.success) setSundownTowns(d.towns);
+      })
+      .catch(() => {
+        // Historical overlay is non-critical; fail silently.
       });
   }, []);
 
@@ -201,6 +286,42 @@ export default function SiteMap({ isActive = false }: { isActive?: boolean }) {
           onToggle={() => setShowHotspots((v) => !v)}
         />
         {isActive && showHotspots && <TraffickingHotspotsLayer />}
+        <SundownTownsToggle
+          showSundownTowns={showSundownTowns}
+          onToggle={() => setShowSundownTowns((v) => !v)}
+        />
+        {showSundownTowns &&
+          sundownTowns.map((town) => (
+            <Marker key={town.id} position={[town.lat, town.lng]} icon={sundownTownIcon(town)}>
+              <Popup>
+                <div style={{ minWidth: 200, fontSize: 13, color: "#0f172a" }}>
+                  <div style={{ fontWeight: 700, marginBottom: 2 }}>{town.name}</div>
+                  <div style={{ color: "#475569", marginBottom: 6 }}>{town.state}</div>
+                  <div
+                    style={{
+                      display: "inline-block",
+                      fontSize: 10,
+                      fontWeight: 700,
+                      textTransform: "uppercase",
+                      color: "#fff",
+                      background: SUNDOWN_CONFIDENCE_COLORS[town.confidence],
+                      padding: "2px 8px",
+                      borderRadius: 999,
+                      marginBottom: 8,
+                    }}
+                  >
+                    {SUNDOWN_CONFIDENCE_LABELS[town.confidence]}
+                  </div>
+                  {town.notes && <p style={{ margin: "6px 0", lineHeight: 1.5 }}>{town.notes}</p>}
+                  {town.source_url && (
+                    <a href={town.source_url} target="_blank" rel="noopener noreferrer" style={{ color: "#2563eb", fontWeight: 700 }}>
+                      {town.source_name || "Source"} →
+                    </a>
+                  )}
+                </div>
+              </Popup>
+            </Marker>
+          ))}
         <MarkerClusterGroup
           chunkedLoading
           iconCreateFunction={clusterIcon}
