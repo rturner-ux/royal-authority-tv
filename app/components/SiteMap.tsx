@@ -249,6 +249,35 @@ function SundownTownsToggle({
   );
 }
 
+function MapStyleToggle({
+  mapStyle,
+  onToggle,
+}: {
+  mapStyle: "satellite" | "dark";
+  onToggle: () => void;
+}) {
+  return (
+    <div style={{ position: "absolute", top: 148, right: 10, zIndex: 1000, maxWidth: 260 }}>
+      <button
+        onClick={onToggle}
+        style={{
+          background: "#0f172a",
+          color: "#fff",
+          border: "1px solid rgba(201,162,74,0.5)",
+          borderRadius: 8,
+          padding: "8px 14px",
+          fontSize: 13,
+          fontWeight: 600,
+          cursor: "pointer",
+          width: "100%",
+        }}
+      >
+        {mapStyle === "satellite" ? "Switch to Dark Map" : "Switch to Satellite"}
+      </button>
+    </div>
+  );
+}
+
 function clusterIcon(cluster: { getChildCount: () => number }): L.DivIcon {
   const count = cluster.getChildCount();
   const size = count >= 20 ? 52 : count >= 8 ? 44 : 36;
@@ -272,6 +301,7 @@ export default function SiteMap({ isActive = false }: { isActive?: boolean }) {
   const [showHotspots, setShowHotspots] = useState(false);
   const [sundownTowns, setSundownTowns] = useState<SundownTown[]>([]);
   const [showSundownTowns, setShowSundownTowns] = useState(false);
+  const [mapStyle, setMapStyle] = useState<"satellite" | "dark">("satellite");
 
   useEffect(() => {
     fetch("/api/incidents", { cache: "no-store" })
@@ -313,10 +343,19 @@ export default function SiteMap({ isActive = false }: { isActive?: boolean }) {
         }
       `}</style>
       <MapContainer center={DFW_CENTER} zoom={9} minZoom={4} style={{ width: "100%", height: "100%" }}>
-        <TileLayer
-          attribution="Tiles &copy; Esri. Source: Esri, Maxar, Earthstar Geographics"
-          url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
-        />
+        {mapStyle === "satellite" ? (
+          <TileLayer
+            key="satellite"
+            attribution="Tiles &copy; Esri. Source: Esri, Maxar, Earthstar Geographics"
+            url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+          />
+        ) : (
+          <TileLayer
+            key="dark"
+            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+            url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+          />
+        )}
         <ViewAllCasesButton incidents={visibleIncidents} />
         <MapLegend hidden={hidden} onToggle={toggleCategory} />
         <TraffickingHotspotsToggle
@@ -328,6 +367,10 @@ export default function SiteMap({ isActive = false }: { isActive?: boolean }) {
         <SundownTownsToggle
           showSundownTowns={showSundownTowns}
           onToggle={() => setShowSundownTowns((v) => !v)}
+        />
+        <MapStyleToggle
+          mapStyle={mapStyle}
+          onToggle={() => setMapStyle((v) => (v === "satellite" ? "dark" : "satellite"))}
         />
         {showSundownTowns &&
           sundownTowns.map((town) => (
