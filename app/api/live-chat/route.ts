@@ -35,6 +35,11 @@ export async function POST(req: NextRequest) {
 
   if (!user) return NextResponse.json({ error: 'Sign in to chat' }, { status: 401 })
 
+  const db = supabase()
+
+  const { data: ban } = await db.from('live_chat_bans').select('user_id').eq('user_id', user.id).maybeSingle()
+  if (ban) return NextResponse.json({ error: 'You have been removed from chat by a moderator' }, { status: 403 })
+
   const { streamId, body } = await req.json()
   if (!streamId || typeof body !== 'string' || !body.trim()) {
     return NextResponse.json({ error: 'Missing fields' }, { status: 400 })
@@ -42,8 +47,6 @@ export async function POST(req: NextRequest) {
   if (body.length > MAX_BODY_LENGTH) {
     return NextResponse.json({ error: 'Message is too long' }, { status: 400 })
   }
-
-  const db = supabase()
 
   const { data: recent } = await db
     .from('live_chat_messages')

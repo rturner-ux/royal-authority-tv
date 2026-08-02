@@ -39,6 +39,14 @@ export default function LiveChat({ streamId, isSignedIn }: { streamId: string; i
           setMessages((prev) => (prev.some((m) => m.id === incoming.id) ? prev : [...prev, incoming]));
         }
       )
+      .on(
+        "postgres_changes",
+        { event: "DELETE", schema: "public", table: "live_chat_messages", filter: `live_stream_id=eq.${streamId}` },
+        (payload) => {
+          const removed = payload.old as { id: string };
+          setMessages((prev) => prev.filter((m) => m.id !== removed.id));
+        }
+      )
       .subscribe();
 
     return () => {

@@ -34,6 +34,14 @@ export default function LiveChatOverlay({ streamId }: { streamId: string }) {
           }, VISIBLE_MS);
         }
       )
+      .on(
+        "postgres_changes",
+        { event: "DELETE", schema: "public", table: "live_chat_messages", filter: `live_stream_id=eq.${streamId}` },
+        (payload) => {
+          const removed = payload.old as { id: string };
+          setMessages((prev) => prev.filter((m) => m.id !== removed.id));
+        }
+      )
       .subscribe();
 
     return () => {
