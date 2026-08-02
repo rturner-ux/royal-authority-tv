@@ -1,6 +1,7 @@
 import Navbar from "../components/Navbar";
 import LivePlayer from "../components/LivePlayer";
 import LiveChat from "../components/LiveChat";
+import LiveViewerCount from "../components/LiveViewerCount";
 import { getCurrentLiveStream } from "@/lib/live";
 import { getSubscriberStatus } from "@/lib/subscription";
 
@@ -31,6 +32,7 @@ export default async function LivePage() {
               {liveStream ? liveStream.title : "Live"}
             </h1>
           </div>
+          {liveStream && <LiveViewerCount streamId={liveStream.id} />}
         </div>
 
         {liveStream ? (
