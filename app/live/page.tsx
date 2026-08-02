@@ -14,7 +14,10 @@ export default async function LivePage() {
       <Navbar breadcrumbs={[{ label: "Home", href: "/" }, { label: "Live" }]} />
 
       <h1 className="mb-6 font-serif text-3xl font-bold md:text-4xl">
-        {liveStream ? liveStream.title : "Live"}
+        {liveStream ? liveStream.title : "Live"}{" "}
+        {liveStream && (
+          <span className="align-middle text-lg font-bold text-red-500">&#9679; LIVE</span>
+        )}
       </h1>
 
       {liveStream ? (
@@ -23,8 +26,8 @@ export default async function LivePage() {
           <LiveChat streamId={liveStream.id} isSignedIn={Boolean(user)} />
         </div>
       ) : (
-        <div className="rounded-2xl border border-white/10 bg-black/30 p-10 text-center text-slate-400">
-          Not live right now. Check back soon.
+        <div className="flex aspect-video items-center justify-center rounded-2xl border border-white/10 bg-black p-10 text-center">
+          <p className="max-w-xs text-sm text-slate-500">Not live right now. Check back soon.</p>
         </div>
       )}
     </main>
