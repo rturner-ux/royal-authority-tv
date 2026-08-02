@@ -6,12 +6,20 @@ import { usePathname } from "next/navigation";
 import { supabaseBrowser } from "@/lib/supabase/browser";
 import type { LiveChatMessage } from "@/lib/types";
 
-const AVATAR_COLORS = ["#38bdf8", "#f472b6", "#facc15", "#a78bfa", "#4ade80", "#fb923c"];
+const NAME_COLORS = ["#38bdf8", "#f472b6", "#facc15", "#a78bfa", "#4ade80", "#fb923c"];
 
-function avatarColor(name: string): string {
+function nameColor(name: string): string {
   let hash = 0;
   for (let i = 0; i < name.length; i++) hash = (hash * 31 + name.charCodeAt(i)) | 0;
-  return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length];
+  return NAME_COLORS[Math.abs(hash) % NAME_COLORS.length];
+}
+
+function SendIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" className="h-4 w-4">
+      <path d="M2 21l21-9L2 3v7l15 2-15 2z" />
+    </svg>
+  );
 }
 
 export default function LiveChat({ streamId, isSignedIn }: { streamId: string; isSignedIn: boolean }) {
@@ -83,27 +91,33 @@ export default function LiveChat({ streamId, isSignedIn }: { streamId: string; i
   }
 
   return (
-    <div className="flex h-[500px] flex-col rounded-2xl border border-white/10 bg-black/30">
-      <div className="border-b border-white/10 px-4 py-3 text-xs uppercase tracking-[0.26em] text-[#E8D19A]">
-        Live Chat
+    <div className="flex h-[500px] flex-col rounded-xl border border-white/10 bg-[#0f0f0f]">
+      <div className="flex items-center justify-between border-b border-white/10 px-4 py-3">
+        <span className="text-sm font-semibold text-white">Live chat</span>
+        <span className="flex items-center gap-1.5 text-[11px] font-semibold text-red-500">
+          <span className="h-1.5 w-1.5 rounded-full bg-red-500" />
+          LIVE
+        </span>
       </div>
 
-      <div className="flex-1 space-y-3 overflow-y-auto px-4 py-3">
+      <div className="flex-1 overflow-y-auto px-2 py-2">
         {messages.length === 0 ? (
-          <p className="text-sm text-slate-500">No messages yet. Be the first to say something.</p>
+          <p className="px-2 py-3 text-sm text-slate-500">No messages yet. Be the first to say something.</p>
         ) : (
           messages.map((m) => (
-            <div key={m.id} className="flex items-start gap-2">
+            <div key={m.id} className="flex items-start gap-2 rounded-md px-2 py-1 hover:bg-white/5">
               <div
                 className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[11px] font-bold text-black"
-                style={{ backgroundColor: avatarColor(m.display_name) }}
+                style={{ backgroundColor: nameColor(m.display_name) }}
               >
                 {m.display_name.charAt(0).toUpperCase()}
               </div>
-              <div className="min-w-0">
-                <span className="mr-1.5 text-xs font-semibold text-white">{m.display_name}</span>
-                <span className="break-words text-sm text-slate-300">{m.body}</span>
-              </div>
+              <p className="min-w-0 break-words text-[13px] leading-5">
+                <span className="mr-1 font-medium" style={{ color: nameColor(m.display_name) }}>
+                  {m.display_name}
+                </span>
+                <span className="text-white/90">{m.body}</span>
+              </p>
             </div>
           ))
         )}
@@ -114,7 +128,7 @@ export default function LiveChat({ streamId, isSignedIn }: { streamId: string; i
         {isSignedIn ? (
           <div>
             {error && <p className="mb-2 text-xs text-red-300">{error}</p>}
-            <div className="flex gap-2">
+            <div className="flex items-center gap-1 rounded-full bg-white/10 py-1 pl-4 pr-1">
               <input
                 value={draft}
                 onChange={(e) => setDraft(e.target.value)}
@@ -123,21 +137,22 @@ export default function LiveChat({ streamId, isSignedIn }: { streamId: string; i
                 }}
                 maxLength={300}
                 placeholder="Say something..."
-                className="min-w-0 flex-1 rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-white outline-none placeholder:text-slate-500 focus:border-[#C9A24A]/40"
+                className="min-w-0 flex-1 bg-transparent text-sm text-white outline-none placeholder:text-slate-500"
               />
               <button
                 onClick={submit}
                 disabled={submitting || !draft.trim()}
-                className="shrink-0 rounded-xl bg-[#C9A24A] px-4 py-2 text-sm font-semibold text-black transition hover:opacity-90 disabled:opacity-40"
+                aria-label="Send"
+                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#C9A24A] text-black transition hover:opacity-90 disabled:opacity-40"
               >
-                Send
+                <SendIcon />
               </button>
             </div>
           </div>
         ) : (
           <Link
             href={`/signup?next=${encodeURIComponent(pathname)}`}
-            className="block rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-center text-sm font-semibold text-[#E8D19A] transition hover:bg-white/10"
+            className="block rounded-full border border-white/10 bg-white/5 px-4 py-2 text-center text-sm font-semibold text-[#E8D19A] transition hover:bg-white/10"
           >
             Sign up to join the chat
           </Link>
