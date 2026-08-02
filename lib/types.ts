@@ -252,6 +252,9 @@ export type IncidentVideo = {
   source_label: string | null
   youtube_url: string
   sequence: number
+  view_count: number
+  like_count: number
+  share_count: number
 }
 
 export type ConnectionRelationshipType = 'parent' | 'grandparent' | 'sibling' | 'spouse' | 'possible'

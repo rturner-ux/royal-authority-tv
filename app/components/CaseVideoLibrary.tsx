@@ -3,13 +3,7 @@
 import { useEffect, useState } from "react";
 import type { IncidentVideo } from "@/lib/types";
 import { playSfx } from "@/lib/sfx";
-
-function extractYouTubeId(url: string): string | null {
-  const match = url.match(
-    /(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/
-  );
-  return match ? match[1] : null;
-}
+import { extractYouTubeId } from "@/lib/youtube";
 
 export default function CaseVideoLibrary({ videos }: { videos: IncidentVideo[] }) {
   const [openVideo, setOpenVideo] = useState<IncidentVideo | null>(null);
