@@ -55,3 +55,8 @@ body {
   border-width: 3px;
   animation: ra-alert-flash 1.6s ease-in-out infinite;
 }
+
+@keyframes ra-overlay-in {
+  0% { opacity: 0; transform: translateY(10px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
