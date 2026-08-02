@@ -319,6 +319,10 @@ export type LiveStream = {
   status: 'idle' | 'active' | 'ended'
   mux_playback_id: string
   started_at: string | null
+  graphic_visible: boolean
+  graphic_title: string | null
+  graphic_location: string | null
+  graphic_status: string | null
 }
 
 export type LiveChatMessage = {
