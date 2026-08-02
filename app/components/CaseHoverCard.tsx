@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import type { Incident } from "@/lib/types";
-import { CATEGORY_LABELS, CATEGORY_COLORS, isActiveAlert } from "@/lib/labels";
+import { CATEGORY_LABELS, CATEGORY_COLORS, isActiveAlert, statusBadgeLabel } from "@/lib/labels";
 
 export const COLLAPSED_WIDTH = 165;
 export const COLLAPSED_HEIGHT = 235;
@@ -16,6 +16,7 @@ export const COLLAPSED_HEIGHT = 235;
 export default function CaseHoverCard({ incident }: { incident: Incident }) {
   const href = `/case-file/${incident.slug}`;
   const alert = isActiveAlert(incident);
+  const badge = statusBadgeLabel(incident);
 
   return (
     <Link
@@ -25,6 +26,12 @@ export default function CaseHoverCard({ incident }: { incident: Incident }) {
       }`}
       style={{ width: COLLAPSED_WIDTH, height: COLLAPSED_HEIGHT }}
     >
+      {badge && (
+        <span className="absolute left-1.5 top-1.5 z-[3] rounded-full bg-emerald-600 px-2 py-0.5 text-[0.62rem] font-bold uppercase tracking-wide text-white">
+          {badge}
+        </span>
+      )}
+
       <div className="absolute inset-0">
         {incident.poster_url ? (
           // Poster art already has the case title baked in as a stylized

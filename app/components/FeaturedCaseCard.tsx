@@ -3,11 +3,12 @@
 import Link from "next/link";
 import Image from "next/image";
 import type { Incident } from "@/lib/types";
-import { CATEGORY_LABELS, isActiveAlert } from "@/lib/labels";
+import { CATEGORY_LABELS, isActiveAlert, statusBadgeLabel } from "@/lib/labels";
 import { playSfx } from "@/lib/sfx";
 
 export default function FeaturedCaseCard({ incident }: { incident: Incident }) {
   const alert = isActiveAlert(incident);
+  const badge = statusBadgeLabel(incident);
 
   return (
     <Link
@@ -18,6 +19,11 @@ export default function FeaturedCaseCard({ incident }: { incident: Incident }) {
       }`}
     >
       <div className="relative h-[280px] overflow-hidden border-b border-white/10 bg-gradient-to-b from-white/[0.02] to-white/[0.01]">
+        {badge && (
+          <span className="absolute left-3 top-3 z-10 rounded-full bg-emerald-600 px-3 py-1 text-xs font-bold uppercase tracking-wide text-white">
+            {badge}
+          </span>
+        )}
         {incident.image_url ? (
           <Image
             src={incident.image_url}

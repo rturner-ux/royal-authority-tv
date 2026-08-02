@@ -16,6 +16,15 @@ export function isActiveAlert(incident: Pick<Incident, 'status' | 'category'>): 
   return incident.status === 'active' && ALERT_CATEGORIES.includes(incident.category)
 }
 
+// Small badge shown on case cards once a case is no longer active -- "Found"
+// for missing-person/alert categories reads much better than the generic
+// "Resolved" used everywhere else.
+export function statusBadgeLabel(incident: Pick<Incident, 'status' | 'category'>): string | null {
+  if (incident.status === 'active') return null
+  if (incident.status === 'resolved') return ALERT_CATEGORIES.includes(incident.category) ? 'Found' : 'Resolved'
+  return 'Cleared'
+}
+
 export const CATEGORY_LABELS: Record<IncidentCategory, string> = {
   amber_alert: 'Amber Alert',
   silver_alert: 'Silver Alert',
