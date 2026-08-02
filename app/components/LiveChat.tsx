@@ -91,16 +91,10 @@ export default function LiveChat({ streamId, isSignedIn }: { streamId: string; i
   }
 
   return (
-    <div className="flex h-[500px] flex-col rounded-xl border border-white/10 bg-[#0f0f0f]">
-      <div className="flex items-center justify-between border-b border-white/10 px-4 py-3">
-        <span className="text-sm font-semibold text-white">Live chat</span>
-        <span className="flex items-center gap-1.5 text-[11px] font-semibold text-red-500">
-          <span className="h-1.5 w-1.5 rounded-full bg-red-500" />
-          LIVE
-        </span>
-      </div>
+    <div className="flex h-[500px] flex-col overflow-hidden rounded-[32px] border border-white/10 bg-[#0f0f0f]">
+      <div className="border-b border-white/10 px-5 py-4 text-sm font-semibold text-white">Live chat</div>
 
-      <div className="flex-1 overflow-y-auto px-2 py-2">
+      <div className="flex-1 overflow-y-auto px-3 py-3">
         {messages.length === 0 ? (
           <p className="px-2 py-3 text-sm text-slate-500">No messages yet. Be the first to say something.</p>
         ) : (

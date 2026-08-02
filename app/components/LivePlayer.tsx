@@ -4,7 +4,7 @@ import MuxPlayer from "@mux/mux-player-react";
 
 export default function LivePlayer({ playbackId, title }: { playbackId: string; title: string }) {
   return (
-    <div className="overflow-hidden rounded-2xl border-2 border-red-500">
+    <div className="overflow-hidden rounded-[32px] border-2 border-red-500">
       <MuxPlayer
         playbackId={playbackId}
         streamType="ll-live"
