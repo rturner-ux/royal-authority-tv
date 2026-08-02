@@ -9,8 +9,17 @@ import { COLLECTIONS } from "@/lib/collections";
 // never reflects later is_featured/is_hidden changes until the next deploy.
 export const dynamic = "force-dynamic";
 
-export default async function CaseFilePage() {
-  const cases = await getAllCaseFiles();
+export default async function CaseFilePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ state?: string }>;
+}) {
+  const { state } = await searchParams;
+  const allCases = await getAllCaseFiles();
+
+  const states = [...new Set(allCases.map((c) => c.state).filter((s): s is string => Boolean(s)))].sort();
+
+  const cases = state ? allCases.filter((c) => c.state === state.toUpperCase()) : allCases;
 
   return (
     <main className="relative min-h-screen bg-[#05070b] text-white overflow-hidden">
@@ -53,6 +62,37 @@ export default async function CaseFilePage() {
             </Link>
           ))}
         </div>
+
+        <div className="mb-8 flex flex-wrap items-center gap-2">
+          <Link
+            href="/case-file"
+            className={`rounded-full px-3 py-1.5 text-xs font-semibold uppercase tracking-wide transition ${
+              !state
+                ? "bg-[#C9A24A] text-black"
+                : "border border-white/10 text-gray-400 hover:border-[#C9A24A]/40 hover:text-white"
+            }`}
+          >
+            All States
+          </Link>
+          {states.map((s) => (
+            <Link
+              key={s}
+              href={`/case-file?state=${s}`}
+              className={`rounded-full px-3 py-1.5 text-xs font-semibold uppercase tracking-wide transition ${
+                state?.toUpperCase() === s
+                  ? "bg-[#C9A24A] text-black"
+                  : "border border-white/10 text-gray-400 hover:border-[#C9A24A]/40 hover:text-white"
+              }`}
+            >
+              {s}
+            </Link>
+          ))}
+        </div>
+
+        <p className="mb-6 text-sm text-gray-500">
+          {cases.length} {cases.length === 1 ? "case" : "cases"}
+          {state ? ` in ${state.toUpperCase()}` : ""}
+        </p>
 
         <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
           {cases.map((c) => (
