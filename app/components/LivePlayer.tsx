@@ -1,6 +1,6 @@
 "use client";
 
-import MuxPlayer from "@mux/mux-player-react";
+import MuxPlayer, { type MuxPlayerCSSProperties } from "@mux/mux-player-react";
 
 export default function LivePlayer({ playbackId, title }: { playbackId: string; title: string }) {
   return (
@@ -12,7 +12,7 @@ export default function LivePlayer({ playbackId, title }: { playbackId: string; 
         accentColor="#C9A24A"
         autoPlay
         muted
-        style={{ width: "100%", aspectRatio: "16 / 9" }}
+        style={{ width: "100%", aspectRatio: "16 / 9", "--media-object-fit": "cover" } as MuxPlayerCSSProperties}
       />
     </div>
   );
