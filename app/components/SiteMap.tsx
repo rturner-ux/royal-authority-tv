@@ -27,10 +27,6 @@ function ViewAllCasesButton({ incidents }: { incidents: Incident[] }) {
         map.fitBounds(bounds, { padding: [60, 60], maxZoom: 10 });
       }}
       style={{
-        position: "absolute",
-        top: 10,
-        right: 10,
-        zIndex: 1000,
         background: "#0f172a",
         color: "#E8D19A",
         border: "1px solid rgba(201,162,74,0.4)",
@@ -56,7 +52,7 @@ function TraffickingHotspotsToggle({
   onToggle: () => void;
 }) {
   return (
-    <div style={{ position: "absolute", top: 56, right: 10, zIndex: 1000, maxWidth: 260 }}>
+    <div style={{ maxWidth: 260 }}>
       {isActive ? (
         <button
           onClick={onToggle}
@@ -195,7 +191,7 @@ function SundownTownsToggle({
   onToggle: () => void;
 }) {
   return (
-    <div style={{ position: "absolute", top: 102, right: 10, zIndex: 1000, maxWidth: 260 }}>
+    <div style={{ maxWidth: 260 }}>
       <button
         onClick={onToggle}
         style={{
@@ -257,7 +253,7 @@ function MapStyleToggle({
   onToggle: () => void;
 }) {
   return (
-    <div style={{ position: "absolute", top: 148, right: 10, zIndex: 1000, maxWidth: 260 }}>
+    <div style={{ maxWidth: 260 }}>
       <button
         onClick={onToggle}
         style={{
@@ -356,22 +352,34 @@ export default function SiteMap({ isActive = false }: { isActive?: boolean }) {
             url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
           />
         )}
-        <ViewAllCasesButton incidents={visibleIncidents} />
         <MapLegend hidden={hidden} onToggle={toggleCategory} />
-        <TraffickingHotspotsToggle
-          isActive={isActive}
-          showHotspots={showHotspots}
-          onToggle={() => setShowHotspots((v) => !v)}
-        />
+        <div
+          style={{
+            position: "absolute",
+            top: 10,
+            right: 10,
+            zIndex: 1000,
+            display: "flex",
+            flexDirection: "column",
+            gap: 8,
+          }}
+        >
+          <ViewAllCasesButton incidents={visibleIncidents} />
+          <TraffickingHotspotsToggle
+            isActive={isActive}
+            showHotspots={showHotspots}
+            onToggle={() => setShowHotspots((v) => !v)}
+          />
+          <SundownTownsToggle
+            showSundownTowns={showSundownTowns}
+            onToggle={() => setShowSundownTowns((v) => !v)}
+          />
+          <MapStyleToggle
+            mapStyle={mapStyle}
+            onToggle={() => setMapStyle((v) => (v === "satellite" ? "dark" : "satellite"))}
+          />
+        </div>
         {isActive && showHotspots && <TraffickingHotspotsLayer />}
-        <SundownTownsToggle
-          showSundownTowns={showSundownTowns}
-          onToggle={() => setShowSundownTowns((v) => !v)}
-        />
-        <MapStyleToggle
-          mapStyle={mapStyle}
-          onToggle={() => setMapStyle((v) => (v === "satellite" ? "dark" : "satellite"))}
-        />
         {showSundownTowns &&
           sundownTowns.map((town) => (
             <Marker key={town.id} position={[town.lat, town.lng]} icon={sundownTownIcon(town)}>
