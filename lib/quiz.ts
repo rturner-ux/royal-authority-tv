@@ -3,10 +3,11 @@ import { supabase } from './supabase/server'
 import { generateQuizQuestions } from './quizPrompts'
 import type { IncidentQuizQuestion, IncidentUpdate, IncidentPerson } from './types'
 
-// Lazily generates and caches a 5-question quiz per case the first time
+// Lazily generates and caches a 10-question pool per case the first time
 // anyone requests it, so the ~90 existing cases (and every new one) get a
 // quiz without needing a backfill cron. Later requests just read the
-// cached rows.
+// cached rows -- the API route picks a random 5 of the 10 per attempt, so
+// retrying doesn't show the identical quiz every time.
 export async function getOrCreateQuizQuestions(
   incidentId: string,
   input: {

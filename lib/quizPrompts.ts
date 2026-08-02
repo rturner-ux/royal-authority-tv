@@ -46,7 +46,7 @@ ${SHARED_RULES}
 
 ## Output format
 
-Return ONLY a JSON array of exactly 5 objects, nothing else, no markdown code fences, no commentary. Each object must have exactly these fields:
+Return ONLY a JSON array of exactly 10 objects, nothing else, no markdown code fences, no commentary. Each object must have exactly these fields:
 
 {
   "question": "the quiz question",
@@ -56,7 +56,7 @@ Return ONLY a JSON array of exactly 5 objects, nothing else, no markdown code fe
   "sourceUrl": "the exact source_url string of that case log entry, copied exactly as given, or null if that entry has no source_url"
 }
 
-Vary the question types across the 5: mix up dates, locations, people's roles, and what happened, so it doesn't feel repetitive. Make the 3 wrong options plausible but clearly wrong to someone who read the case, not absurd. Never make two options both defensibly correct.
+Vary the question types across all 10: mix up dates, locations, people's roles, and what happened, so no two feel repetitive of each other. Make the 3 wrong options plausible but clearly wrong to someone who read the case, not absurd. Never make two options both defensibly correct.
 
 Your entire reply must be valid, parseable JSON. If any question, option, or excerpt needs to include a direct quote, use single quotation marks around it (') instead of double quotation marks ("), since double quotes inside a JSON string value break parsing. Never use an unescaped double quote character anywhere inside a string value.`
 
@@ -77,7 +77,7 @@ ${formatPeople(input.people)}
 Chronological case log:
 ${formatLog(input.updates)}
 
-Write the 5-question quiz now.`
+Write the 10-question quiz now.`
 
   const text = await callClaude({
     system: SYSTEM,
@@ -85,8 +85,9 @@ Write the 5-question quiz now.`
     // Extended thinking eats into this budget before the actual JSON text
     // is written, and longer/heavier cases (more updates, longer quotes)
     // need more room -- 2048 was cutting the response off mid-JSON on
-    // cases with a lot of content.
-    maxTokens: 4096,
+    // cases with a lot of content at 5 questions; bumped further after
+    // doubling to 10 questions per case.
+    maxTokens: 8192,
     temperature: 0.5,
   })
 
