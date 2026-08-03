@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import Link from "next/link";
 import Image from "next/image";
 import Navbar from "../components/Navbar";
 import AccountActions from "./AccountActions";
@@ -8,6 +9,7 @@ import AccountTabs from "./AccountTabs";
 import { supabaseServerAuth } from "@/lib/supabase/serverAuth";
 import { supabase } from "@/lib/supabase/server";
 import { getRole } from "@/lib/roles";
+import { getPlaylistPreviews } from "@/lib/playlists";
 
 export default async function AccountPage() {
   const db = await supabaseServerAuth();
@@ -33,51 +35,22 @@ export default async function AccountPage() {
   // RLS-scoped session.
   const svc = supabase();
 
-  const [{ data: myRequestsRaw }, { data: myPlaylists }] = await Promise.all([
-    isActive
-      ? svc
-          .from("member_questions")
-          .select("id, topic, message, created_at, incidents(title, slug)")
-          .eq("user_id", user.id)
-          .order("created_at", { ascending: false })
-      : Promise.resolve({ data: [] }),
-    isActive
-      ? svc.from("subscriber_playlists").select("id, name").eq("user_id", user.id).order("sequence", { ascending: true })
-      : Promise.resolve({ data: [] }),
-  ]);
+  const [{ data: myRequestsRaw }, { previews: playlistPreviews, savedIncidentIds: allSavedIncidentIds }] =
+    await Promise.all([
+      isActive
+        ? svc
+            .from("member_questions")
+            .select("id, topic, message, created_at, incidents(title, slug)")
+            .eq("user_id", user.id)
+            .order("created_at", { ascending: false })
+        : Promise.resolve({ data: [] }),
+      isActive ? getPlaylistPreviews(user.id) : Promise.resolve({ previews: [], savedIncidentIds: new Set<string>() }),
+    ]);
 
   const myRequests = (myRequestsRaw ?? []).map((r) => ({
     ...r,
     incident: Array.isArray(r.incidents) ? r.incidents[0] : r.incidents,
   }));
-
-  const playlistIds = (myPlaylists ?? []).map((p) => p.id);
-  const { data: playlistCases } = playlistIds.length
-    ? await svc
-        .from("playlist_cases")
-        .select("playlist_id, incident_id, incidents(image_url)")
-        .in("playlist_id", playlistIds)
-    : { data: [] };
-
-  const casesByPlaylist = new Map<string, { incident_id: string; image_url: string | null }[]>();
-  const allSavedIncidentIds = new Set<string>();
-  for (const pc of playlistCases ?? []) {
-    const incident = Array.isArray(pc.incidents) ? pc.incidents[0] : pc.incidents;
-    const list = casesByPlaylist.get(pc.playlist_id) ?? [];
-    list.push({ incident_id: pc.incident_id, image_url: incident?.image_url ?? null });
-    casesByPlaylist.set(pc.playlist_id, list);
-    allSavedIncidentIds.add(pc.incident_id);
-  }
-
-  const playlistPreviews = (myPlaylists ?? []).map((p) => {
-    const cases = casesByPlaylist.get(p.id) ?? [];
-    return {
-      id: p.id,
-      name: p.name,
-      caseCount: cases.length,
-      thumbnails: cases.map((c) => c.image_url).filter((u): u is string => !!u),
-    };
-  });
 
   const memberSince = user.created_at
     ? new Date(user.created_at).toLocaleDateString("en-US", { month: "long", year: "numeric" })
@@ -151,6 +124,16 @@ export default async function AccountPage() {
                   <div className="text-xs uppercase tracking-[0.15em] text-slate-500">Case Requests</div>
                 </div>
               </div>
+
+              {isActive && (
+                <Link
+                  href="/account/videos"
+                  className="mt-5 flex items-center justify-between gap-3 rounded-2xl border border-[#C9A24A]/30 bg-gradient-to-r from-[#C9A24A]/[0.1] to-transparent px-4 py-3 transition hover:border-[#C9A24A]/50"
+                >
+                  <span className="text-sm font-semibold text-[#E8D19A]">My Video Profile</span>
+                  <span className="text-[#E8D19A]">→</span>
+                </Link>
+              )}
 
               <AccountActions isActive={isActive} />
 

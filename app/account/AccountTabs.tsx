@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import VideoGrid from "../components/VideoGrid";
 
 type PlaylistPreview = {
   id: string;
@@ -39,7 +38,7 @@ export default function AccountTabs({
   playlists: PlaylistPreview[];
   caseRequests: CaseRequest[];
 }) {
-  const [tab, setTab] = useState<"playlists" | "requests" | "notes" | "videos" | "liked">("playlists");
+  const [tab, setTab] = useState<"playlists" | "requests" | "notes">("playlists");
 
   return (
     <div className="mt-8">
@@ -73,26 +72,6 @@ export default function AccountTabs({
           }`}
         >
           Notes
-        </button>
-        <button
-          onClick={() => setTab("videos")}
-          className={`px-4 py-3 text-sm font-semibold uppercase tracking-[0.15em] transition ${
-            tab === "videos"
-              ? "border-b-2 border-[#C9A24A] text-[#E8D19A]"
-              : "border-b-2 border-transparent text-slate-500 hover:text-white"
-          }`}
-        >
-          Videos
-        </button>
-        <button
-          onClick={() => setTab("liked")}
-          className={`px-4 py-3 text-sm font-semibold uppercase tracking-[0.15em] transition ${
-            tab === "liked"
-              ? "border-b-2 border-[#C9A24A] text-[#E8D19A]"
-              : "border-b-2 border-transparent text-slate-500 hover:text-white"
-          }`}
-        >
-          Liked
         </button>
       </div>
 
@@ -178,18 +157,6 @@ export default function AccountTabs({
       )}
 
       {tab === "notes" && <NotesTab />}
-
-      {tab === "videos" && (
-        <div className="mt-5">
-          <VideoGrid isSignedIn filter="all" />
-        </div>
-      )}
-
-      {tab === "liked" && (
-        <div className="mt-5">
-          <VideoGrid isSignedIn filter="liked" />
-        </div>
-      )}
     </div>
   );
 }

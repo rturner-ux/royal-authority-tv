@@ -40,6 +40,7 @@ const MENU_LINKS = [
 const SUBSCRIBER_LINKS = [
   { label: "Investigation Board", href: "/investigation-board" },
   { label: "My Playlists", href: "/account/playlists" },
+  { label: "My Video Profile", href: "/account/videos" },
   { label: "Pattern Intelligence", href: "/pattern-intelligence" },
 ];
 
