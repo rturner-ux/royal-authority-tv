@@ -29,5 +29,6 @@ export default function robots(): MetadataRoute.Robots {
       { userAgent: "*", allow: "/", disallow: "/api/" },
       ...BLOCKED_SCRAPERS.map((userAgent) => ({ userAgent, disallow: "/" })),
     ],
+    sitemap: "https://royalauthorityofficial.com/sitemap.xml",
   };
 }

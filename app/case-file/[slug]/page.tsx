@@ -58,6 +58,7 @@ export async function generateMetadata({
   return {
     title,
     description,
+    alternates: { canonical: `/case-file/${slug}` },
     openGraph: {
       title,
       description,
@@ -151,8 +152,32 @@ export default async function CaseFileSlugPage({
     );
   }
 
+  // Article structured data -- gives Google Discover and rich results
+  // something concrete to key off of; without it the page is just prose to
+  // a crawler. Escaping "</" prevents case text that happens to contain it
+  // from breaking out of the script tag.
+  const articleJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    headline: incident.title,
+    description: incident.description || undefined,
+    image: incident.poster_url || incident.image_url || undefined,
+    datePublished: incident.published_at,
+    dateModified: incident.updated_at || incident.published_at,
+    url: `https://royalauthorityofficial.com/case-file/${slug}`,
+    publisher: {
+      "@type": "Organization",
+      name: "Royal Authority TV",
+      url: "https://royalauthorityofficial.com",
+    },
+  };
+
   return (
     <main className="relative min-h-screen bg-[#05070b] text-white overflow-hidden">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(articleJsonLd).replace(/</g, "\\u003c") }}
+      />
       <div className="absolute inset-0 bg-gradient-to-br from-[#05070b] via-[#08111d] to-black" />
       <div className="absolute top-0 left-0 h-[500px] w-[500px] rounded-full bg-red-700/10 blur-[140px]" />
       <div className="absolute right-0 top-40 h-[450px] w-[450px] rounded-full bg-[#C9A24A]/10 blur-[140px]" />
