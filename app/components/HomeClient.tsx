@@ -439,15 +439,6 @@ export default function HomeClient({
             transition={{ duration: 0.4 }}
             className="relative z-10 mx-auto flex max-w-3xl flex-col px-6 pb-28 pt-16 lg:pb-36 lg:pt-24"
           >
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.7, delay: 0.2, ease: EASE }}
-              className="mb-4 text-xs font-black uppercase tracking-[0.3em] text-[#E8D19A]"
-            >
-              {CATEGORY_LABELS[spotlight.category]}
-            </motion.div>
-
             <motion.h1
               initial={{ opacity: 0, y: 40 }}
               animate={{ opacity: 1, y: 0 }}
@@ -507,20 +498,6 @@ export default function HomeClient({
                 </Link>
               </motion.div>
             </motion.div>
-
-            {spotlightIsRecent && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.8, delay: 1 }}
-                className="mt-10 inline-flex w-fit items-center gap-2 rounded-sm border-2 border-red-600/60 px-4 py-1.5"
-              >
-                <span className="h-1.5 w-1.5 rounded-full bg-red-500" />
-                <span className="font-mono text-[10px] uppercase leading-tight tracking-[0.3em] text-red-500/90">
-                  Recently Updated
-                </span>
-              </motion.div>
-            )}
           </motion.div>
           </AnimatePresence>
         ) : (
@@ -534,6 +511,15 @@ export default function HomeClient({
               Investigate every case.
               <span className="block italic text-red-500">Anytime.</span>
             </motion.h1>
+          </div>
+        )}
+
+        {spotlightIsRecent && (
+          <div className="absolute bottom-8 right-6 z-20 lg:right-16">
+            <div className="inline-flex items-center gap-2 rounded-full bg-black/60 px-4 py-2 backdrop-blur-sm">
+              <span className="h-1.5 w-1.5 rounded-full bg-red-500" />
+              <span className="text-xs font-semibold text-white/90">Recently Updated</span>
+            </div>
           </div>
         )}
 

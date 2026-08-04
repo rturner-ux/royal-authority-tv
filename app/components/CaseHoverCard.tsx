@@ -13,10 +13,13 @@ export const COLLAPSED_HEIGHT = 235;
 // (the title is already baked into the art, and a strip on top of it would
 // cover the bottom of the generated text); older plain-photo cards keep the
 // overlaid title + category strip.
+const RECENT_WINDOW_MS = 1000 * 60 * 60 * 24 * 14;
+
 export default function CaseHoverCard({ incident }: { incident: Incident }) {
   const href = `/case-file/${incident.slug}`;
   const alert = isActiveAlert(incident);
   const badge = statusBadgeLabel(incident);
+  const isRecent = Date.now() - new Date(incident.published_at).getTime() < RECENT_WINDOW_MS;
 
   return (
     <Link
@@ -29,6 +32,12 @@ export default function CaseHoverCard({ incident }: { incident: Incident }) {
       {badge && (
         <span className="absolute left-1.5 top-1.5 z-[3] rounded-full bg-emerald-600 px-2 py-0.5 text-[0.62rem] font-bold uppercase tracking-wide text-white">
           {badge}
+        </span>
+      )}
+
+      {!badge && isRecent && (
+        <span className="absolute bottom-7 left-1.5 z-[3] bg-red-600 px-1.5 py-0.5 text-[0.62rem] font-bold uppercase tracking-wide text-white">
+          Recently Added
         </span>
       )}
 
