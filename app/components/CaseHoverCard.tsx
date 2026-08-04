@@ -4,15 +4,14 @@ import Link from "next/link";
 import type { Incident } from "@/lib/types";
 import { CATEGORY_LABELS, CATEGORY_COLORS, isActiveAlert, statusBadgeLabel } from "@/lib/labels";
 
-export const COLLAPSED_WIDTH = 165;
-export const COLLAPSED_HEIGHT = 235;
+export const COLLAPSED_WIDTH = 300;
+export const COLLAPSED_HEIGHT = 170;
 
-// A plain poster card with a subtle scale + shadow lift on hover (pure CSS,
-// no JS state) -- no expanding popover, no icon row. Cards with generated
-// poster art render edge-to-edge with no title block or category strip
-// (the title is already baked into the art, and a strip on top of it would
-// cover the bottom of the generated text); older plain-photo cards keep the
-// overlaid title + category strip.
+// A wide landscape thumbnail (Netflix-style row card) with a subtle scale +
+// shadow lift on hover (pure CSS, no JS state) -- no expanding popover, no
+// icon row. Cards with generated poster art render edge-to-edge with no
+// title overlay (the title is already baked into the art); plain-photo
+// cards get a bottom gradient scrim with the title over it instead.
 const RECENT_WINDOW_MS = 1000 * 60 * 60 * 24 * 14;
 
 export default function CaseHoverCard({ incident }: { incident: Incident }) {
@@ -35,17 +34,8 @@ export default function CaseHoverCard({ incident }: { incident: Incident }) {
         </span>
       )}
 
-      {!badge && isRecent && (
-        <span className="absolute bottom-7 left-1.5 z-[3] bg-red-600 px-1.5 py-0.5 text-[0.62rem] font-bold uppercase tracking-wide text-white">
-          Recently Added
-        </span>
-      )}
-
       <div className="absolute inset-0">
         {incident.poster_url ? (
-          // Poster art already has the case title baked in as a stylized
-          // text treatment (generated separately from, and composited onto,
-          // the real unaltered photo) -- no separate title block needed.
           // eslint-disable-next-line @next/next/no-img-element
           <img src={incident.poster_url} alt={incident.title} className="h-full w-full object-cover" />
         ) : incident.image_url ? (
@@ -74,22 +64,25 @@ export default function CaseHoverCard({ incident }: { incident: Incident }) {
       </div>
 
       {!incident.poster_url && (
-        <div className="relative z-[2] mt-auto px-2.5 py-3 text-center">
+        <div className="relative z-[2] mt-auto bg-gradient-to-t from-black/90 via-black/40 to-transparent pt-10">
           <div
-            className="line-clamp-2 text-sm font-extrabold leading-tight text-white"
+            className="line-clamp-1 px-2.5 pb-1 text-sm font-extrabold leading-tight text-white"
             style={{ textShadow: "0 2px 6px rgba(0,0,0,0.7)" }}
           >
             {incident.title}
           </div>
-        </div>
-      )}
-
-      {!incident.poster_url && (
-        <div
-          className="relative z-[2] mt-auto w-full py-1 text-center text-[0.72rem] font-bold uppercase tracking-wide text-white"
-          style={{ backgroundColor: CATEGORY_COLORS[incident.category] }}
-        >
-          {CATEGORY_LABELS[incident.category]}
+          {isRecent && !badge ? (
+            <div className="bg-red-600 px-2.5 py-1 text-[0.62rem] font-bold uppercase tracking-wide text-white">
+              Recently Added
+            </div>
+          ) : (
+            <div
+              className="px-2.5 pb-1.5 text-[0.62rem] font-bold uppercase tracking-wide"
+              style={{ color: CATEGORY_COLORS[incident.category] }}
+            >
+              {CATEGORY_LABELS[incident.category]}
+            </div>
+          )}
         </div>
       )}
     </Link>

@@ -237,12 +237,12 @@ function TrendingCarousel({ cases }: { cases: Incident[] }) {
       <div className="relative">
       <div ref={scrollerRef} className="flex gap-2 overflow-x-auto overflow-y-hidden pb-4 pl-1 pt-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         {filtered.map((c, i) => (
-          <div key={c.id} className="relative flex flex-shrink-0 items-end" style={{ width: 300, height: 260 }}>
+          <div key={c.id} className="relative flex flex-shrink-0 items-end" style={{ width: COLLAPSED_WIDTH + 100, height: COLLAPSED_HEIGHT + 25 }}>
             <div
               className="pointer-events-none absolute bottom-0 left-0 select-none font-sans font-black"
               style={{
                 height: COLLAPSED_HEIGHT,
-                fontSize: 326,
+                fontSize: 236,
                 lineHeight: 0.72,
                 color: "transparent",
                 WebkitTextStroke: "4px #595959",
@@ -252,7 +252,7 @@ function TrendingCarousel({ cases }: { cases: Incident[] }) {
             >
               {i + 1}
             </div>
-            <div className="relative z-[2]" style={{ marginLeft: 110, width: COLLAPSED_WIDTH }}>
+            <div className="relative z-[2]" style={{ marginLeft: 90, width: COLLAPSED_WIDTH }}>
               <CaseHoverCard incident={c} />
             </div>
           </div>
@@ -261,7 +261,7 @@ function TrendingCarousel({ cases }: { cases: Incident[] }) {
       <button
         type="button"
         aria-label="Scroll trending cases"
-        onClick={() => scrollerRef.current?.scrollBy({ left: 320, behavior: "smooth" })}
+        onClick={() => scrollerRef.current?.scrollBy({ left: 620, behavior: "smooth" })}
         className="absolute right-0 top-1/2 hidden h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full border border-white/15 bg-black/70 text-white backdrop-blur-sm transition hover:bg-black/90 md:flex"
       >
         →
