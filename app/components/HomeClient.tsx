@@ -9,7 +9,7 @@ import { CATEGORY_LABELS, CATEGORY_COLORS } from "@/lib/labels";
 import Navbar from "./Navbar";
 import FilmGrain from "./FilmGrain";
 import CaseRow from "./CaseRow";
-import CaseHoverCard, { COLLAPSED_WIDTH, COLLAPSED_HEIGHT } from "./CaseHoverCard";
+import CaseHoverCard from "./CaseHoverCard";
 import SiteVisitorCount from "./SiteVisitorCount";
 import LiveClickCount from "./LiveClickCount";
 import { getRole } from "@/lib/roles";
@@ -196,6 +196,9 @@ function FaqItem({ q, a, index }: { q: string; a: string; index: number }) {
   );
 }
 
+const TOP_TEN_WIDTH = 165;
+const TOP_TEN_HEIGHT = 235;
+
 function TrendingCarousel({ cases }: { cases: Incident[] }) {
   const scrollerRef = useRef<HTMLDivElement>(null);
   const [activeCategory, setActiveCategory] = useState<Incident["category"] | "all">("all");
@@ -237,12 +240,12 @@ function TrendingCarousel({ cases }: { cases: Incident[] }) {
       <div className="relative">
       <div ref={scrollerRef} className="flex gap-2 overflow-x-auto overflow-y-hidden pb-4 pl-1 pt-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         {filtered.map((c, i) => (
-          <div key={c.id} className="relative flex flex-shrink-0 items-end" style={{ width: COLLAPSED_WIDTH + 100, height: COLLAPSED_HEIGHT + 25 }}>
+          <div key={c.id} className="relative flex flex-shrink-0 items-end" style={{ width: 300, height: 260 }}>
             <div
               className="pointer-events-none absolute bottom-0 left-0 select-none font-sans font-black"
               style={{
-                height: COLLAPSED_HEIGHT,
-                fontSize: 236,
+                height: TOP_TEN_HEIGHT,
+                fontSize: 326,
                 lineHeight: 0.72,
                 color: "transparent",
                 WebkitTextStroke: "4px #595959",
@@ -252,8 +255,8 @@ function TrendingCarousel({ cases }: { cases: Incident[] }) {
             >
               {i + 1}
             </div>
-            <div className="relative z-[2]" style={{ marginLeft: 90, width: COLLAPSED_WIDTH }}>
-              <CaseHoverCard incident={c} />
+            <div className="relative z-[2]" style={{ marginLeft: 110, width: TOP_TEN_WIDTH }}>
+              <CaseHoverCard incident={c} width={TOP_TEN_WIDTH} height={TOP_TEN_HEIGHT} />
             </div>
           </div>
         ))}
