@@ -5,6 +5,7 @@ import ScrapeDeterrent from "./components/ScrapeDeterrent";
 import SubscribePrompt from "./components/SubscribePrompt";
 import Footer from "./components/Footer";
 import PresenceProvider from "./components/PresenceProvider";
+import SiteClickTracker from "./components/SiteClickTracker";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -63,6 +64,7 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col">
         <PresenceProvider>
+          <SiteClickTracker />
           <ScrapeDeterrent />
           <div className="flex-1">{children}</div>
           <Footer />

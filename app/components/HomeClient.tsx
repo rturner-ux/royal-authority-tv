@@ -11,6 +11,7 @@ import FilmGrain from "./FilmGrain";
 import CaseRow from "./CaseRow";
 import CaseHoverCard, { COLLAPSED_WIDTH, COLLAPSED_HEIGHT } from "./CaseHoverCard";
 import SiteVisitorCount from "./SiteVisitorCount";
+import LiveClickCount from "./LiveClickCount";
 import { getRole } from "@/lib/roles";
 
 const EASE = [0.16, 1, 0.3, 1] as [number, number, number, number];
@@ -282,6 +283,7 @@ export default function HomeClient({
   stats,
   isLive,
   spotlightCases,
+  totalClicks,
   accountLabel,
   accountHref,
 }: {
@@ -290,6 +292,7 @@ export default function HomeClient({
   stats: Stats;
   isLive?: boolean;
   spotlightCases?: Incident[];
+  totalClicks?: number;
 } & AccountProps) {
   const statRow = [
     { value: stats.totalCases, label: "Cases Tracked" },
@@ -550,7 +553,7 @@ export default function HomeClient({
             initial="hidden"
             whileInView="show"
             viewport={{ once: true, margin: "-60px" }}
-            className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-3"
+            className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4"
           >
             {statRow.map((s, i) => (
               <motion.div key={s.label} variants={staggerItem} className="rounded-2xl border border-white/10 bg-black/30 p-6 backdrop-blur-sm">
@@ -564,6 +567,18 @@ export default function HomeClient({
                 <div className="mt-2 text-sm text-white/60">{s.label}</div>
               </motion.div>
             ))}
+            {typeof totalClicks === "number" && (
+              <motion.div variants={staggerItem} className="rounded-2xl border border-[#C9A24A]/30 bg-[#C9A24A]/[0.06] p-6 backdrop-blur-sm">
+                <div className="flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.25em] text-[#E8D19A]/70">
+                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+                  Live
+                </div>
+                <div className="mt-1 text-4xl font-black text-[#E8D19A]">
+                  <LiveClickCount initialCount={totalClicks} />
+                </div>
+                <div className="mt-2 text-sm text-white/60">Total Clicks on the Site</div>
+              </motion.div>
+            )}
           </motion.div>
         </div>
 
