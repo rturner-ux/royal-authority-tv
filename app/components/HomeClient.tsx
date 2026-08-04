@@ -274,12 +274,14 @@ type Stats = { totalCases: number; featuredCases: number; transcriptRows: number
 
 type AccountProps = { accountLabel?: string; accountHref?: string };
 
+const SLIDE_INTERVAL_MS = 7000;
+
 export default function HomeClient({
   cases,
   featuredCases,
   stats,
   isLive,
-  spotlightCase,
+  spotlightCases,
   accountLabel,
   accountHref,
 }: {
@@ -287,7 +289,7 @@ export default function HomeClient({
   featuredCases: Incident[];
   stats: Stats;
   isLive?: boolean;
-  spotlightCase?: Incident | null;
+  spotlightCases?: Incident[];
 } & AccountProps) {
   const statRow = [
     { value: stats.totalCases, label: "Cases Tracked" },
@@ -300,20 +302,22 @@ export default function HomeClient({
     cases: featuredCases.filter((c) => c.category === category),
   }));
 
-  const spotlight = spotlightCase ?? cases[0] ?? featuredCases[0] ?? null;
+  const slides = spotlightCases && spotlightCases.length > 0 ? spotlightCases : cases[0] ? [cases[0]] : featuredCases[0] ? [featuredCases[0]] : [];
+
+  const [slideIndex, setSlideIndex] = useState(0);
+
+  useEffect(() => {
+    if (slides.length < 2) return;
+    const timer = setInterval(() => {
+      setSlideIndex((i) => (i + 1) % slides.length);
+    }, SLIDE_INTERVAL_MS);
+    return () => clearInterval(timer);
+  }, [slides.length]);
+
+  const spotlight = slides[slideIndex] ?? null;
   const spotlightYear = spotlight ? new Date(spotlight.published_at).getFullYear() : null;
   const spotlightIsRecent =
     spotlight && Date.now() - new Date(spotlight.published_at).getTime() < 1000 * 60 * 60 * 24 * 14;
-
-  const [heroMuted, setHeroMuted] = useState(true);
-  const heroVideoRef = useRef<HTMLVideoElement>(null);
-
-  function toggleHeroSound() {
-    const video = heroVideoRef.current;
-    if (!video) return;
-    video.muted = !video.muted;
-    setHeroMuted(video.muted);
-  }
 
   const [welcome, setWelcome] = useState<{ role: string; callsign: string | null } | null>(null);
   const [lastCase, setLastCase] = useState<{ slug: string; title: string } | null>(null);
@@ -343,26 +347,42 @@ export default function HomeClient({
       {/* Hero */}
       <section className="relative overflow-hidden">
         <div className="absolute inset-0">
-          <video
-            ref={heroVideoRef}
-            src="/video/hero-commercial.mp4"
-            poster={spotlight?.image_url || "/hero-wallpaper.webp"}
-            autoPlay
-            muted
-            loop
-            playsInline
-            className="h-full w-full object-cover opacity-[0.85] will-change-transform"
-          />
+          <AnimatePresence mode="sync">
+            <motion.div
+              key={spotlight?.id ?? "empty"}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 1.2, ease: "easeInOut" }}
+              className="absolute inset-0"
+            >
+              <Image
+                src={spotlight?.image_url || "/hero-wallpaper.webp"}
+                alt={spotlight?.title || ""}
+                fill
+                unoptimized
+                priority
+                className="object-cover object-top opacity-[0.85]"
+              />
+            </motion.div>
+          </AnimatePresence>
         </div>
 
-        <button
-          type="button"
-          onClick={toggleHeroSound}
-          aria-label={heroMuted ? "Unmute video" : "Mute video"}
-          className="absolute right-6 top-24 z-20 flex h-11 w-11 items-center justify-center rounded-full border border-white/30 bg-black/50 text-lg text-white backdrop-blur-sm transition hover:bg-black/70 lg:right-16"
-        >
-          {heroMuted ? "🔇" : "🔊"}
-        </button>
+        {slides.length > 1 && (
+          <div className="absolute right-6 top-24 z-20 flex gap-2 lg:right-16">
+            {slides.map((s, i) => (
+              <button
+                key={s.id}
+                type="button"
+                onClick={() => setSlideIndex(i)}
+                aria-label={`Show ${s.title}`}
+                className={`h-1.5 rounded-full transition-all ${
+                  i === slideIndex ? "w-6 bg-white" : "w-1.5 bg-white/40 hover:bg-white/60"
+                }`}
+              />
+            ))}
+          </div>
+        )}
         <div className="absolute inset-0 bg-gradient-to-b from-black/75 via-black/55 to-[#020617]" />
         <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/20 to-transparent" />
         <FilmGrain opacity={0.045} />
@@ -409,7 +429,13 @@ export default function HomeClient({
         )}
 
         {spotlight ? (
-          <div className="relative z-10 mx-auto flex max-w-3xl flex-col px-6 pb-28 pt-16 lg:pb-36 lg:pt-24">
+          <AnimatePresence mode="wait">
+          <motion.div
+            key={spotlight.id}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.4 }}
+            className="relative z-10 mx-auto flex max-w-3xl flex-col px-6 pb-28 pt-16 lg:pb-36 lg:pt-24"
+          >
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -492,7 +518,8 @@ export default function HomeClient({
                 </span>
               </motion.div>
             )}
-          </div>
+          </motion.div>
+          </AnimatePresence>
         ) : (
           <div className="relative z-10 mx-auto flex max-w-3xl flex-col items-center px-6 pb-28 pt-16 text-center lg:pb-36 lg:pt-24">
             <motion.h1

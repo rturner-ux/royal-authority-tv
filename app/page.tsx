@@ -1,16 +1,16 @@
-import { getTrendingCases, getFeaturedCases, getSiteStats, getRandomSpotlightCase } from "@/lib/cases";
+import { getTrendingCases, getFeaturedCases, getSiteStats, getRandomSpotlightCases } from "@/lib/cases";
 import { getSubscriberStatus } from "@/lib/subscription";
 import { isTikTokLive } from "@/lib/tiktokLive";
 import HomeClient from "./components/HomeClient";
 
 export default async function Home() {
-  const [cases, featuredCases, stats, { user }, isLive, spotlightCase] = await Promise.all([
+  const [cases, featuredCases, stats, { user }, isLive, spotlightCases] = await Promise.all([
     getTrendingCases(),
     getFeaturedCases(),
     getSiteStats(),
     getSubscriberStatus(),
     isTikTokLive(),
-    getRandomSpotlightCase(),
+    getRandomSpotlightCases(6),
   ]);
 
   const accountProps = user
@@ -23,7 +23,7 @@ export default async function Home() {
       featuredCases={featuredCases}
       stats={stats}
       isLive={isLive}
-      spotlightCase={spotlightCase}
+      spotlightCases={spotlightCases}
       {...accountProps}
     />
   );

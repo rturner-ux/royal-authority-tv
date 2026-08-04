@@ -95,20 +95,28 @@ export async function getTrendingCases(): Promise<Incident[]> {
   return (data ?? []) as Incident[]
 }
 
-// Picks a random case for the homepage hero spotlight -- pulls from every
-// visible, linkable case in the database (not just featured/trending), so
-// the same handful of cases don't dominate every page load.
-export async function getRandomSpotlightCase(): Promise<Incident | null> {
+// Picks a random set of cases for the homepage hero slideshow -- pulls from
+// every visible, linkable case with a real photo (not just featured/
+// trending), so the same handful of cases don't dominate every page load.
+export async function getRandomSpotlightCases(count: number): Promise<Incident[]> {
   const db = supabase()
   const { data, error } = await db
     .from('incidents')
     .select('*')
     .eq('is_hidden', false)
     .not('slug', 'is', null)
+    .not('image_url', 'is', null)
 
   if (error) throw error
-  if (!data || data.length === 0) return null
-  return data[Math.floor(Math.random() * data.length)] as Incident
+  if (!data || data.length === 0) return []
+
+  // Fisher-Yates shuffle, then take the first `count`.
+  const shuffled = [...data]
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1))
+    ;[shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]
+  }
+  return shuffled.slice(0, count) as Incident[]
 }
 
 export type IncidentWithOccurredAt = Incident & { occurred_at: string; hasDisputedRuling: boolean }
