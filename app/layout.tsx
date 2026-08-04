@@ -4,6 +4,7 @@ import "./globals.css";
 import ScrapeDeterrent from "./components/ScrapeDeterrent";
 import SubscribePrompt from "./components/SubscribePrompt";
 import Footer from "./components/Footer";
+import PresenceProvider from "./components/PresenceProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -61,10 +62,12 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} ${playfairDisplay.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
-        <ScrapeDeterrent />
-        <div className="flex-1">{children}</div>
-        <Footer />
-        <SubscribePrompt />
+        <PresenceProvider>
+          <ScrapeDeterrent />
+          <div className="flex-1">{children}</div>
+          <Footer />
+          <SubscribePrompt />
+        </PresenceProvider>
       </body>
     </html>
   );

@@ -10,6 +10,7 @@ import Navbar from "./Navbar";
 import FilmGrain from "./FilmGrain";
 import CaseRow from "./CaseRow";
 import CaseHoverCard, { COLLAPSED_WIDTH, COLLAPSED_HEIGHT } from "./CaseHoverCard";
+import SiteVisitorCount from "./SiteVisitorCount";
 import { getRole } from "@/lib/roles";
 
 const EASE = [0.16, 1, 0.3, 1] as [number, number, number, number];
@@ -431,13 +432,16 @@ export default function HomeClient({
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.8, delay: 0.5 }}
-              className="mt-4 flex items-center gap-2 text-sm font-semibold text-white/70"
+              className="mt-4 flex flex-wrap items-center gap-3 text-sm font-semibold text-white/70"
             >
-              <span>{CATEGORY_LABELS[spotlight.category]}</span>
-              <span className="text-white/30">•</span>
-              <span>{spotlightYear}</span>
-              <span className="text-white/30">•</span>
-              <span className="capitalize">{spotlight.status}</span>
+              <span className="flex items-center gap-2">
+                <span>{CATEGORY_LABELS[spotlight.category]}</span>
+                <span className="text-white/30">•</span>
+                <span>{spotlightYear}</span>
+                <span className="text-white/30">•</span>
+                <span className="capitalize">{spotlight.status}</span>
+              </span>
+              <SiteVisitorCount />
             </motion.div>
 
             {spotlight.description && (
