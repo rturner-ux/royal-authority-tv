@@ -223,7 +223,7 @@ export default function ProfileSidebar() {
               key={item.href}
               href={item.href}
               className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold transition ${
-                active ? "bg-white/10 text-white" : "text-slate-300 hover:bg-white/5 hover:text-white"
+                active ? "text-red-500" : "text-slate-300 hover:bg-white/5 hover:text-white"
               }`}
             >
               <Icon />
@@ -237,7 +237,7 @@ export default function ProfileSidebar() {
         <Link
           href="/account"
           className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold transition ${
-            pathname === "/account" ? "bg-white/10 text-white" : "text-slate-300 hover:bg-white/5 hover:text-white"
+            pathname === "/account" ? "text-red-500" : "text-slate-300 hover:bg-white/5 hover:text-white"
           }`}
         >
           <Avatar avatarUrl={avatarUrl} roleBadge={role?.badge ?? null} name={callsign || "?"} size={24} />

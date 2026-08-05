@@ -84,12 +84,12 @@ export default function MobileTabBar() {
 
   return (
     <nav className="fixed inset-x-0 bottom-0 z-[999] flex items-center justify-around border-t border-white/10 bg-[#05070b]/95 px-2 pb-[env(safe-area-inset-bottom)] pt-1.5 backdrop-blur-xl lg:hidden">
-      <Link href="/account/home" className={`flex flex-col items-center gap-0.5 px-3 py-1.5 ${home ? "text-white" : "text-slate-500"}`}>
+      <Link href="/account/home" className={`flex flex-col items-center gap-0.5 px-3 py-1.5 ${home ? "text-red-500" : "text-slate-500"}`}>
         <HomeIcon active={home} />
         <span className="text-[0.6rem] font-semibold">Home</span>
       </Link>
 
-      <Link href="/account/friends" className={`flex flex-col items-center gap-0.5 px-3 py-1.5 ${friends ? "text-white" : "text-slate-500"}`}>
+      <Link href="/account/friends" className={`flex flex-col items-center gap-0.5 px-3 py-1.5 ${friends ? "text-red-500" : "text-slate-500"}`}>
         <FriendsIcon active={friends} />
         <span className="text-[0.6rem] font-semibold">Friends</span>
       </Link>
@@ -100,7 +100,7 @@ export default function MobileTabBar() {
         </span>
       </Link>
 
-      <Link href="/account/messages" className={`relative flex flex-col items-center gap-0.5 px-3 py-1.5 ${messages ? "text-white" : "text-slate-500"}`}>
+      <Link href="/account/messages" className={`relative flex flex-col items-center gap-0.5 px-3 py-1.5 ${messages ? "text-red-500" : "text-slate-500"}`}>
         <MessagesIcon active={messages} />
         {unreadCount > 0 && (
           <span className="absolute right-1.5 top-0 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-red-600 px-1 text-[0.55rem] font-bold text-white">
@@ -110,8 +110,8 @@ export default function MobileTabBar() {
         <span className="text-[0.6rem] font-semibold">Inbox</span>
       </Link>
 
-      <Link href="/account" className={`flex flex-col items-center gap-0.5 px-3 py-1.5 ${profile ? "text-white" : "text-slate-500"}`}>
-        <Avatar avatarUrl={avatarUrl} roleBadge={role?.badge ?? null} name={callsign || "?"} size={24} className={profile ? "ring-2 ring-white" : ""} />
+      <Link href="/account" className={`flex flex-col items-center gap-0.5 px-3 py-1.5 ${profile ? "text-red-500" : "text-slate-500"}`}>
+        <Avatar avatarUrl={avatarUrl} roleBadge={role?.badge ?? null} name={callsign || "?"} size={24} className={profile ? "ring-2 ring-red-500" : ""} />
         <span className="text-[0.6rem] font-semibold">Profile</span>
       </Link>
     </nav>
