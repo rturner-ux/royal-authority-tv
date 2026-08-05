@@ -14,7 +14,6 @@ import CaseFactChecker from "../../components/CaseFactChecker";
 import CaseVideoLibrary from "../../components/CaseVideoLibrary";
 import CasePictureScan from "../../components/CasePictureScan";
 import CaseIntroVideo from "../../components/CaseIntroVideo";
-import CaseWatchVideo from "../../components/CaseWatchVideo";
 import RecordLastCase from "../../components/RecordLastCase";
 import InvestigatorToolkit from "../../components/InvestigatorToolkit";
 import { getCaseBySlug, getCaseTrackingCount, getCaseConnections } from "@/lib/cases";
@@ -81,6 +80,31 @@ export default async function CaseFileSlugPage({
 
   const { incident, updates, people, transcript, courtRecords, photos, relatedIncident, courtCase, charges } = result;
   const incidentCollection = incident.collection_slug ? getCollection(incident.collection_slug) : null;
+
+  // Facebook's video plugin embeds (Reels, posts) are portrait and come with
+  // their own width/height query params -- those get their own small
+  // section below rather than being forced into the landscape card grid.
+  // Everything else (YouTube, news station embeds, etc.) is folded into the
+  // same Video Library grid as a synthetic first entry so there's one
+  // consistent small-card presentation instead of a separate large player.
+  const primaryVideoIsFacebook = incident.video_embed_url?.includes("facebook.com/plugins/video") ?? false;
+  const libraryVideos =
+    incident.video_embed_url && !primaryVideoIsFacebook
+      ? [
+          {
+            id: "primary-embed",
+            incident_id: incident.id,
+            title: `${incident.title} video`,
+            source_label: null,
+            youtube_url: incident.video_embed_url,
+            sequence: -1,
+            view_count: 0,
+            like_count: 0,
+            share_count: 0,
+          },
+          ...result.videos,
+        ]
+      : result.videos;
   const trackingCount = await getCaseTrackingCount(incident.id);
   const connections = await getCaseConnections(incident.id);
   const { user, isActive } = await getSubscriberStatus();
@@ -312,55 +336,37 @@ export default async function CaseFileSlugPage({
           <CaseIntroVideo url={incident.intro_video_url} title={incident.title} />
         )}
 
-        {/* LIVE / EMBEDDED VIDEO */}
-        {incident.video_embed_url && (() => {
-          // Facebook's video plugin embeds (Reels, posts) are portrait and
-          // come with their own width/height query params -- stretching
-          // those into a 16:9 landscape box distorts and oversizes them.
-          // Everything else (YouTube, etc.) is assumed landscape.
-          const isFacebookPlugin = incident.video_embed_url.includes("facebook.com/plugins/video");
-
-          return (
-            <section className="mb-12 overflow-hidden rounded-[32px] border border-red-500/30 bg-black/30 backdrop-blur-sm">
-              <div className="flex items-center gap-2 px-6 pt-6">
-                <span className="h-2 w-2 animate-pulse rounded-full bg-red-500" />
-                <div className="text-xs font-bold uppercase tracking-[0.3em] text-red-400">
-                  Watch
-                </div>
+        {/* LIVE / FACEBOOK PLUGIN VIDEO (portrait, rare) */}
+        {incident.video_embed_url && primaryVideoIsFacebook && (
+          <section className="mb-12 overflow-hidden rounded-[32px] border border-red-500/30 bg-black/30 backdrop-blur-sm">
+            <div className="flex items-center gap-2 px-6 pt-6">
+              <span className="h-2 w-2 animate-pulse rounded-full bg-red-500" />
+              <div className="text-xs font-bold uppercase tracking-[0.3em] text-red-400">
+                Watch
               </div>
-              {isFacebookPlugin ? (
-                <div className="mt-4 flex justify-center px-6 pb-6">
-                  <iframe
-                    src={incident.video_embed_url}
-                    title={`${incident.title} video`}
-                    width="350"
-                    height="622"
-                    style={{ border: "none", overflow: "hidden", maxWidth: "100%" }}
-                    scrolling="no"
-                    allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
-                    allowFullScreen
-                  />
-                </div>
-              ) : (
-                <div className="px-6">
-                  <CaseWatchVideo
-                    embedUrl={incident.video_embed_url}
-                    title={`${incident.title} video`}
-                    thumbnailUrl={incident.poster_url || incident.image_url}
-                  />
-                </div>
-              )}
-            </section>
-          );
-        })()}
+            </div>
+            <div className="mt-4 flex justify-center px-6 pb-6">
+              <iframe
+                src={incident.video_embed_url}
+                title={`${incident.title} video`}
+                width="350"
+                height="622"
+                style={{ border: "none", overflow: "hidden", maxWidth: "100%" }}
+                scrolling="no"
+                allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
+                allowFullScreen
+              />
+            </div>
+          </section>
+        )}
 
         {/* VIDEO LIBRARY */}
-        {result.videos.length > 0 && (
+        {libraryVideos.length > 0 && (
           <section className="mb-12">
             <div className="mb-4 text-xs font-bold uppercase tracking-[0.3em] text-[#E8D19A]">
               Video Library
             </div>
-            <CaseVideoLibrary videos={result.videos} />
+            <CaseVideoLibrary videos={libraryVideos} fallbackThumbnail={incident.poster_url || incident.image_url} />
           </section>
         )}
 

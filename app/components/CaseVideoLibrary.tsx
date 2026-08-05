@@ -5,7 +5,13 @@ import type { IncidentVideo } from "@/lib/types";
 import { playSfx } from "@/lib/sfx";
 import { extractYouTubeId } from "@/lib/youtube";
 
-export default function CaseVideoLibrary({ videos }: { videos: IncidentVideo[] }) {
+export default function CaseVideoLibrary({
+  videos,
+  fallbackThumbnail,
+}: {
+  videos: IncidentVideo[];
+  fallbackThumbnail?: string | null;
+}) {
   const [openVideo, setOpenVideo] = useState<IncidentVideo | null>(null);
 
   useEffect(() => {
@@ -23,8 +29,11 @@ export default function CaseVideoLibrary({ videos }: { videos: IncidentVideo[] }
     <div>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {videos.map((video) => {
+          // youtube_url isn't always YouTube -- news station embeds, etc.
+          // fall back to the case's own thumbnail when there's no video ID
+          // to build a YouTube thumbnail from.
           const videoId = extractYouTubeId(video.youtube_url);
-          const thumbnail = videoId ? `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg` : null;
+          const thumbnail = videoId ? `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg` : fallbackThumbnail;
 
           return (
             <button
@@ -74,7 +83,11 @@ export default function CaseVideoLibrary({ videos }: { videos: IncidentVideo[] }
             onClick={(e) => e.stopPropagation()}
           >
             <iframe
-              src={`https://www.youtube.com/embed/${extractYouTubeId(openVideo.youtube_url)}?autoplay=1`}
+              src={
+                extractYouTubeId(openVideo.youtube_url)
+                  ? `https://www.youtube.com/embed/${extractYouTubeId(openVideo.youtube_url)}?autoplay=1`
+                  : openVideo.youtube_url
+              }
               title={openVideo.title}
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
               allowFullScreen
