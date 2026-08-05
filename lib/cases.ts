@@ -66,6 +66,12 @@ export async function getFeaturedCases(): Promise<Incident[]> {
 // case (photos, people, sourced updates, all of it) was invisible on the
 // site's own case index unless someone separately remembered to flip
 // is_featured, silently hiding real work.
+export async function getIncidentIdBySlug(slug: string): Promise<string | null> {
+  const db = supabase()
+  const { data } = await db.from('incidents').select('id').eq('slug', slug).maybeSingle()
+  return data?.id ?? null
+}
+
 export async function getAllCaseFiles(): Promise<Incident[]> {
   const db = supabase()
   const { data, error } = await db

@@ -15,7 +15,9 @@ import CaseVideoLibrary from "../../components/CaseVideoLibrary";
 import CasePictureScan from "../../components/CasePictureScan";
 import CaseIntroVideo from "../../components/CaseIntroVideo";
 import RecordLastCase from "../../components/RecordLastCase";
+import CaseEngagementPopup from "../../components/CaseEngagementPopup";
 import InvestigatorToolkit from "../../components/InvestigatorToolkit";
+import CasePartners from "../../components/CasePartners";
 import { getCaseBySlug, getCaseTrackingCount, getCaseConnections } from "@/lib/cases";
 import { getCollection } from "@/lib/collections";
 import { getSubscriberStatus } from "@/lib/subscription";
@@ -213,6 +215,7 @@ export default async function CaseFileSlugPage({
 
       <div className="relative z-10 mx-auto max-w-7xl px-6 py-6 lg:px-10">
         <RecordLastCase slug={slug} title={incident.title} />
+        <CaseEngagementPopup slug={slug} isActive={isActive} />
         <Navbar
           breadcrumbs={[
             { label: "Home", href: "/" },
@@ -483,6 +486,11 @@ export default async function CaseFileSlugPage({
         {/* INVESTIGATOR TOOLKIT */}
         <div className="mb-6">
           <InvestigatorToolkit slug={slug} isActive={isActive} hasRole={hasRole} initialRole={subscriberRole} />
+        </div>
+
+        {/* PARTNER UP */}
+        <div className="mb-6">
+          <CasePartners slug={slug} isActive={isActive} currentUserId={user?.id ?? null} />
         </div>
 
         {/* COURT & ARREST RECORDS */}

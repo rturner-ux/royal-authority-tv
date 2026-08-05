@@ -273,6 +273,26 @@ export type DirectoryProfile = {
   is_verified: boolean
 }
 
+export type CasePartnerStatus = 'pending' | 'accepted' | 'declined'
+
+export type CasePartner = {
+  id: string
+  incident_id: string
+  initiator_id: string
+  partner_id: string
+  status: CasePartnerStatus
+  created_at: string
+  responded_at: string | null
+}
+
+export type CasePartnerNote = {
+  id: string
+  case_partner_id: string
+  author_id: string
+  body: string
+  created_at: string
+}
+
 export type IncidentVideo = {
   id: string
   incident_id: string
