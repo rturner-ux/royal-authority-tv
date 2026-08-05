@@ -25,7 +25,7 @@ export async function GET(req: NextRequest) {
 
   let query = db
     .from('subscriber_profiles')
-    .select('user_id, callsign, role')
+    .select('user_id, callsign, role, avatar_url, is_verified')
     .eq('directory_visible', true)
     .not('callsign', 'is', null)
     .neq('user_id', user.id)

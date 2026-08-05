@@ -2,15 +2,21 @@
 
 import { useRouter } from "next/navigation";
 import { getRole } from "@/lib/roles";
+import Avatar from "../../../components/Avatar";
+import VerifiedBadge from "../../../components/VerifiedBadge";
 
 export default function ThreadDetailsPanel({
   friendId,
   friendName,
   friendRole,
+  friendAvatarUrl = null,
+  friendVerified = false,
 }: {
   friendId: string;
   friendName: string;
   friendRole: string | null;
+  friendAvatarUrl?: string | null;
+  friendVerified?: boolean;
 }) {
   const router = useRouter();
   const role = getRole(friendRole);
@@ -39,10 +45,11 @@ export default function ThreadDetailsPanel({
   return (
     <div className="flex h-full w-72 flex-shrink-0 flex-col border-l border-white/10 p-6">
       <div className="flex flex-col items-center text-center">
-        <div className="flex h-16 w-16 items-center justify-center rounded-full bg-white/5 text-xl font-bold text-white/50">
-          {friendName.charAt(0).toUpperCase()}
+        <Avatar avatarUrl={friendAvatarUrl} roleBadge={role?.badge ?? null} name={friendName} size={64} />
+        <div className="mt-3 flex items-center gap-1.5 text-sm font-semibold text-white">
+          {friendName}
+          {friendVerified && <VerifiedBadge className="h-3.5 w-3.5" />}
         </div>
-        <div className="mt-3 text-sm font-semibold text-white">{friendName}</div>
         {role && (
           <span className="mt-1 rounded-full border border-[#C9A24A]/30 bg-[#C9A24A]/10 px-2.5 py-0.5 text-[0.65rem] font-semibold uppercase tracking-[0.1em] text-[#E8D19A]">
             {role.title}

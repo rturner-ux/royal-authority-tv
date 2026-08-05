@@ -4,6 +4,8 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabaseBrowser } from "@/lib/supabase/browser";
 import type { DirectMessage } from "@/lib/types";
+import Avatar from "../../../components/Avatar";
+import VerifiedBadge from "../../../components/VerifiedBadge";
 
 function SendIcon() {
   return (
@@ -17,10 +19,14 @@ export default function ThreadClient({
   currentUserId,
   friendId,
   friendName,
+  friendAvatarUrl = null,
+  friendVerified = false,
 }: {
   currentUserId: string;
   friendId: string;
   friendName: string;
+  friendAvatarUrl?: string | null;
+  friendVerified?: boolean;
 }) {
   const router = useRouter();
   const [messages, setMessages] = useState<DirectMessage[]>([]);
@@ -121,7 +127,11 @@ export default function ThreadClient({
   return (
     <div className="flex h-full min-h-[500px] flex-col overflow-hidden bg-[#0f0f0f] lg:h-full">
       <div className="flex items-center justify-between border-b border-white/10 px-5 py-4">
-        <span className="text-sm font-semibold text-white">{friendName}</span>
+        <div className="flex items-center gap-2.5">
+          <Avatar avatarUrl={friendAvatarUrl} roleBadge={null} name={friendName} size={32} />
+          <span className="text-sm font-semibold text-white">{friendName}</span>
+          {friendVerified && <VerifiedBadge className="h-3.5 w-3.5" />}
+        </div>
         {/* Desktop gets a dedicated details panel (block/report live there);
             this menu is the mobile-only equivalent since that panel is
             hidden below lg. */}

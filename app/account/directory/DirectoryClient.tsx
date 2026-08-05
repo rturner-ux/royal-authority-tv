@@ -2,11 +2,15 @@
 
 import { useEffect, useState } from "react";
 import { getRole } from "@/lib/roles";
+import Avatar from "../../components/Avatar";
+import VerifiedBadge from "../../components/VerifiedBadge";
 
 type Profile = {
   user_id: string;
   callsign: string;
   role: string | null;
+  avatar_url: string | null;
+  is_verified: boolean;
   friendStatus: "none" | "pending" | "friends";
 };
 
@@ -68,11 +72,12 @@ export default function DirectoryClient() {
               key={p.user_id}
               className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.03] p-4"
             >
-              <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full bg-white/5 text-sm font-bold text-white/50">
-                {p.callsign.charAt(0).toUpperCase()}
-              </div>
+              <Avatar avatarUrl={p.avatar_url} roleBadge={role?.badge ?? null} name={p.callsign} size={44} />
               <div className="min-w-0 flex-1">
-                <div className="truncate text-sm font-semibold text-white">{p.callsign}</div>
+                <div className="flex items-center gap-1.5">
+                  <span className="truncate text-sm font-semibold text-white">{p.callsign}</span>
+                  {p.is_verified && <VerifiedBadge className="h-3.5 w-3.5" />}
+                </div>
                 {role && <div className="truncate text-xs text-slate-500">{role.title}</div>}
               </div>
 

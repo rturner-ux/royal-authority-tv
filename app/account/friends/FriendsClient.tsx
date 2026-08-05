@@ -3,8 +3,16 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { getRole } from "@/lib/roles";
+import Avatar from "../../components/Avatar";
+import VerifiedBadge from "../../components/VerifiedBadge";
 
-type OtherUser = { user_id: string; callsign: string | null; role: string | null };
+type OtherUser = {
+  user_id: string;
+  callsign: string | null;
+  role: string | null;
+  avatar_url: string | null;
+  is_verified: boolean;
+};
 type Row = {
   id: string;
   sender_id: string;
@@ -18,11 +26,12 @@ function Person({ otherUser }: { otherUser: OtherUser }) {
   const name = otherUser.callsign || "Unnamed Investigator";
   return (
     <div className="flex min-w-0 flex-1 items-center gap-3">
-      <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full bg-white/5 text-sm font-bold text-white/50">
-        {name.charAt(0).toUpperCase()}
-      </div>
+      <Avatar avatarUrl={otherUser.avatar_url} roleBadge={role?.badge ?? null} name={name} size={44} />
       <div className="min-w-0">
-        <div className="truncate text-sm font-semibold text-white">{name}</div>
+        <div className="flex items-center gap-1.5">
+          <span className="truncate text-sm font-semibold text-white">{name}</span>
+          {otherUser.is_verified && <VerifiedBadge className="h-3.5 w-3.5" />}
+        </div>
         {role && <div className="truncate text-xs text-slate-500">{role.title}</div>}
       </div>
     </div>

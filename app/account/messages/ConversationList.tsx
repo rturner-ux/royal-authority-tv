@@ -4,9 +4,11 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { getRole } from "@/lib/roles";
+import Avatar from "../../components/Avatar";
+import VerifiedBadge from "../../components/VerifiedBadge";
 
 type Conversation = {
-  friend: { user_id: string; callsign: string | null; role: string | null };
+  friend: { user_id: string; callsign: string | null; role: string | null; avatar_url: string | null; is_verified: boolean };
   lastMessage: { body: string; created_at: string; sender_id: string } | null;
   unreadCount: number;
 };
@@ -93,12 +95,11 @@ export default function ConversationList() {
                   active ? "bg-white/10" : "hover:bg-white/[0.04]"
                 }`}
               >
-                <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full bg-white/5 text-sm font-bold text-white/50">
-                  {name.charAt(0).toUpperCase()}
-                </div>
+                <Avatar avatarUrl={c.friend.avatar_url} roleBadge={role?.badge ?? null} name={name} size={44} />
                 <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1.5">
                     <span className="truncate text-sm font-semibold text-white">{name}</span>
+                    {c.friend.is_verified && <VerifiedBadge className="h-3 w-3" />}
                     {role && <span className="flex-shrink-0 text-[0.65rem] text-slate-500">{role.title}</span>}
                   </div>
                   <p className="mt-0.5 truncate text-xs text-slate-400">

@@ -6,6 +6,8 @@ import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { getRole } from "@/lib/roles";
 import { supabaseBrowser } from "@/lib/supabase/browser";
+import Avatar from "./Avatar";
+import VerifiedBadge from "./VerifiedBadge";
 
 function HomeIcon() {
   return (
@@ -115,6 +117,8 @@ export default function ProfileSidebar() {
   const router = useRouter();
   const [callsign, setCallsign] = useState<string | null>(null);
   const [roleKey, setRoleKey] = useState<string | null>(null);
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [isVerified, setIsVerified] = useState(false);
 
   useEffect(() => {
     fetch("/api/subscriber-status")
@@ -122,6 +126,8 @@ export default function ProfileSidebar() {
       .then((d) => {
         setRoleKey(d.role ?? null);
         setCallsign(d.callsign ?? null);
+        setAvatarUrl(d.avatarUrl ?? null);
+        setIsVerified(Boolean(d.isVerified));
       })
       .catch(() => {});
   }, []);
@@ -185,16 +191,9 @@ export default function ProfileSidebar() {
             pathname === "/account" ? "bg-white/10 text-white" : "text-slate-300 hover:bg-white/5 hover:text-white"
           }`}
         >
-          <div className="relative h-6 w-6 flex-shrink-0 overflow-hidden rounded-full bg-white/10">
-            {role ? (
-              <Image src={role.badge} alt="" fill unoptimized className="object-contain p-0.5" />
-            ) : (
-              <div className="grid h-full w-full place-items-center text-[10px] font-bold text-white/50">
-                {(callsign || "?").charAt(0).toUpperCase()}
-              </div>
-            )}
-          </div>
+          <Avatar avatarUrl={avatarUrl} roleBadge={role?.badge ?? null} name={callsign || "?"} size={24} />
           Profile
+          {isVerified && <VerifiedBadge className="h-3.5 w-3.5" />}
         </Link>
         <button
           onClick={handleSignOut}

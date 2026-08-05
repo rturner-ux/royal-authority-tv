@@ -1,11 +1,12 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import Image from "next/image";
 import Navbar from "../components/Navbar";
 import AccountActions from "./AccountActions";
 import InvestigatorProfile from "./InvestigatorProfile";
 import EmailAlertsToggle from "./EmailAlertsToggle";
 import DirectoryVisibleToggle from "./DirectoryVisibleToggle";
+import AvatarUpload from "./AvatarUpload";
+import VerifiedBadge from "../components/VerifiedBadge";
 import AccountTabs from "./AccountTabs";
 import { supabaseServerAuth } from "@/lib/supabase/serverAuth";
 import { supabase } from "@/lib/supabase/server";
@@ -26,7 +27,7 @@ export default async function AccountPage() {
     db.from("subscribers").select("status, current_period_end").eq("user_id", user.id).maybeSingle(),
     db
       .from("subscriber_profiles")
-      .select("role, callsign, email_alerts_enabled, directory_visible")
+      .select("role, callsign, email_alerts_enabled, directory_visible, avatar_url, is_verified")
       .eq("user_id", user.id)
       .maybeSingle(),
   ]);
@@ -81,15 +82,13 @@ export default async function AccountPage() {
             <div className="h-24 bg-gradient-to-r from-[#C9A24A]/25 via-red-700/15 to-transparent" />
             <div className="px-6 pb-6">
               <div className="-mt-12 flex items-end gap-4">
-                <div className="relative h-24 w-24 flex-shrink-0 rounded-full border-4 border-[#05070b] bg-[#0b0e14]">
-                  {role ? (
-                    <Image src={role.badge} alt="" fill unoptimized className="rounded-full object-contain p-3" />
-                  ) : (
-                    <div className="grid h-full w-full place-items-center rounded-full text-2xl font-bold text-white/40">
-                      {(profile?.callsign || user.email || "?").charAt(0).toUpperCase()}
-                    </div>
-                  )}
-                </div>
+                <AvatarUpload
+                  userId={user.id}
+                  initialAvatarUrl={profile?.avatar_url ?? null}
+                  roleBadge={role?.badge ?? null}
+                  name={profile?.callsign || user.email || "?"}
+                  size={96}
+                />
                 <div
                   className={`mb-1 rounded-full border px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] ${
                     isActive
@@ -106,6 +105,7 @@ export default async function AccountPage() {
                   <h1 className="font-serif text-3xl text-white">
                     {profile?.callsign || "Unnamed Investigator"}
                   </h1>
+                  {profile?.is_verified && <VerifiedBadge className="h-5 w-5" />}
                   {role && (
                     <span className="rounded-full border border-[#C9A24A]/30 bg-[#C9A24A]/10 px-2.5 py-0.5 text-xs font-semibold uppercase tracking-[0.15em] text-[#E8D19A]">
                       {role.title}

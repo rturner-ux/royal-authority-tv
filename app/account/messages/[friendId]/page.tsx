@@ -17,7 +17,7 @@ export default async function ThreadPage({ params }: { params: Promise<{ friendI
   const db = supabase();
   const { data: friendProfile } = await db
     .from("subscriber_profiles")
-    .select("callsign, role")
+    .select("callsign, role, avatar_url, is_verified")
     .eq("user_id", friendId)
     .maybeSingle();
 
@@ -39,11 +39,23 @@ export default async function ThreadPage({ params }: { params: Promise<{ friendI
       </div>
 
       <div className="min-w-0 flex-1">
-        <ThreadClient currentUserId={user.id} friendId={friendId} friendName={friendName} />
+        <ThreadClient
+          currentUserId={user.id}
+          friendId={friendId}
+          friendName={friendName}
+          friendAvatarUrl={friendProfile?.avatar_url ?? null}
+          friendVerified={friendProfile?.is_verified ?? false}
+        />
       </div>
 
       <div className="hidden lg:block">
-        <ThreadDetailsPanel friendId={friendId} friendName={friendName} friendRole={friendProfile?.role ?? null} />
+        <ThreadDetailsPanel
+          friendId={friendId}
+          friendName={friendName}
+          friendRole={friendProfile?.role ?? null}
+          friendAvatarUrl={friendProfile?.avatar_url ?? null}
+          friendVerified={friendProfile?.is_verified ?? false}
+        />
       </div>
     </div>
   );

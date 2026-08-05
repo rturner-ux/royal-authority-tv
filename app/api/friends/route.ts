@@ -27,13 +27,16 @@ export async function GET() {
     new Set((rows ?? []).map((r) => (r.sender_id === user.id ? r.recipient_id : r.sender_id)))
   )
   const { data: profiles } = otherIds.length
-    ? await db.from('subscriber_profiles').select('user_id, callsign, role').in('user_id', otherIds)
+    ? await db.from('subscriber_profiles').select('user_id, callsign, role, avatar_url, is_verified').in('user_id', otherIds)
     : { data: [] }
   const profileById = new Map((profiles ?? []).map((p) => [p.user_id, p]))
 
   const hydrate = (r: (typeof rows)[number]) => {
     const otherId = r.sender_id === user.id ? r.recipient_id : r.sender_id
-    return { ...r, otherUser: profileById.get(otherId) ?? { user_id: otherId, callsign: null, role: null } }
+    return {
+      ...r,
+      otherUser: profileById.get(otherId) ?? { user_id: otherId, callsign: null, role: null, avatar_url: null, is_verified: false },
+    }
   }
 
   const friends = (rows ?? []).filter((r) => r.status === 'accepted').map(hydrate)

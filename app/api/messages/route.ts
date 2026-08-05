@@ -24,7 +24,7 @@ export async function GET() {
 
   const { data: profiles } = await db
     .from('subscriber_profiles')
-    .select('user_id, callsign, role')
+    .select('user_id, callsign, role, avatar_url, is_verified')
     .in('user_id', friendIds)
   const profileById = new Map((profiles ?? []).map((p) => [p.user_id, p]))
 
@@ -48,7 +48,7 @@ export async function GET() {
 
   const conversations = friendIds
     .map((friendId) => ({
-      friend: profileById.get(friendId) ?? { user_id: friendId, callsign: null, role: null },
+      friend: profileById.get(friendId) ?? { user_id: friendId, callsign: null, role: null, avatar_url: null, is_verified: false },
       lastMessage: lastByFriend.get(friendId) ?? null,
       unreadCount: unreadByFriend.get(friendId) ?? 0,
     }))

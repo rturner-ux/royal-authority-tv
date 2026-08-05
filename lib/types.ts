@@ -269,6 +269,8 @@ export type DirectoryProfile = {
   user_id: string
   callsign: string
   role: string | null
+  avatar_url: string | null
+  is_verified: boolean
 }
 
 export type IncidentVideo = {
