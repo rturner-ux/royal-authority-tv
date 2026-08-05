@@ -245,6 +245,32 @@ export type IncidentPhoto = {
   sequence: number
 }
 
+export type FriendRequestStatus = 'pending' | 'accepted' | 'declined'
+
+export type FriendRequest = {
+  id: string
+  sender_id: string
+  recipient_id: string
+  status: FriendRequestStatus
+  created_at: string
+  responded_at: string | null
+}
+
+export type DirectMessage = {
+  id: string
+  sender_id: string
+  recipient_id: string
+  body: string
+  created_at: string
+  read_at: string | null
+}
+
+export type DirectoryProfile = {
+  user_id: string
+  callsign: string
+  role: string | null
+}
+
 export type IncidentVideo = {
   id: string
   incident_id: string

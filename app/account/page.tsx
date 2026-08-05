@@ -5,6 +5,7 @@ import Navbar from "../components/Navbar";
 import AccountActions from "./AccountActions";
 import InvestigatorProfile from "./InvestigatorProfile";
 import EmailAlertsToggle from "./EmailAlertsToggle";
+import DirectoryVisibleToggle from "./DirectoryVisibleToggle";
 import AccountTabs from "./AccountTabs";
 import { supabaseServerAuth } from "@/lib/supabase/serverAuth";
 import { supabase } from "@/lib/supabase/server";
@@ -23,7 +24,11 @@ export default async function AccountPage() {
 
   const [{ data: subscriber }, { data: profile }] = await Promise.all([
     db.from("subscribers").select("status, current_period_end").eq("user_id", user.id).maybeSingle(),
-    db.from("subscriber_profiles").select("role, callsign, email_alerts_enabled").eq("user_id", user.id).maybeSingle(),
+    db
+      .from("subscriber_profiles")
+      .select("role, callsign, email_alerts_enabled, directory_visible")
+      .eq("user_id", user.id)
+      .maybeSingle(),
   ]);
 
   const isActive = subscriber?.status === "active";
@@ -126,13 +131,43 @@ export default async function AccountPage() {
               </div>
 
               {isActive && (
-                <Link
-                  href="/account/videos"
-                  className="mt-5 flex items-center justify-between gap-3 rounded-2xl border border-[#C9A24A]/30 bg-gradient-to-r from-[#C9A24A]/[0.1] to-transparent px-4 py-3 transition hover:border-[#C9A24A]/50"
-                >
-                  <span className="text-sm font-semibold text-[#E8D19A]">My Video Profile</span>
-                  <span className="text-[#E8D19A]">→</span>
-                </Link>
+                <div className="mt-5 grid gap-2">
+                  <Link
+                    href="/account/videos"
+                    className="flex items-center justify-between gap-3 rounded-2xl border border-[#C9A24A]/30 bg-gradient-to-r from-[#C9A24A]/[0.1] to-transparent px-4 py-3 transition hover:border-[#C9A24A]/50"
+                  >
+                    <span className="text-sm font-semibold text-[#E8D19A]">My Video Profile</span>
+                    <span className="text-[#E8D19A]">→</span>
+                  </Link>
+                  <Link
+                    href="/account/directory"
+                    className="flex items-center justify-between gap-3 rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 transition hover:border-white/25"
+                  >
+                    <span className="text-sm font-semibold text-white">Subscriber Directory</span>
+                    <span className="text-white/50">→</span>
+                  </Link>
+                  <Link
+                    href="/account/friends"
+                    className="flex items-center justify-between gap-3 rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 transition hover:border-white/25"
+                  >
+                    <span className="text-sm font-semibold text-white">Friends & Requests</span>
+                    <span className="text-white/50">→</span>
+                  </Link>
+                  <Link
+                    href="/account/messages"
+                    className="flex items-center justify-between gap-3 rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 transition hover:border-white/25"
+                  >
+                    <span className="text-sm font-semibold text-white">Messages</span>
+                    <span className="text-white/50">→</span>
+                  </Link>
+                </div>
+              )}
+
+              {isActive && (
+                <DirectoryVisibleToggle
+                  userId={user.id}
+                  initialVisible={profile?.directory_visible ?? false}
+                />
               )}
 
               <AccountActions isActive={isActive} />

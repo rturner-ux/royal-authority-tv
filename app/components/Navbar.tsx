@@ -41,6 +41,7 @@ const SUBSCRIBER_LINKS = [
   { label: "Investigation Board", href: "/investigation-board" },
   { label: "My Playlists", href: "/account/playlists" },
   { label: "My Video Profile", href: "/account/videos" },
+  { label: "Messages", href: "/account/messages" },
   { label: "Pattern Intelligence", href: "/pattern-intelligence" },
 ];
 
