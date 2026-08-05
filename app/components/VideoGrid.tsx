@@ -142,7 +142,7 @@ export default function VideoGrid({
 
   return (
     <div>
-      <div className="grid grid-cols-[repeat(auto-fill,minmax(100px,1fr))] gap-1.5">
+      <div className="grid grid-cols-[repeat(auto-fill,minmax(260px,1fr))] gap-3">
         {shown.map((video) => {
           const videoId = extractYouTubeId(video.youtube_url);
           const thumbnail = videoId ? `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg` : null;
@@ -156,42 +156,55 @@ export default function VideoGrid({
                 setOpenVideo(video);
               }}
               title={video.title}
-              className="group relative flex flex-col overflow-hidden rounded-lg border border-white/10 bg-white/[0.03] text-left transition hover:border-[#C9A24A]/40"
+              className="group relative flex aspect-video w-full flex-shrink-0 flex-col overflow-hidden rounded-md text-left shadow-[0_4px_14px_rgba(0,0,0,0.55)] transition duration-[250ms] ease-out hover:z-10 hover:scale-[1.04] hover:shadow-[0_8px_26px_rgba(0,0,0,0.8)]"
             >
-              <div className="relative aspect-[9/16] w-full overflow-hidden bg-black/40">
+              <span className="absolute left-1.5 top-1.5 z-[3] flex items-center gap-1 rounded-full bg-black/60 px-2 py-0.5 text-[0.62rem] font-bold text-white backdrop-blur-sm">
+                <svg viewBox="0 0 24 24" fill="currentColor" className="h-2.5 w-2.5">
+                  <path d="M8 5v14l11-7z" />
+                </svg>
+                {formatCount(video.view_count)}
+              </span>
+
+              <div className="absolute inset-0">
                 {thumbnail && (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img src={thumbnail} alt={video.title} className="h-full w-full object-cover transition group-hover:scale-105" />
+                  <img src={thumbnail} alt={video.title} className="h-full w-full object-cover" />
                 )}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 transition group-hover:opacity-100" />
+              </div>
 
-                <span className="absolute bottom-1.5 left-1.5 flex items-center gap-1 rounded-md bg-black/60 px-1.5 py-0.5 text-[10px] font-semibold text-white backdrop-blur-sm">
-                  <svg viewBox="0 0 24 24" fill="currentColor" className="h-2.5 w-2.5">
-                    <path d="M8 5v14l11-7z" />
-                  </svg>
-                  {formatCount(video.view_count)}
-                </span>
-
-                <div className="absolute right-1.5 top-1.5 flex flex-col items-end gap-1 opacity-0 transition group-hover:opacity-100">
-                  <span
-                    role="button"
-                    onClick={(e) => toggleLike(video, e)}
-                    className={`flex items-center gap-1 rounded-md bg-black/60 px-1.5 py-0.5 text-[10px] font-semibold backdrop-blur-sm transition ${
-                      video.likedByMe ? "text-red-500" : "text-white hover:text-red-400"
-                    }`}
-                  >
-                    <HeartIcon filled={video.likedByMe} />
-                    {formatCount(video.like_count)}
-                  </span>
-                  <span
-                    role="button"
-                    onClick={(e) => share(video, e)}
-                    className="flex items-center gap-1 rounded-md bg-black/60 px-1.5 py-0.5 text-[10px] font-semibold text-white backdrop-blur-sm hover:text-[#E8D19A]"
-                  >
-                    <ShareIcon />
-                    {formatCount(video.share_count)}
-                  </span>
+              <div className="relative z-[2] mt-auto bg-gradient-to-t from-black/90 via-black/40 to-transparent pt-10">
+                <div
+                  className="line-clamp-2 px-2.5 pb-2 text-sm font-extrabold leading-tight text-white"
+                  style={{ textShadow: "0 2px 6px rgba(0,0,0,0.7)" }}
+                >
+                  {video.title}
                 </div>
+                {video.source_label && (
+                  <div className="px-2.5 pb-2 text-[0.62rem] font-bold uppercase tracking-wide text-[#E8D19A]">
+                    {video.source_label}
+                  </div>
+                )}
+              </div>
+
+              <div className="absolute right-1.5 top-1.5 z-[3] flex items-center gap-1.5 opacity-0 transition group-hover:opacity-100">
+                <span
+                  role="button"
+                  onClick={(e) => toggleLike(video, e)}
+                  className={`flex items-center gap-1 rounded-full bg-black/60 px-2 py-0.5 text-[0.62rem] font-bold backdrop-blur-sm transition ${
+                    video.likedByMe ? "text-red-500" : "text-white hover:text-red-400"
+                  }`}
+                >
+                  <HeartIcon filled={video.likedByMe} />
+                  {formatCount(video.like_count)}
+                </span>
+                <span
+                  role="button"
+                  onClick={(e) => share(video, e)}
+                  className="flex items-center gap-1 rounded-full bg-black/60 px-2 py-0.5 text-[0.62rem] font-bold text-white backdrop-blur-sm hover:text-[#E8D19A]"
+                >
+                  <ShareIcon />
+                  {formatCount(video.share_count)}
+                </span>
               </div>
             </button>
           );
