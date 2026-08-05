@@ -194,7 +194,7 @@ export default function ProfileSidebar() {
   }
 
   return (
-    <aside className="sticky top-0 hidden h-screen w-60 flex-shrink-0 flex-col overflow-y-auto border-r border-white/10 bg-[#05070b] px-3 py-6 lg:flex">
+    <aside className="sticky top-0 hidden h-screen w-60 flex-shrink-0 flex-col overflow-y-auto border-r border-white/10 bg-[#05070b] px-3 py-6 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden lg:flex">
       <Link href="/account/home" className="flex items-center px-3">
         <Image
           src="/royal-authority-wordmark.png"
