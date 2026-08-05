@@ -3,8 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import Navbar from "../../components/Navbar";
-import PersonProfileTabs from "../../components/PersonProfileTabs";
-import PersonPhotoVideo from "../../components/PersonPhotoVideo";
+import PersonCard from "../../components/PersonCard";
 import ShareButton from "../../components/ShareButton";
 import LocationZoomReveal from "../../components/LocationZoomReveal";
 import PhotoGallery from "../../components/PhotoGallery";
@@ -24,7 +23,6 @@ import { supabaseServerAuth } from "@/lib/supabase/serverAuth";
 import {
   CATEGORY_LABELS,
   PERSON_ROLE_LABELS,
-  PERSON_ROLE_CLASSES,
   isActiveAlert,
 } from "@/lib/labels";
 
@@ -698,68 +696,10 @@ export default async function CaseFileSlugPage({
 
         {/* PEOPLE */}
         {people.length > 0 && (
-          <section className="mt-10 space-y-6">
-            {people.map((person) => {
-              const isMissingAlert = isActiveAlert(incident);
-
-              return (
-              <div
-                key={person.id}
-                className={`rounded-[32px] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.04),rgba(255,255,255,0.02))] p-7 backdrop-blur-sm ${
-                  isMissingAlert ? "ra-alert-card" : ""
-                }`}
-              >
-                <div className="mb-6 flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
-                  <div className="min-w-0">
-                    <div className="text-xs uppercase tracking-[0.3em] text-red-400">
-                      Investigative Focus
-                    </div>
-                    <h3 className="mt-2 font-serif text-2xl text-white md:text-3xl">
-                      {PERSON_ROLE_LABELS[person.role]}
-                    </h3>
-                  </div>
-
-                  {person.status && (
-                    <div
-                      className={`max-w-full whitespace-normal break-words rounded-2xl border px-4 py-2 text-left text-xs font-semibold uppercase tracking-[0.15em] md:max-w-[380px] ${PERSON_ROLE_CLASSES[person.role]}`}
-                    >
-                      {person.status}
-                    </div>
-                  )}
-                </div>
-
-                <div className="grid gap-6 lg:grid-cols-[0.8fr_1.2fr]">
-                  <div className="rounded-[28px] border border-white/10 bg-black/30 p-5">
-                    <div className="text-xs uppercase tracking-[0.26em] text-[#E8D19A]">
-                      Profile
-                    </div>
-
-                    <PersonPhotoVideo
-                      photoUrl={person.photo_url}
-                      videoUrl={person.video_url}
-                      name={person.name}
-                      photoFit={person.photo_fit}
-                    />
-
-                    <div className="mt-5 grid gap-3">
-                      <div className="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-slate-300">
-                        <span className="font-semibold text-white">Name:</span>{" "}
-                        {person.name}
-                      </div>
-                      {person.age && (
-                        <div className="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-slate-300">
-                          <span className="font-semibold text-white">Age:</span>{" "}
-                          {person.age}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  <PersonProfileTabs person={person} />
-                </div>
-              </div>
-              );
-            })}
+          <section className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {people.map((person) => (
+              <PersonCard key={person.id} person={person} isMissingAlert={isActiveAlert(incident)} />
+            ))}
           </section>
         )}
 
