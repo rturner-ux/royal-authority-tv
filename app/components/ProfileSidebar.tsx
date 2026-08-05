@@ -180,7 +180,12 @@ export default function ProfileSidebar() {
         setIsVerified(Boolean(d.isVerified));
       })
       .catch(() => {});
+  }, []);
 
+  // Opening a thread marks its messages read server-side, but that only
+  // updates this badge if we refetch -- rerun on every route change (not
+  // just on mount) so leaving a thread reflects the drop immediately.
+  useEffect(() => {
     fetch("/api/messages")
       .then((r) => r.json())
       .then((d) => {
@@ -190,7 +195,7 @@ export default function ProfileSidebar() {
         }
       })
       .catch(() => {});
-  }, []);
+  }, [pathname]);
 
   const role = getRole(roleKey);
 

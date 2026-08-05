@@ -71,6 +71,21 @@ export default function MobileTabBar() {
       .catch(() => {});
   }, []);
 
+  // Opening a thread marks its messages read server-side -- refetch on every
+  // route change (not just mount) so leaving a thread reflects the drop
+  // immediately instead of waiting for a full reload.
+  useEffect(() => {
+    fetch("/api/messages")
+      .then((r) => r.json())
+      .then((d) => {
+        if (d.success) {
+          const total = d.conversations.reduce((sum: number, c: { unreadCount: number }) => sum + c.unreadCount, 0);
+          setUnreadCount(total);
+        }
+      })
+      .catch(() => {});
+  }, [pathname]);
+
   const role = getRole(roleKey);
 
   function isActive(href: string) {

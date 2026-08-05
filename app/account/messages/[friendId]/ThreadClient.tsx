@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import type { RealtimeChannel } from "@supabase/supabase-js";
 import { supabaseBrowser } from "@/lib/supabase/browser";
 import type { DirectMessage } from "@/lib/types";
 import Avatar from "../../../components/Avatar";
@@ -35,7 +36,11 @@ export default function ThreadClient({
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [friendTyping, setFriendTyping] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
+  const typingChannelRef = useRef<RealtimeChannel | null>(null);
+  const lastTypingSentAtRef = useRef(0);
+  const friendTypingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     fetch(`/api/messages/${friendId}`)
@@ -76,12 +81,57 @@ export default function ThreadClient({
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages.length]);
+  }, [messages.length, friendTyping]);
+
+  // Ephemeral broadcast channel (no DB table -- same pattern as the
+  // Presence-based visitor/viewer counts) shared by both participants via a
+  // deterministic, sorted channel name so each side's client joins the same
+  // channel regardless of who opened the thread first.
+  useEffect(() => {
+    const channelName = `dm-typing-${[currentUserId, friendId].sort().join("-")}`;
+    const channel = supabaseBrowser()
+      .channel(channelName)
+      .on("broadcast", { event: "typing" }, ({ payload }) => {
+        if (payload?.userId !== friendId) return;
+        setFriendTyping(true);
+        if (friendTypingTimeoutRef.current) clearTimeout(friendTypingTimeoutRef.current);
+        friendTypingTimeoutRef.current = setTimeout(() => setFriendTyping(false), 3000);
+      })
+      .on("broadcast", { event: "stop-typing" }, ({ payload }) => {
+        if (payload?.userId !== friendId) return;
+        if (friendTypingTimeoutRef.current) clearTimeout(friendTypingTimeoutRef.current);
+        setFriendTyping(false);
+      })
+      .subscribe();
+
+    typingChannelRef.current = channel;
+
+    return () => {
+      if (friendTypingTimeoutRef.current) clearTimeout(friendTypingTimeoutRef.current);
+      supabaseBrowser().removeChannel(channel);
+      typingChannelRef.current = null;
+    };
+  }, [currentUserId, friendId]);
+
+  function handleDraftChange(value: string) {
+    setDraft(value);
+    const now = Date.now();
+    // Throttle to at most one "typing" broadcast every 2s so keystrokes
+    // don't flood the channel.
+    if (value.trim() && now - lastTypingSentAtRef.current > 2000) {
+      lastTypingSentAtRef.current = now;
+      typingChannelRef.current?.send({ type: "broadcast", event: "typing", payload: { userId: currentUserId } });
+    }
+    if (!value.trim()) {
+      typingChannelRef.current?.send({ type: "broadcast", event: "stop-typing", payload: { userId: currentUserId } });
+    }
+  }
 
   async function submit() {
     if (!draft.trim() || submitting) return;
     setSubmitting(true);
     setError(null);
+    typingChannelRef.current?.send({ type: "broadcast", event: "stop-typing", payload: { userId: currentUserId } });
     try {
       const res = await fetch(`/api/messages/${friendId}`, {
         method: "POST",
@@ -188,6 +238,15 @@ export default function ThreadClient({
             })}
           </div>
         )}
+        {friendTyping && (
+          <div className="mt-2 flex justify-start">
+            <div className="flex items-center gap-1 rounded-2xl bg-white/10 px-4 py-3">
+              <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-slate-300 [animation-delay:-0.3s]" />
+              <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-slate-300 [animation-delay:-0.15s]" />
+              <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-slate-300" />
+            </div>
+          </div>
+        )}
         <div ref={bottomRef} />
       </div>
 
@@ -196,7 +255,7 @@ export default function ThreadClient({
         <div className="flex items-center gap-1 rounded-full bg-white/10 py-1 pl-4 pr-1">
           <input
             value={draft}
-            onChange={(e) => setDraft(e.target.value)}
+            onChange={(e) => handleDraftChange(e.target.value)}
             onKeyDown={(e) => {
               if (e.key === "Enter") submit();
             }}

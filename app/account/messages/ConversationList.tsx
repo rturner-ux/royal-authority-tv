@@ -32,6 +32,9 @@ export default function ConversationList() {
   const [loading, setLoading] = useState(true);
   const [unreadOnly, setUnreadOnly] = useState(false);
 
+  // Opening a thread marks its messages read server-side -- refetch on every
+  // route change (not just mount) so its row's unread badge clears as soon
+  // as you leave the thread, instead of waiting for a full reload.
   useEffect(() => {
     fetch("/api/messages")
       .then((r) => r.json())
@@ -39,7 +42,7 @@ export default function ConversationList() {
         if (d.success) setConversations(d.conversations);
         setLoading(false);
       });
-  }, []);
+  }, [pathname]);
 
   const activeFriendId = pathname.startsWith("/account/messages/") ? pathname.split("/").pop() : null;
   const shown = unreadOnly ? conversations.filter((c) => c.unreadCount > 0) : conversations;
