@@ -341,13 +341,13 @@ export default async function CaseFileSlugPage({
                   />
                 </div>
               ) : (
-                <div className="relative mt-4 aspect-video w-full">
+                <div className="relative mx-auto mt-4 aspect-video w-full max-w-3xl px-6 pb-6">
                   <iframe
                     src={incident.video_embed_url}
                     title={`${incident.title} video`}
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                     allowFullScreen
-                    className="absolute inset-0 h-full w-full"
+                    className="absolute inset-0 h-[calc(100%-1.5rem)] w-[calc(100%-3rem)]"
                   />
                 </div>
               )}
