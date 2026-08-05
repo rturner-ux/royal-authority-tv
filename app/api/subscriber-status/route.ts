@@ -13,19 +13,21 @@ export async function GET() {
   let callsign: string | null = null
   let avatarUrl: string | null = null
   let isVerified = false
+  let interests: string[] = []
 
   if (user && isActive) {
     const db = await supabaseServerAuth()
     const { data } = await db
       .from('subscriber_profiles')
-      .select('role, callsign, avatar_url, is_verified')
+      .select('role, callsign, avatar_url, is_verified, interests')
       .eq('user_id', user.id)
       .maybeSingle()
     role = data?.role ?? null
     callsign = data?.callsign ?? null
     avatarUrl = data?.avatar_url ?? null
     isVerified = data?.is_verified ?? false
+    interests = data?.interests ?? []
   }
 
-  return NextResponse.json({ isActive, role, callsign, avatarUrl, isVerified })
+  return NextResponse.json({ isActive, role, callsign, avatarUrl, isVerified, interests })
 }

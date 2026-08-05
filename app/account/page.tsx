@@ -5,6 +5,7 @@ import AccountActions from "./AccountActions";
 import InvestigatorProfile from "./InvestigatorProfile";
 import EmailAlertsToggle from "./EmailAlertsToggle";
 import DirectoryVisibleToggle from "./DirectoryVisibleToggle";
+import InterestsPicker from "./InterestsPicker";
 import AvatarUpload from "./AvatarUpload";
 import VerifiedBadge from "../components/VerifiedBadge";
 import AccountTabs from "./AccountTabs";
@@ -27,7 +28,7 @@ export default async function AccountPage() {
     db.from("subscribers").select("status, current_period_end").eq("user_id", user.id).maybeSingle(),
     db
       .from("subscriber_profiles")
-      .select("role, callsign, email_alerts_enabled, directory_visible, avatar_url, is_verified")
+      .select("role, callsign, email_alerts_enabled, directory_visible, avatar_url, is_verified, interests")
       .eq("user_id", user.id)
       .maybeSingle(),
   ]);
@@ -170,6 +171,10 @@ export default async function AccountPage() {
                   userId={user.id}
                   initialVisible={profile?.directory_visible ?? false}
                 />
+              )}
+
+              {isActive && (
+                <InterestsPicker userId={user.id} initialInterests={profile?.interests ?? []} />
               )}
 
               <AccountActions isActive={isActive} />

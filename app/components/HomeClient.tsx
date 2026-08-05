@@ -306,10 +306,22 @@ export default function HomeClient({
     { value: stats.featuredCases, label: "Featured Investigations" },
   ];
 
-  const genreRows = Array.from(new Set(featuredCases.map((c) => c.category))).map((category) => ({
-    category,
-    cases: featuredCases.filter((c) => c.category === category),
-  }));
+  const [interests, setInterests] = useState<string[]>([]);
+
+  // Rows matching a subscriber's stated case-type interests lead, everything
+  // else follows in its normal order -- a lean, not a filter, so nothing
+  // disappears just because it wasn't picked.
+  const genreRows = Array.from(new Set(featuredCases.map((c) => c.category)))
+    .map((category) => ({
+      category,
+      cases: featuredCases.filter((c) => c.category === category),
+    }))
+    .sort((a, b) => {
+      if (interests.length === 0) return 0;
+      const aMatch = interests.includes(a.category) ? 0 : 1;
+      const bMatch = interests.includes(b.category) ? 0 : 1;
+      return aMatch - bMatch;
+    });
 
   const slides = spotlightCases && spotlightCases.length > 0 ? spotlightCases : cases[0] ? [cases[0]] : featuredCases[0] ? [featuredCases[0]] : [];
 
@@ -337,6 +349,7 @@ export default function HomeClient({
       .then((d) => {
         const role = getRole(d.role);
         if (role) setWelcome({ role: role.title, callsign: d.callsign ?? null });
+        setInterests(d.interests ?? []);
       })
       .catch(() => {});
 

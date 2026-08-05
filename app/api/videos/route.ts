@@ -16,15 +16,20 @@ export async function GET() {
 
   const { data: videos, error } = await db
     .from('incident_videos')
-    .select('*, incidents(title, slug)')
+    .select('*, incidents(title, slug, category)')
     .order('created_at', { ascending: false })
 
   if (error) return NextResponse.json({ error: 'Could not load videos' }, { status: 500 })
 
   let likedIds = new Set<string>()
+  let interests: string[] = []
   if (user) {
-    const { data: likes } = await db.from('video_likes').select('video_id').eq('user_id', user.id)
+    const [{ data: likes }, { data: profile }] = await Promise.all([
+      db.from('video_likes').select('video_id').eq('user_id', user.id),
+      db.from('subscriber_profiles').select('interests').eq('user_id', user.id).maybeSingle(),
+    ])
     likedIds = new Set((likes ?? []).map((l) => l.video_id))
+    interests = profile?.interests ?? []
   }
 
   const enriched = (videos ?? []).map((v) => {
@@ -33,5 +38,16 @@ export async function GET() {
     return { ...rest, incident, likedByMe: likedIds.has(v.id) }
   })
 
-  return NextResponse.json({ success: true, videos: enriched })
+  // Rank interested-category videos first, but never hide anything -- this
+  // is a lean toward stated interests, not a filter. created_at order
+  // (already applied above) is preserved within each group.
+  const ranked = interests.length
+    ? [...enriched].sort((a, b) => {
+        const aMatch = a.incident && interests.includes(a.incident.category) ? 0 : 1
+        const bMatch = b.incident && interests.includes(b.incident.category) ? 0 : 1
+        return aMatch - bMatch
+      })
+    : enriched
+
+  return NextResponse.json({ success: true, videos: ranked })
 }
