@@ -14,6 +14,7 @@ import CaseFactChecker from "../../components/CaseFactChecker";
 import CaseVideoLibrary from "../../components/CaseVideoLibrary";
 import CasePictureScan from "../../components/CasePictureScan";
 import CaseIntroVideo from "../../components/CaseIntroVideo";
+import CaseWatchVideo from "../../components/CaseWatchVideo";
 import RecordLastCase from "../../components/RecordLastCase";
 import InvestigatorToolkit from "../../components/InvestigatorToolkit";
 import { getCaseBySlug, getCaseTrackingCount, getCaseConnections } from "@/lib/cases";
@@ -341,13 +342,11 @@ export default async function CaseFileSlugPage({
                   />
                 </div>
               ) : (
-                <div className="relative mx-auto mt-4 aspect-video w-full max-w-3xl px-6 pb-6">
-                  <iframe
-                    src={incident.video_embed_url}
+                <div className="px-6">
+                  <CaseWatchVideo
+                    embedUrl={incident.video_embed_url}
                     title={`${incident.title} video`}
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                    allowFullScreen
-                    className="absolute inset-0 h-[calc(100%-1.5rem)] w-[calc(100%-3rem)]"
+                    thumbnailUrl={incident.poster_url || incident.image_url}
                   />
                 </div>
               )}
