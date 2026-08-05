@@ -96,16 +96,65 @@ function ExitIcon() {
     </svg>
   );
 }
+function MapIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="h-5 w-5 flex-shrink-0">
+      <path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2-6-2Z" strokeLinejoin="round" />
+      <path d="M9 4v14M15 6v14" />
+    </svg>
+  );
+}
+function TranscriptIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="h-5 w-5 flex-shrink-0">
+      <path d="M6 3h9l5 5v13a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Z" strokeLinejoin="round" />
+      <path d="M8 12h8M8 16h5" strokeLinecap="round" />
+    </svg>
+  );
+}
+function BoardIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="h-5 w-5 flex-shrink-0">
+      <rect x="3" y="4" width="18" height="16" rx="2" />
+      <circle cx="8" cy="9" r="1.2" fill="currentColor" stroke="none" />
+      <circle cx="16" cy="14" r="1.2" fill="currentColor" stroke="none" />
+      <path d="M8 9l8 5" />
+    </svg>
+  );
+}
+function PatternIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="h-5 w-5 flex-shrink-0">
+      <circle cx="6" cy="7" r="2.2" />
+      <circle cx="18" cy="7" r="2.2" />
+      <circle cx="12" cy="18" r="2.2" />
+      <path d="M7.8 8.5L10.5 16M16.2 8.5L13.5 16M8.2 7h7.6" />
+    </svg>
+  );
+}
+function ScanIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="h-5 w-5 flex-shrink-0">
+      <path d="M4 8V5a1 1 0 0 1 1-1h3M20 8V5a1 1 0 0 1-1-1h-3M4 16v3a1 1 0 0 0 1 1h3M20 16v3a1 1 0 0 1-1 1h-3" strokeLinecap="round" />
+      <circle cx="12" cy="12" r="3" />
+    </svg>
+  );
+}
 
 const NAV_ITEMS = [
   { label: "Home", href: "/account/home", icon: HomeIcon },
   { label: "Case Files", href: "/account/case-file", icon: FilesIcon },
-  { label: "Live", href: "/live", icon: LiveIcon },
+  { label: "Live", href: "/account/live", icon: LiveIcon },
+  { label: "Investigation Map", href: "/account/map", icon: MapIcon },
   { label: "Friends", href: "/account/friends", icon: FriendsIcon },
   { label: "Messages", href: "/account/messages", icon: MessagesIcon },
   { label: "Directory", href: "/account/directory", icon: DirectoryIcon },
   { label: "My Playlists", href: "/account/playlists", icon: PlaylistIcon },
   { label: "My Video Profile", href: "/account/videos", icon: VideoIcon },
+  { label: "Transcript Archive", href: "/account/transcript", icon: TranscriptIcon },
+  { label: "Investigation Board", href: "/account/investigation-board", icon: BoardIcon },
+  { label: "Pattern Intelligence", href: "/account/pattern-intelligence", icon: PatternIcon },
+  { label: "AI Picture Scan", href: "/account/picture-scan", icon: ScanIcon },
 ];
 
 // Persistent left nav for the account/subscriber section only -- public
@@ -158,7 +207,7 @@ export default function ProfileSidebar() {
       </Link>
 
       <Link
-        href="/search"
+        href="/account/search"
         className="mt-6 flex items-center gap-3 rounded-full bg-white/5 px-4 py-2.5 text-sm text-slate-400 transition hover:bg-white/10"
       >
         <SearchIcon />

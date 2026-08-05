@@ -6,10 +6,16 @@ import type { Incident } from "@/lib/types";
 import { CATEGORY_LABELS } from "@/lib/labels";
 import { playSfx } from "@/lib/sfx";
 
-export default function CaseCard({ incident }: { incident: Incident }) {
+export default function CaseCard({
+  incident,
+  basePath = "/case-file",
+}: {
+  incident: Incident;
+  basePath?: string;
+}) {
   return (
     <Link
-      href={`/case-file/${incident.slug}`}
+      href={`${basePath}/${incident.slug}`}
       onClick={() => playSfx("shutter")}
       className="group overflow-hidden rounded-2xl border border-white/10 bg-zinc-900/80 transition hover:scale-[1.02] hover:border-[#C9A24A]/30"
     >

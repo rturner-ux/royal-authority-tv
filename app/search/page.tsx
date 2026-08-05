@@ -8,8 +8,10 @@ import type { Incident } from "@/lib/types";
 
 export default async function SearchPage({
   searchParams,
+  embedded,
 }: {
   searchParams: Promise<{ q?: string }>;
+  embedded?: boolean;
 }) {
   const { q } = await searchParams;
   const query = (q || "").trim();
@@ -17,6 +19,7 @@ export default async function SearchPage({
   const accountProps = user
     ? { accountLabel: "My Profile", accountHref: "/account" }
     : { accountLabel: "Sign In", accountHref: "/login" };
+  const basePath = embedded ? "/account/case-file" : "/case-file";
 
   let results: Incident[] = [];
 
@@ -42,6 +45,7 @@ export default async function SearchPage({
       <div className="relative z-10 mx-auto max-w-7xl px-6 py-6 lg:px-10">
         <Navbar
           breadcrumbs={[{ label: "Home", href: "/" }, { label: "Search" }]}
+          embedded={embedded}
           {...accountProps}
         />
 
@@ -65,7 +69,7 @@ export default async function SearchPage({
           {results.map((incident) => (
             <Link
               key={incident.id}
-              href={`/case-file/${incident.slug}`}
+              href={`${basePath}/${incident.slug}`}
               className="group overflow-hidden rounded-[24px] border border-white/10 bg-black/30 transition hover:border-[#C9A24A]/40"
             >
               <div className="relative h-40 w-full bg-white/[0.02]">

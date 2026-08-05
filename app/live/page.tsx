@@ -7,7 +7,7 @@ import { getSubscriberStatus } from "@/lib/subscription";
 
 export const dynamic = "force-dynamic";
 
-export default async function LivePage() {
+export default async function LivePage({ embedded }: { embedded?: boolean } = {}) {
   const [liveStream, { user }] = await Promise.all([getCurrentLiveStream(), getSubscriberStatus()]);
 
   return (
@@ -17,7 +17,7 @@ export default async function LivePage() {
       <div className="absolute right-0 top-40 h-[450px] w-[450px] rounded-full bg-[#C9A24A]/10 blur-[140px]" />
 
       <div className="relative z-10 mx-auto max-w-7xl px-6 pb-20 pt-6 lg:px-10">
-        <Navbar breadcrumbs={[{ label: "Home", href: "/" }, { label: "Live" }]} />
+        <Navbar breadcrumbs={[{ label: "Home", href: "/" }, { label: "Live" }]} embedded={embedded} />
 
         <div className="mb-8 flex items-center gap-4">
           {liveStream && (

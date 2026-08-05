@@ -21,15 +21,17 @@ export default function CaseHoverCard({
   incident,
   width = COLLAPSED_WIDTH,
   height = COLLAPSED_HEIGHT,
+  basePath = "/case-file",
 }: {
   incident: Incident;
   width?: number;
   height?: number;
+  basePath?: string;
 }) {
   const [expanded, setExpanded] = useState(false);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const href = `/case-file/${incident.slug}`;
+  const href = `${basePath}/${incident.slug}`;
   const alert = isActiveAlert(incident);
   const badge = statusBadgeLabel(incident);
   const isRecent = Date.now() - new Date(incident.published_at).getTime() < RECENT_WINDOW_MS;

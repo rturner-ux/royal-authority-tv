@@ -49,7 +49,7 @@ export default async function CaseFilePage({
           {Object.values(COLLECTIONS).map((collection) => (
             <Link
               key={collection.slug}
-              href={`/collections/${collection.slug}`}
+              href={`${embedded ? "/account/collections" : "/collections"}/${collection.slug}`}
               className="group flex items-center justify-between gap-4 rounded-2xl border border-[#C9A24A]/20 bg-gradient-to-r from-[#C9A24A]/[0.06] to-transparent p-6 transition hover:border-[#C9A24A]/40"
             >
               <div>

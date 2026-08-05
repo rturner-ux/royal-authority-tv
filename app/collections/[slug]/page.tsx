@@ -27,12 +27,15 @@ export async function generateMetadata({
 
 export default async function CollectionPage({
   params,
+  embedded,
 }: {
   params: Promise<{ slug: string }>;
+  embedded?: boolean;
 }) {
   const { slug } = await params;
   const collection = getCollection(slug);
   if (!collection) notFound();
+  const caseBasePath = embedded ? "/account/case-file" : "/case-file";
 
   const cases = await getCasesByCollection(slug);
 
@@ -62,9 +65,10 @@ export default async function CollectionPage({
         <Navbar
           breadcrumbs={[
             { label: "Home", href: "/" },
-            { label: "Case Files", href: "/case-file" },
+            { label: "Case Files", href: caseBasePath },
             { label: collection.name },
           ]}
+          embedded={embedded}
         />
 
         <div className="mb-12">
@@ -85,7 +89,7 @@ export default async function CollectionPage({
               {genres.map(([key, group]) => (
                 <Link
                   key={key}
-                  href={`/collections/${slug}/${key}`}
+                  href={`${embedded ? "/account/collections" : "/collections"}/${slug}/${key}`}
                   className="group flex items-center justify-between gap-4 overflow-hidden rounded-2xl border border-white/10 bg-zinc-900/80 p-6 transition hover:scale-[1.02] hover:border-[#C9A24A]/30"
                 >
                   <div>
@@ -110,7 +114,7 @@ export default async function CollectionPage({
         ) : cases.length > 0 ? (
           <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
             {cases.map((c) => (
-              <CaseCard key={c.id} incident={c} />
+              <CaseCard key={c.id} incident={c} basePath={caseBasePath} />
             ))}
           </div>
         ) : (

@@ -32,8 +32,10 @@ export async function generateMetadata({
 
 export default async function CollectionGenrePage({
   params,
+  embedded,
 }: {
   params: Promise<{ slug: string; genreSlug: string }>;
+  embedded?: boolean;
 }) {
   const { slug, genreSlug: targetGenreSlug } = await params;
   const collection = getCollection(slug);
@@ -44,6 +46,7 @@ export default async function CollectionGenrePage({
   if (cases.length === 0) notFound();
 
   const genreName = cases[0].genre;
+  const prefix = embedded ? "/account" : "";
 
   return (
     <main className="relative min-h-screen bg-[#05070b] text-white overflow-hidden">
@@ -55,10 +58,11 @@ export default async function CollectionGenrePage({
         <Navbar
           breadcrumbs={[
             { label: "Home", href: "/" },
-            { label: "Case Files", href: "/case-file" },
-            { label: collection.name, href: `/collections/${slug}` },
+            { label: "Case Files", href: `${prefix}/case-file` },
+            { label: collection.name, href: `${prefix}/collections/${slug}` },
             { label: genreName! },
           ]}
+          embedded={embedded}
         />
 
         <div className="mb-12">
@@ -73,7 +77,7 @@ export default async function CollectionGenrePage({
 
         <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
           {cases.map((c) => (
-            <CaseCard key={c.id} incident={c} />
+            <CaseCard key={c.id} incident={c} basePath={`${prefix}/case-file`} />
           ))}
         </div>
       </div>

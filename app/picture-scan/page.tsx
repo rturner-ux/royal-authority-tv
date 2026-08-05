@@ -6,7 +6,7 @@ export const metadata = {
   description: "Upload a photo you saw circulating online to identify which case or person on Royal Authority TV it relates to.",
 };
 
-export default function PictureScanPage() {
+export default function PictureScanPage({ embedded }: { embedded?: boolean } = {}) {
   return (
     <main className="relative min-h-screen bg-[#05070b] text-white overflow-hidden">
       <div className="absolute inset-0 bg-gradient-to-br from-[#05070b] via-[#08111d] to-black" />
@@ -14,7 +14,7 @@ export default function PictureScanPage() {
       <div className="absolute right-0 top-40 h-[450px] w-[450px] rounded-full bg-[#C9A24A]/10 blur-[140px]" />
 
       <div className="relative z-10 mx-auto max-w-3xl px-6 py-6 lg:px-10">
-        <Navbar breadcrumbs={[{ label: "Home", href: "/" }, { label: "AI Picture Scan" }]} />
+        <Navbar breadcrumbs={[{ label: "Home", href: "/" }, { label: "AI Picture Scan" }]} embedded={embedded} />
 
         <div className="mb-8 mt-4">
           <div className="text-xs uppercase tracking-[0.34em] text-[#E8D19A]">Royal Authority TV</div>

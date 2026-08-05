@@ -199,7 +199,7 @@ function FaqItem({ q, a, index }: { q: string; a: string; index: number }) {
 const TOP_TEN_WIDTH = 165;
 const TOP_TEN_HEIGHT = 235;
 
-function TrendingCarousel({ cases }: { cases: Incident[] }) {
+function TrendingCarousel({ cases, basePath = "/case-file" }: { cases: Incident[]; basePath?: string }) {
   const scrollerRef = useRef<HTMLDivElement>(null);
   const [activeCategory, setActiveCategory] = useState<Incident["category"] | "all">("all");
 
@@ -256,7 +256,7 @@ function TrendingCarousel({ cases }: { cases: Incident[] }) {
               {i + 1}
             </div>
             <div className="relative z-[2]" style={{ marginLeft: 110, width: TOP_TEN_WIDTH }}>
-              <CaseHoverCard incident={c} width={TOP_TEN_WIDTH} height={TOP_TEN_HEIGHT} />
+              <CaseHoverCard incident={c} width={TOP_TEN_WIDTH} height={TOP_TEN_HEIGHT} basePath={basePath} />
             </div>
           </div>
         ))}
@@ -299,6 +299,7 @@ export default function HomeClient({
   totalClicks?: number;
   embedded?: boolean;
 } & AccountProps) {
+  const caseBasePath = embedded ? "/account/case-file" : "/case-file";
   const statRow = [
     { value: stats.totalCases, label: "Cases Tracked" },
     { value: stats.transcriptRows, label: "Verified Transcript Entries" },
@@ -427,7 +428,7 @@ export default function HomeClient({
             </div>
             {lastCase && (
               <Link
-                href={`/case-file/${lastCase.slug}`}
+                href={`${caseBasePath}/${lastCase.slug}`}
                 className="mt-3 inline-flex items-center gap-2 text-sm font-semibold text-white/80 transition hover:text-white"
               >
                 Continue where you left off: <span className="text-[#E8D19A]">{lastCase.title}</span> →
@@ -488,7 +489,7 @@ export default function HomeClient({
             >
               <motion.div variants={staggerItem}>
                 <Link
-                  href={`/case-file/${spotlight.slug}`}
+                  href={`${caseBasePath}/${spotlight.slug}`}
                   className="inline-flex items-center gap-2 rounded-md bg-white px-8 py-4 text-base font-bold text-black shadow-lg transition hover:bg-white/85"
                 >
                   <span>▶</span> Open Case File
@@ -496,7 +497,7 @@ export default function HomeClient({
               </motion.div>
               <motion.div variants={staggerItem}>
                 <Link
-                  href={`/case-file/${spotlight.slug}`}
+                  href={`${caseBasePath}/${spotlight.slug}`}
                   className="inline-flex items-center gap-2 rounded-md border border-white/25 bg-white/10 px-8 py-4 text-base font-bold text-white backdrop-blur-sm transition hover:bg-white/20"
                 >
                   More Info
@@ -601,7 +602,7 @@ export default function HomeClient({
               <div className="text-sm text-white/50">Category filters, real-time pins, zero cost to browse.</div>
             </div>
           </div>
-          <Link href="/map" className="flex-shrink-0 rounded-md border border-white/20 bg-white/10 px-5 py-2.5 text-sm font-bold text-white transition hover:bg-white/20">
+          <Link href={embedded ? "/account/map" : "/map"} className="flex-shrink-0 rounded-md border border-white/20 bg-white/10 px-5 py-2.5 text-sm font-bold text-white transition hover:bg-white/20">
             View Map
           </Link>
         </Reveal>
@@ -613,7 +614,7 @@ export default function HomeClient({
           <Reveal>
             <h2 className="text-2xl font-black md:text-3xl">Top 10 Trending Cases</h2>
           </Reveal>
-          <TrendingCarousel cases={cases} />
+          <TrendingCarousel cases={cases} basePath={caseBasePath} />
         </div>
       </section>
 
@@ -622,7 +623,7 @@ export default function HomeClient({
         <section key={category} className="px-6 py-8 lg:px-16">
           <div className="mx-auto max-w-6xl">
             <Reveal>
-              <CaseRow title={CATEGORY_LABELS[category]} cases={rowCases} />
+              <CaseRow title={CATEGORY_LABELS[category]} cases={rowCases} basePath={caseBasePath} />
             </Reveal>
           </div>
         </section>
@@ -741,7 +742,7 @@ export default function HomeClient({
           </h2>
           <div className="flex flex-wrap items-center justify-center gap-4">
             <Link
-              href="/case-file"
+              href={caseBasePath}
               className="inline-flex items-center gap-2 rounded-md bg-red-600 px-8 py-4 text-base font-bold text-white shadow-lg shadow-red-600/30 transition hover:bg-red-700"
             >
               Browse Case Files <span>→</span>
@@ -756,9 +757,9 @@ export default function HomeClient({
           <div>
             <div className="mb-3 text-xs font-black uppercase tracking-[0.2em] text-white/30">Coverage</div>
             <div className="space-y-2">
-              <Link href="/case-file" className="block transition hover:text-white">Case Files</Link>
-              <Link href="/transcript" className="block transition hover:text-white">Transcripts</Link>
-              <Link href="/map" className="block transition hover:text-white">Live Map</Link>
+              <Link href={caseBasePath} className="block transition hover:text-white">Case Files</Link>
+              <Link href={embedded ? "/account/transcript" : "/transcript"} className="block transition hover:text-white">Transcripts</Link>
+              <Link href={embedded ? "/account/map" : "/map"} className="block transition hover:text-white">Live Map</Link>
             </div>
           </div>
           <div>

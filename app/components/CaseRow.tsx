@@ -7,7 +7,15 @@ import CaseHoverCard from "./CaseHoverCard";
 // A fixed genre-style row (no filter pills), mirroring Netflix's per-category
 // rows like "Documentaries" -- unlike TrendingCarousel, this always shows the
 // same set of cases for its category rather than letting the viewer filter.
-export default function CaseRow({ title, cases }: { title: string; cases: Incident[] }) {
+export default function CaseRow({
+  title,
+  cases,
+  basePath = "/case-file",
+}: {
+  title: string;
+  cases: Incident[];
+  basePath?: string;
+}) {
   const scrollerRef = useRef<HTMLDivElement>(null);
   const capped = cases.slice(0, 10);
 
@@ -23,7 +31,7 @@ export default function CaseRow({ title, cases }: { title: string; cases: Incide
           className="flex gap-2 overflow-x-auto overflow-y-hidden pb-20 pl-1 pt-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
         >
           {capped.map((c) => (
-            <CaseHoverCard key={c.id} incident={c} />
+            <CaseHoverCard key={c.id} incident={c} basePath={basePath} />
           ))}
         </div>
         <button
