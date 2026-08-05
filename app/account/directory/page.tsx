@@ -23,7 +23,9 @@ export default async function DirectoryPage() {
       <div className="absolute right-0 top-40 h-[450px] w-[450px] rounded-full bg-[#C9A24A]/10 blur-[140px]" />
 
       <div className="relative z-10 mx-auto max-w-4xl px-6 pb-20 pt-6">
-        <Navbar breadcrumbs={[{ label: "Home", href: "/" }, { label: "Profile", href: "/account" }, { label: "Directory" }]} />
+        <div className="lg:hidden">
+          <Navbar breadcrumbs={[{ label: "Home", href: "/" }, { label: "Profile", href: "/account" }, { label: "Directory" }]} />
+        </div>
 
         <h1 className="font-serif text-3xl font-bold text-white">Subscriber Directory</h1>
         <p className="mt-2 text-sm leading-6 text-slate-400">
