@@ -44,7 +44,15 @@ function ShareIcon() {
   );
 }
 
-export default function VideoGrid({ isSignedIn, filter = "all" }: { isSignedIn: boolean; filter?: "all" | "liked" }) {
+export default function VideoGrid({
+  isSignedIn,
+  filter = "all",
+  sort = "latest",
+}: {
+  isSignedIn: boolean;
+  filter?: "all" | "liked";
+  sort?: "latest" | "popular" | "oldest";
+}) {
   const [videos, setVideos] = useState<FeedVideo[]>([]);
   const [loading, setLoading] = useState(true);
   const [openVideo, setOpenVideo] = useState<FeedVideo | null>(null);
@@ -111,7 +119,16 @@ export default function VideoGrid({ isSignedIn, filter = "all" }: { isSignedIn: 
     });
   }
 
-  const shown = filter === "liked" ? videos.filter((v) => v.likedByMe) : videos;
+  const filtered = filter === "liked" ? videos.filter((v) => v.likedByMe) : videos;
+  // The API already returns newest-first, so "latest" is a no-op; "oldest"
+  // just reverses that, and "popular" ranks by view_count. All client-side
+  // since the full list is already in memory.
+  const shown =
+    sort === "popular"
+      ? [...filtered].sort((a, b) => b.view_count - a.view_count)
+      : sort === "oldest"
+        ? [...filtered].reverse()
+        : filtered;
 
   if (loading) return <p className="text-sm text-slate-400">Loading videos...</p>;
 
@@ -125,7 +142,7 @@ export default function VideoGrid({ isSignedIn, filter = "all" }: { isSignedIn: 
 
   return (
     <div>
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+      <div className="grid grid-cols-3 gap-1.5 sm:grid-cols-4 lg:grid-cols-6">
         {shown.map((video) => {
           const videoId = extractYouTubeId(video.youtube_url);
           const thumbnail = videoId ? `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg` : null;
@@ -138,45 +155,42 @@ export default function VideoGrid({ isSignedIn, filter = "all" }: { isSignedIn: 
                 playSfx("zoom");
                 setOpenVideo(video);
               }}
-              className="group flex flex-col overflow-hidden rounded-xl border border-white/10 bg-white/[0.03] text-left transition hover:border-[#C9A24A]/40"
+              title={video.title}
+              className="group relative flex flex-col overflow-hidden rounded-lg border border-white/10 bg-white/[0.03] text-left transition hover:border-[#C9A24A]/40"
             >
-              <div className="relative aspect-[9/12] w-full overflow-hidden bg-black/40">
+              <div className="relative aspect-[9/16] w-full overflow-hidden bg-black/40">
                 {thumbnail && (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img src={thumbnail} alt={video.title} className="h-full w-full object-cover transition group-hover:scale-105" />
                 )}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/10 to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 transition group-hover:opacity-100" />
 
-                <div className="absolute bottom-2 left-2 right-2">
-                  <p className="line-clamp-2 text-xs font-semibold leading-4 text-white">{video.title}</p>
-                  <div className="mt-1.5 flex items-center justify-between text-white">
-                    <span className="flex items-center gap-1 text-[11px] font-semibold">
-                      <svg viewBox="0 0 24 24" fill="currentColor" className="h-3 w-3">
-                        <path d="M8 5v14l11-7z" />
-                      </svg>
-                      {formatCount(video.view_count)}
-                    </span>
-                    <div className="flex items-center gap-2">
-                      <span
-                        role="button"
-                        onClick={(e) => toggleLike(video, e)}
-                        className={`flex items-center gap-1 text-[11px] font-semibold transition ${
-                          video.likedByMe ? "text-red-500" : "text-white hover:text-red-400"
-                        }`}
-                      >
-                        <HeartIcon filled={video.likedByMe} />
-                        {formatCount(video.like_count)}
-                      </span>
-                      <span
-                        role="button"
-                        onClick={(e) => share(video, e)}
-                        className="flex items-center gap-1 text-[11px] font-semibold text-white hover:text-[#E8D19A]"
-                      >
-                        <ShareIcon />
-                        {formatCount(video.share_count)}
-                      </span>
-                    </div>
-                  </div>
+                <span className="absolute bottom-1.5 left-1.5 flex items-center gap-1 rounded-md bg-black/60 px-1.5 py-0.5 text-[10px] font-semibold text-white backdrop-blur-sm">
+                  <svg viewBox="0 0 24 24" fill="currentColor" className="h-2.5 w-2.5">
+                    <path d="M8 5v14l11-7z" />
+                  </svg>
+                  {formatCount(video.view_count)}
+                </span>
+
+                <div className="absolute right-1.5 top-1.5 flex flex-col items-end gap-1 opacity-0 transition group-hover:opacity-100">
+                  <span
+                    role="button"
+                    onClick={(e) => toggleLike(video, e)}
+                    className={`flex items-center gap-1 rounded-md bg-black/60 px-1.5 py-0.5 text-[10px] font-semibold backdrop-blur-sm transition ${
+                      video.likedByMe ? "text-red-500" : "text-white hover:text-red-400"
+                    }`}
+                  >
+                    <HeartIcon filled={video.likedByMe} />
+                    {formatCount(video.like_count)}
+                  </span>
+                  <span
+                    role="button"
+                    onClick={(e) => share(video, e)}
+                    className="flex items-center gap-1 rounded-md bg-black/60 px-1.5 py-0.5 text-[10px] font-semibold text-white backdrop-blur-sm hover:text-[#E8D19A]"
+                  >
+                    <ShareIcon />
+                    {formatCount(video.share_count)}
+                  </span>
                 </div>
               </div>
             </button>

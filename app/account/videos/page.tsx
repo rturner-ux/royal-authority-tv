@@ -34,11 +34,11 @@ export default async function VideoProfilePage() {
       <div className="absolute top-0 left-0 h-[500px] w-[500px] rounded-full bg-red-700/10 blur-[140px]" />
       <div className="absolute right-0 top-40 h-[450px] w-[450px] rounded-full bg-[#C9A24A]/10 blur-[140px]" />
 
-      <div className="relative z-10 mx-auto max-w-4xl px-6 pb-20 pt-6">
+      <div className="relative z-10 mx-auto max-w-5xl px-6 pb-20 pt-6">
         <Navbar breadcrumbs={[{ label: "Home", href: "/" }, { label: "Account", href: "/account" }, { label: "My Profile" }]} />
 
-        <div className="flex flex-col items-center text-center">
-          <div className="relative h-24 w-24 flex-shrink-0 rounded-full border-4 border-[#05070b] bg-[#0b0e14]">
+        <div className="flex flex-col gap-6 sm:flex-row sm:items-start">
+          <div className="relative h-24 w-24 flex-shrink-0 rounded-full border-4 border-[#05070b] bg-[#0b0e14] sm:h-28 sm:w-28">
             {role ? (
               <Image src={role.badge} alt="" fill unoptimized className="rounded-full object-contain p-3" />
             ) : (
@@ -48,29 +48,31 @@ export default async function VideoProfilePage() {
             )}
           </div>
 
-          <h1 className="mt-4 font-serif text-3xl font-bold text-white">{displayName}</h1>
-          <p className="text-sm text-slate-500">@{handle}</p>
+          <div className="min-w-0 flex-1">
+            <h1 className="font-serif text-2xl font-bold text-white sm:text-3xl">{displayName}</h1>
+            <p className="text-sm text-slate-500">@{handle}</p>
 
-          <div className="mt-6 flex gap-10">
-            <div>
-              <div className="text-lg font-bold text-white">{playlistPreviews.length}</div>
-              <div className="text-xs uppercase tracking-[0.15em] text-slate-500">Playlists</div>
+            <div className="mt-4 flex gap-8">
+              <div>
+                <span className="text-base font-bold text-white">{playlistPreviews.length}</span>{" "}
+                <span className="text-sm text-slate-500">Playlists</span>
+              </div>
+              <div>
+                <span className="text-base font-bold text-white">{savedIncidentIds.size}</span>{" "}
+                <span className="text-sm text-slate-500">Cases Saved</span>
+              </div>
             </div>
-            <div>
-              <div className="text-lg font-bold text-white">{savedIncidentIds.size}</div>
-              <div className="text-xs uppercase tracking-[0.15em] text-slate-500">Cases Saved</div>
+
+            {role && <p className="mt-4 max-w-md text-sm leading-6 text-slate-400">{role.tagline}</p>}
+
+            <div className="mt-4 flex gap-3">
+              <Link
+                href="/account"
+                className="rounded-full border border-white/15 px-5 py-2 text-sm font-semibold text-white transition hover:bg-white/5"
+              >
+                Edit Profile
+              </Link>
             </div>
-          </div>
-
-          {role && <p className="mt-4 max-w-md text-sm leading-6 text-slate-400">{role.tagline}</p>}
-
-          <div className="mt-6 flex gap-3">
-            <Link
-              href="/account"
-              className="rounded-full border border-white/15 px-5 py-2 text-sm font-semibold text-white transition hover:bg-white/5"
-            >
-              Edit Profile
-            </Link>
           </div>
         </div>
 
@@ -82,17 +84,17 @@ export default async function VideoProfilePage() {
                 <Link
                   key={p.id}
                   href="/account/playlists"
-                  className="flex w-48 flex-shrink-0 items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.03] p-3 transition hover:border-white/25"
+                  className="flex w-52 flex-shrink-0 flex-col overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] transition hover:border-white/25"
                 >
                   {p.thumbnails.length > 0 ? (
                     // eslint-disable-next-line @next/next/no-img-element
-                    <img src={p.thumbnails[0]} alt="" className="h-12 w-12 flex-shrink-0 rounded-lg object-cover" />
+                    <img src={p.thumbnails[0]} alt="" className="aspect-video w-full object-cover" />
                   ) : (
-                    <div className="h-12 w-12 flex-shrink-0 rounded-lg bg-[#181818]" />
+                    <div className="aspect-video w-full bg-[#181818]" />
                   )}
-                  <div className="min-w-0">
+                  <div className="min-w-0 p-3">
                     <div className="truncate text-sm font-semibold text-white">{p.name}</div>
-                    <div className="text-xs text-slate-500">{p.caseCount} cases</div>
+                    <div className="text-xs text-slate-500">{p.caseCount} posts</div>
                   </div>
                 </Link>
               ))}
