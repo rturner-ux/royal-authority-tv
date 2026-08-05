@@ -119,10 +119,13 @@ export default function ThreadClient({
   }
 
   return (
-    <div className="mt-6 flex h-[600px] flex-col overflow-hidden rounded-[32px] border border-white/10 bg-[#0f0f0f]">
+    <div className="flex h-full min-h-[500px] flex-col overflow-hidden bg-[#0f0f0f] lg:h-full">
       <div className="flex items-center justify-between border-b border-white/10 px-5 py-4">
         <span className="text-sm font-semibold text-white">{friendName}</span>
-        <div className="relative">
+        {/* Desktop gets a dedicated details panel (block/report live there);
+            this menu is the mobile-only equivalent since that panel is
+            hidden below lg. */}
+        <div className="relative lg:hidden">
           <button
             onClick={() => setMenuOpen((v) => !v)}
             aria-label="More options"
