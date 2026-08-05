@@ -15,7 +15,7 @@ export default async function SearchPage({
   const query = (q || "").trim();
   const { user } = await getSubscriberStatus();
   const accountProps = user
-    ? { accountLabel: "My Account", accountHref: "/account" }
+    ? { accountLabel: "My Profile", accountHref: "/account" }
     : { accountLabel: "Sign In", accountHref: "/login" };
 
   let results: Incident[] = [];

@@ -35,7 +35,7 @@ export default async function VideoProfilePage() {
       <div className="absolute right-0 top-40 h-[450px] w-[450px] rounded-full bg-[#C9A24A]/10 blur-[140px]" />
 
       <div className="relative z-10 mx-auto max-w-5xl px-6 pb-20 pt-6">
-        <Navbar breadcrumbs={[{ label: "Home", href: "/" }, { label: "Account", href: "/account" }, { label: "My Profile" }]} />
+        <Navbar breadcrumbs={[{ label: "Home", href: "/" }, { label: "Profile", href: "/account" }, { label: "Video Profile" }]} />
 
         <div className="flex flex-col gap-6 sm:flex-row sm:items-start">
           <div className="relative h-24 w-24 flex-shrink-0 rounded-full border-4 border-[#05070b] bg-[#0b0e14] sm:h-28 sm:w-28">

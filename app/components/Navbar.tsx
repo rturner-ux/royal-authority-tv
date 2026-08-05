@@ -31,7 +31,7 @@ const MENU_LINKS = [
   { label: "Transcript Archive", href: "/transcript" },
   { label: "Investigation Map", href: "/map" },
   { label: "Subscribe", href: "/subscribe" },
-  { label: "My Account", href: "/account" },
+  { label: "My Profile", href: "/account" },
 ];
 
 // Only shown to active subscribers -- both in the primary link row and the
@@ -300,7 +300,7 @@ export default function Navbar({
                           onClick={() => setAccountOpen(false)}
                           className="block px-4 py-3 text-sm text-slate-300 transition hover:bg-white/5 hover:text-white"
                         >
-                          My Account
+                          My Profile
                         </Link>
                         <button
                           type="button"

@@ -142,7 +142,7 @@ export default function VideoGrid({
 
   return (
     <div>
-      <div className="grid grid-cols-3 gap-1.5 sm:grid-cols-4 lg:grid-cols-6">
+      <div className="grid grid-cols-[repeat(auto-fill,minmax(100px,1fr))] gap-1.5">
         {shown.map((video) => {
           const videoId = extractYouTubeId(video.youtube_url);
           const thumbnail = videoId ? `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg` : null;

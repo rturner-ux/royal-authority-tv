@@ -109,7 +109,7 @@ export default async function CaseFileSlugPage({
   const connections = await getCaseConnections(incident.id);
   const { user, isActive } = await getSubscriberStatus();
   const accountProps = user
-    ? { accountLabel: "My Account", accountHref: "/account" }
+    ? { accountLabel: "My Profile", accountHref: "/account" }
     : { accountLabel: "Sign In", accountHref: "/login" };
 
   let subscriberRole: string | null = null;

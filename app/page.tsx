@@ -16,7 +16,7 @@ export default async function Home() {
   ]);
 
   const accountProps = user
-    ? { accountLabel: "My Account", accountHref: "/account" }
+    ? { accountLabel: "My Profile", accountHref: "/account" }
     : { accountLabel: "Sign In", accountHref: "/login" };
 
   return (
