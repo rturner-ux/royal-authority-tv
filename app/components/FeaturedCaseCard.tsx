@@ -6,13 +6,22 @@ import type { Incident } from "@/lib/types";
 import { CATEGORY_LABELS, isActiveAlert, statusBadgeLabel } from "@/lib/labels";
 import { playSfx } from "@/lib/sfx";
 
-export default function FeaturedCaseCard({ incident }: { incident: Incident }) {
+export default function FeaturedCaseCard({
+  incident,
+  basePath = "/case-file",
+}: {
+  incident: Incident;
+  // Lets the wrapped /account/case-file listing keep case clicks inside
+  // "profile mode" (/account/case-file/[slug]) instead of dropping back to
+  // the public route.
+  basePath?: string;
+}) {
   const alert = isActiveAlert(incident);
   const badge = statusBadgeLabel(incident);
 
   return (
     <Link
-      href={`/case-file/${incident.slug}`}
+      href={`${basePath}/${incident.slug}`}
       onClick={() => playSfx("shutter")}
       className={`group overflow-hidden rounded-2xl border border-white/10 bg-zinc-900/80 transition hover:scale-[1.02] hover:border-[#C9A24A]/30 ${
         alert ? "ra-alert-card" : ""

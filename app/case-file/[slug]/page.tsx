@@ -71,8 +71,13 @@ export async function generateMetadata({
 
 export default async function CaseFileSlugPage({
   params,
+  embedded,
 }: {
   params: Promise<{ slug: string }>;
+  // Set only when rendered from inside the account-section sidebar layout
+  // ("profile mode") -- see app/account/case-file/[slug]/page.tsx. Threaded
+  // to Navbar so its full-bleed top bar doesn't overlap the sidebar.
+  embedded?: boolean;
 }) {
   const { slug } = await params;
   const result = await getCaseBySlug(slug);
@@ -143,6 +148,7 @@ export default async function CaseFileSlugPage({
               { label: "Case Files", href: "/case-file" },
               { label: incident.title },
             ]}
+            embedded={embedded}
             {...accountProps}
           />
 
@@ -213,6 +219,7 @@ export default async function CaseFileSlugPage({
             { label: "Case Files", href: "/case-file" },
             { label: incident.title },
           ]}
+          embedded={embedded}
           {...accountProps}
         />
 

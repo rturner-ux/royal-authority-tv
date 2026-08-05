@@ -11,11 +11,16 @@ export const dynamic = "force-dynamic";
 
 export default async function CaseFilePage({
   searchParams,
+  embedded,
 }: {
   searchParams: Promise<{ state?: string }>;
+  // Set only when rendered from inside the account-section sidebar layout
+  // ("profile mode") -- see app/account/case-file/page.tsx.
+  embedded?: boolean;
 }) {
   const { state } = await searchParams;
   const allCases = await getAllCaseFiles();
+  const basePath = embedded ? "/account/case-file" : "/case-file";
 
   const states = [...new Set(allCases.map((c) => c.state).filter((s): s is string => Boolean(s)))].sort();
 
@@ -28,7 +33,7 @@ export default async function CaseFilePage({
       <div className="absolute right-0 top-40 h-[450px] w-[450px] rounded-full bg-[#C9A24A]/10 blur-[140px]" />
 
       <div className="relative z-10 mx-auto max-w-6xl px-6 py-6">
-        <Navbar breadcrumbs={[{ label: "Home", href: "/" }, { label: "Case Files" }]} />
+        <Navbar breadcrumbs={[{ label: "Home", href: "/" }, { label: "Case Files" }]} embedded={embedded} />
 
         <div className="mb-12">
           <div className="text-xs uppercase tracking-[0.34em] text-[#E8D19A]">
@@ -65,7 +70,7 @@ export default async function CaseFilePage({
 
         <div className="mb-8 flex flex-wrap items-center gap-2">
           <Link
-            href="/case-file"
+            href={basePath}
             className={`rounded-full px-3 py-1.5 text-xs font-semibold uppercase tracking-wide transition ${
               !state
                 ? "bg-[#C9A24A] text-black"
@@ -77,7 +82,7 @@ export default async function CaseFilePage({
           {states.map((s) => (
             <Link
               key={s}
-              href={`/case-file?state=${s}`}
+              href={`${basePath}?state=${s}`}
               className={`rounded-full px-3 py-1.5 text-xs font-semibold uppercase tracking-wide transition ${
                 state?.toUpperCase() === s
                   ? "bg-[#C9A24A] text-black"
@@ -96,7 +101,7 @@ export default async function CaseFilePage({
 
         <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
           {cases.map((c) => (
-            <FeaturedCaseCard key={c.id} incident={c} />
+            <FeaturedCaseCard key={c.id} incident={c} basePath={basePath} />
           ))}
         </div>
       </div>

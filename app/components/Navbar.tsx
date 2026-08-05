@@ -13,6 +13,11 @@ type NavbarProps = {
   breadcrumbs?: Crumb[];
   accountLabel?: string;
   accountHref?: string;
+  // Pages rendered inside the account-section sidebar layout sit in a
+  // narrower content column, not the full viewport -- the normal
+  // w-screen/negative-margin full-bleed trick would stretch this bar over
+  // the sidebar. Embedded mode just fills its own container instead.
+  embedded?: boolean;
 };
 
 const PRIMARY_LINKS = [
@@ -72,6 +77,7 @@ export default function Navbar({
   breadcrumbs,
   accountLabel,
   accountHref,
+  embedded,
 }: NavbarProps) {
   const pathname = usePathname();
   const router = useRouter();
@@ -119,7 +125,7 @@ export default function Navbar({
 
   return (
     <div
-      className={`sticky top-0 z-[999] w-screen ml-[calc(50%-50vw)] mb-10 isolate backdrop-blur-xl transition-colors ${
+      className={`sticky top-0 z-[999] ${embedded ? "w-full" : "w-screen ml-[calc(50%-50vw)]"} mb-10 isolate backdrop-blur-xl transition-colors ${
         isActive
           ? "border-b border-[#C9A24A]/50 bg-[#0a0704]/90"
           : "border-b border-white/10 bg-[#05070b]/90"

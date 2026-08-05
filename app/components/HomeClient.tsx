@@ -289,6 +289,7 @@ export default function HomeClient({
   totalClicks,
   accountLabel,
   accountHref,
+  embedded,
 }: {
   cases: Incident[];
   featuredCases: Incident[];
@@ -296,6 +297,7 @@ export default function HomeClient({
   isLive?: boolean;
   spotlightCases?: Incident[];
   totalClicks?: number;
+  embedded?: boolean;
 } & AccountProps) {
   const statRow = [
     { value: stats.totalCases, label: "Cases Tracked" },
@@ -403,7 +405,7 @@ export default function HomeClient({
         />
 
         <div className="relative z-10 mx-auto max-w-6xl px-6 pt-6 lg:px-16">
-          <Navbar accountLabel={accountLabel} accountHref={accountHref} />
+          <Navbar accountLabel={accountLabel} accountHref={accountHref} embedded={embedded} />
         </div>
 
         {welcome && (

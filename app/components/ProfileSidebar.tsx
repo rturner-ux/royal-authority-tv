@@ -87,10 +87,17 @@ function SignOutIcon() {
     </svg>
   );
 }
+function ExitIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="h-5 w-5 flex-shrink-0">
+      <path d="M18 6L6 18M6 6l12 12" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
 
 const NAV_ITEMS = [
-  { label: "Home", href: "/", icon: HomeIcon },
-  { label: "Case Files", href: "/case-file", icon: FilesIcon },
+  { label: "Home", href: "/account/home", icon: HomeIcon },
+  { label: "Case Files", href: "/account/case-file", icon: FilesIcon },
   { label: "Live", href: "/live", icon: LiveIcon },
   { label: "Friends", href: "/account/friends", icon: FriendsIcon },
   { label: "Messages", href: "/account/messages", icon: MessagesIcon },
@@ -133,7 +140,7 @@ export default function ProfileSidebar() {
 
   return (
     <aside className="sticky top-0 hidden h-screen w-60 flex-shrink-0 flex-col overflow-y-auto border-r border-white/10 bg-[#05070b] px-3 py-6 lg:flex">
-      <Link href="/" className="flex items-center px-3">
+      <Link href="/account/home" className="flex items-center px-3">
         <Image
           src="/royal-authority-wordmark.png"
           alt="Royal Authority TV"
@@ -196,6 +203,16 @@ export default function ProfileSidebar() {
           <SignOutIcon />
           Sign Out
         </button>
+
+        {/* The one deliberate way out of the sidebar-nav experience -- every
+            other link here (Home, Case Files) stays inside it. */}
+        <Link
+          href="/"
+          className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold text-[#E8D19A] transition hover:bg-[#C9A24A]/10"
+        >
+          <ExitIcon />
+          Exit Profile
+        </Link>
       </div>
     </aside>
   );
