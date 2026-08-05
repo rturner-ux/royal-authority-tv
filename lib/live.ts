@@ -8,7 +8,9 @@ export async function getCurrentLiveStream(): Promise<LiveStream | null> {
   const db = supabase()
   const { data } = await db
     .from('live_streams')
-    .select('id, title, status, mux_playback_id, started_at, graphic_visible, graphic_title, graphic_location, graphic_status')
+    .select(
+      'id, title, status, provider, mux_playback_id, cf_live_input_uid, started_at, graphic_visible, graphic_title, graphic_location, graphic_status'
+    )
     .eq('status', 'active')
     .order('started_at', { ascending: false })
     .limit(1)

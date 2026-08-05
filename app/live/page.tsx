@@ -37,7 +37,7 @@ export default async function LivePage({ embedded }: { embedded?: boolean } = {}
 
         {liveStream ? (
           <div className="grid gap-6 lg:grid-cols-[1.6fr_1fr]">
-            <LivePlayer playbackId={liveStream.mux_playback_id} title={liveStream.title} />
+            <LivePlayer stream={liveStream} />
             <LiveChat streamId={liveStream.id} isSignedIn={Boolean(user)} />
           </div>
         ) : (

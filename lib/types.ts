@@ -368,7 +368,9 @@ export type LiveStream = {
   id: string
   title: string
   status: 'idle' | 'active' | 'ended'
-  mux_playback_id: string
+  provider: 'mux' | 'cloudflare'
+  mux_playback_id: string | null
+  cf_live_input_uid: string | null
   started_at: string | null
   graphic_visible: boolean
   graphic_title: string | null
