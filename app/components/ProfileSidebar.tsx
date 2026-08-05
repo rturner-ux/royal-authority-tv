@@ -168,6 +168,7 @@ export default function ProfileSidebar() {
   const [roleKey, setRoleKey] = useState<string | null>(null);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [isVerified, setIsVerified] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
 
   useEffect(() => {
     fetch("/api/subscriber-status")
@@ -177,6 +178,16 @@ export default function ProfileSidebar() {
         setCallsign(d.callsign ?? null);
         setAvatarUrl(d.avatarUrl ?? null);
         setIsVerified(Boolean(d.isVerified));
+      })
+      .catch(() => {});
+
+    fetch("/api/messages")
+      .then((r) => r.json())
+      .then((d) => {
+        if (d.success) {
+          const total = d.conversations.reduce((sum: number, c: { unreadCount: number }) => sum + c.unreadCount, 0);
+          setUnreadCount(total);
+        }
       })
       .catch(() => {});
   }, []);
@@ -218,6 +229,7 @@ export default function ProfileSidebar() {
         {NAV_ITEMS.map((item) => {
           const active = isActive(item.href);
           const Icon = item.icon;
+          const badgeCount = item.href === "/account/messages" ? unreadCount : 0;
           return (
             <Link
               key={item.href}
@@ -226,7 +238,14 @@ export default function ProfileSidebar() {
                 active ? "text-red-500" : "text-slate-300 hover:bg-white/5 hover:text-white"
               }`}
             >
-              <Icon />
+              <span className="relative flex-shrink-0">
+                <Icon />
+                {badgeCount > 0 && (
+                  <span className="absolute -right-1.5 -top-1.5 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-red-600 px-1 text-[0.6rem] font-bold text-white">
+                    {badgeCount > 99 ? "99+" : badgeCount}
+                  </span>
+                )}
+              </span>
               {item.label}
             </Link>
           );

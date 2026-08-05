@@ -103,7 +103,7 @@ export default function MobileTabBar() {
       <Link href="/account/messages" className={`relative flex flex-col items-center gap-0.5 px-3 py-1.5 ${messages ? "text-red-500" : "text-slate-500"}`}>
         <MessagesIcon active={messages} />
         {unreadCount > 0 && (
-          <span className="absolute right-1.5 top-0 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-red-600 px-1 text-[0.55rem] font-bold text-white">
+          <span className="absolute right-0.5 top-0 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-red-600 px-1 text-[0.6rem] font-bold text-white">
             {unreadCount > 99 ? "99+" : unreadCount}
           </span>
         )}
