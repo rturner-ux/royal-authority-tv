@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { createPortal } from "react-dom";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { getRole } from "@/lib/roles";
@@ -84,11 +85,16 @@ export default function Navbar({
   const [menuOpen, setMenuOpen] = useState(false);
   const [accountOpen, setAccountOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
+  // The mobile menu renders through a portal (see below), which needs
+  // `document` to exist -- true only after mount, so this also doubles as
+  // the SSR-safety guard for that.
+  const [mounted, setMounted] = useState(false);
   const [isActive, setIsActive] = useState(false);
   const [roleKey, setRoleKey] = useState<string | null>(null);
   const [callsign, setCallsign] = useState<string | null>(null);
 
   useEffect(() => {
+    setMounted(true);
     fetch("/api/subscriber-status")
       .then((r) => r.json())
       .then((d) => {
@@ -142,44 +148,49 @@ export default function Navbar({
             <span className="text-base leading-none sm:text-lg">☰</span>
           </button>
 
-          {menuOpen && (
-            <>
-              <div
-                className="fixed inset-0 z-[9998]"
-                onClick={() => setMenuOpen(false)}
-              />
-              <div className="absolute left-0 top-full z-[9999] mt-3 w-60 overflow-hidden rounded-2xl border border-white/10 bg-[#0a0d14] shadow-2xl">
-                {MENU_LINKS.map((link) => (
-                  <Link
-                    key={link.href}
-                    href={link.href}
-                    onClick={() => setMenuOpen(false)}
-                    className="block px-4 py-3 text-sm text-slate-300 transition hover:bg-white/5 hover:text-white"
-                  >
-                    {link.label}
-                  </Link>
-                ))}
+          {/* Rendered through a portal into document.body, as a viewport-fixed
+              overlay rather than absolutely positioned inside this sticky +
+              backdrop-blur + isolate bar -- nesting it in there caused a real
+              rendering bug on iOS Safari where page content behind would
+              bleed through/tear across the open menu. Escaping the blurred
+              ancestor's stacking context entirely avoids it. */}
+          {mounted && menuOpen &&
+            createPortal(
+              <>
+                <div className="fixed inset-0 z-[9998]" onClick={() => setMenuOpen(false)} />
+                <div className="fixed left-4 top-16 z-[9999] max-h-[calc(100vh-5rem)] w-60 overflow-y-auto overflow-x-hidden rounded-2xl border border-white/10 bg-[#0a0d14] shadow-2xl sm:top-[4.5rem]">
+                  {MENU_LINKS.map((link) => (
+                    <Link
+                      key={link.href}
+                      href={link.href}
+                      onClick={() => setMenuOpen(false)}
+                      className="block px-4 py-3 text-sm text-slate-300 transition hover:bg-white/5 hover:text-white"
+                    >
+                      {link.label}
+                    </Link>
+                  ))}
 
-                {isActive && (
-                  <>
-                    <div className="border-t border-[#C9A24A]/20 px-4 pb-1 pt-3 text-[10px] font-bold uppercase tracking-[0.2em] text-[#E8D19A]">
-                      Subscriber Tools
-                    </div>
-                    {SUBSCRIBER_LINKS.map((link) => (
-                      <Link
-                        key={link.href}
-                        href={link.href}
-                        onClick={() => setMenuOpen(false)}
-                        className="block bg-[#C9A24A]/[0.06] px-4 py-3 text-sm text-[#E8D19A] transition hover:bg-[#C9A24A]/10"
-                      >
-                        {link.label}
-                      </Link>
-                    ))}
-                  </>
-                )}
-              </div>
-            </>
-          )}
+                  {isActive && (
+                    <>
+                      <div className="border-t border-[#C9A24A]/20 px-4 pb-1 pt-3 text-[10px] font-bold uppercase tracking-[0.2em] text-[#E8D19A]">
+                        Subscriber Tools
+                      </div>
+                      {SUBSCRIBER_LINKS.map((link) => (
+                        <Link
+                          key={link.href}
+                          href={link.href}
+                          onClick={() => setMenuOpen(false)}
+                          className="block bg-[#C9A24A]/[0.06] px-4 py-3 text-sm text-[#E8D19A] transition hover:bg-[#C9A24A]/10"
+                        >
+                          {link.label}
+                        </Link>
+                      ))}
+                    </>
+                  )}
+                </div>
+              </>,
+              document.body
+            )}
         </div>
 
         <Link href="/" className="flex-shrink-0">
