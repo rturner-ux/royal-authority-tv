@@ -61,17 +61,40 @@ export async function GET(req: NextRequest) {
     myVote: myVoteByComment.get(c.id) ?? 0,
   }))
 
-  const sorted = enriched.sort((a, b) => {
+  // Total counts replies too (matches a Facebook-style aggregate comment
+  // count), but only top-level comments are paginated/sorted -- replies
+  // always render nested under their parent, oldest first, regardless of
+  // the top-level sort mode.
+  const total = enriched.length
+  const topLevel = enriched.filter((c) => !c.parent_comment_id)
+  const repliesByParent = new Map<string, typeof enriched>()
+  for (const c of enriched) {
+    if (!c.parent_comment_id) continue
+    const list = repliesByParent.get(c.parent_comment_id) ?? []
+    list.push(c)
+    repliesByParent.set(c.parent_comment_id, list)
+  }
+  for (const list of repliesByParent.values()) {
+    list.sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime())
+  }
+
+  const sortedTopLevel = topLevel.sort((a, b) => {
     if (sort === 'oldest') return new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
     if (sort === 'newest') return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
     // best: highest score first, tie-broken by newest
     return b.score - a.score || new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
   })
 
-  const total = sorted.length
-  const pageItems = sorted.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE)
+  const pageItems = sortedTopLevel
+    .slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE)
+    .map((c) => ({ ...c, replies: repliesByParent.get(c.id) ?? [] }))
 
-  return NextResponse.json({ success: true, comments: pageItems, total, hasMore: (page + 1) * PAGE_SIZE < total })
+  return NextResponse.json({
+    success: true,
+    comments: pageItems,
+    total,
+    hasMore: (page + 1) * PAGE_SIZE < sortedTopLevel.length,
+  })
 }
 
 export async function POST(req: NextRequest) {
@@ -82,7 +105,7 @@ export async function POST(req: NextRequest) {
 
   if (!user) return NextResponse.json({ error: 'Sign in to comment' }, { status: 401 })
 
-  const { incidentId, body, recaptchaToken } = await req.json()
+  const { incidentId, body, recaptchaToken, parentCommentId } = await req.json()
 
   if (!incidentId || typeof body !== 'string' || !body.trim()) {
     return NextResponse.json({ error: 'Missing fields' }, { status: 400 })
@@ -97,6 +120,22 @@ export async function POST(req: NextRequest) {
   }
 
   const db = supabase()
+
+  // Replies are capped at one level -- a reply's parent must itself be a
+  // top-level comment, not another reply.
+  if (parentCommentId) {
+    const { data: parent } = await db
+      .from('case_comments')
+      .select('incident_id, parent_comment_id')
+      .eq('id', parentCommentId)
+      .maybeSingle()
+    if (!parent || parent.incident_id !== incidentId) {
+      return NextResponse.json({ error: 'Parent comment not found' }, { status: 404 })
+    }
+    if (parent.parent_comment_id) {
+      return NextResponse.json({ error: 'Cannot reply to a reply' }, { status: 400 })
+    }
+  }
 
   const { data: profile } = await authDb
     .from('subscriber_profiles')
@@ -114,6 +153,7 @@ export async function POST(req: NextRequest) {
       display_name: displayName,
       body: body.trim(),
       status: 'pending',
+      parent_comment_id: parentCommentId || null,
     })
     .select()
     .single()
@@ -123,5 +163,5 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Could not save your comment' }, { status: 500 })
   }
 
-  return NextResponse.json({ success: true, comment: { ...data, score: 0, myVote: 0 } })
+  return NextResponse.json({ success: true, comment: { ...data, score: 0, myVote: 0, replies: [] } })
 }

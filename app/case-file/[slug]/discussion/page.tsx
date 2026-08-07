@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import Navbar from "../../../components/Navbar";
-import CaseComments from "../../../components/CaseComments";
+import DiscussionSection from "./DiscussionSection";
 import { getCaseBySlug } from "@/lib/cases";
 import { getSubscriberStatus } from "@/lib/subscription";
 
@@ -49,7 +49,7 @@ export default async function DiscussionPage({
           </p>
         </div>
 
-        <CaseComments incidentId={incident.id} isSignedIn={!!user} />
+        <DiscussionSection incidentId={incident.id} initialShareCount={incident.share_count} isSignedIn={!!user} />
       </div>
     </main>
   );

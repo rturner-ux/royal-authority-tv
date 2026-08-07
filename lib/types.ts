@@ -65,6 +65,7 @@ export type Incident = {
   ai_summary_updated_at: string | null
   member_analysis: string | null
   member_analysis_updated_at: string | null
+  share_count: number
   published_at: string
   created_at: string
   updated_at: string
@@ -152,6 +153,29 @@ export type PersonComment = {
   status: CommentStatus
   created_at: string
   reviewed_at: string | null
+}
+
+export type CaseComment = {
+  id: string
+  incident_id: string
+  user_id: string
+  display_name: string
+  body: string
+  status: CommentStatus
+  created_at: string
+  reviewed_at: string | null
+  parent_comment_id: string | null
+  score: number
+  myVote: number
+  replies?: CaseComment[]
+}
+
+export type CaseReactionEmoji = 'support' | 'sad' | 'angry' | 'shocked' | 'prayers'
+
+export type CaseReactionSummary = {
+  counts: Record<CaseReactionEmoji, number>
+  total: number
+  myReaction: CaseReactionEmoji | null
 }
 
 export type InterviewQA = {

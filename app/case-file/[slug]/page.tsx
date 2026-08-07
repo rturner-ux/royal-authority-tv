@@ -336,7 +336,7 @@ export default async function CaseFileSlugPage({
                 Open Discussion
               </Link>
 
-              <ShareButton />
+              <ShareButton incidentId={incident.id} initialShareCount={incident.share_count} />
             </div>
           </div>
         </section>
