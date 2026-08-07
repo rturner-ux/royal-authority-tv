@@ -5,13 +5,23 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { CaseReactionEmoji, CaseReactionSummary } from "@/lib/types";
 
-const REACTIONS: { key: CaseReactionEmoji; emoji: string; label: string }[] = [
-  { key: "support", emoji: "👍", label: "Support" },
-  { key: "sad", emoji: "😢", label: "Sad" },
-  { key: "angry", emoji: "😡", label: "Angry" },
-  { key: "shocked", emoji: "😮", label: "Shocked" },
-  { key: "prayers", emoji: "🙏", label: "Prayers" },
+const ICON_BASE = "https://alkmgedjgmaibfpyszij.supabase.co/storage/v1/object/public/case-photos/reactions";
+
+const REACTIONS: { key: CaseReactionEmoji; iconUrl: string; label: string }[] = [
+  { key: "support", iconUrl: `${ICON_BASE}/support.svg`, label: "Support" },
+  { key: "sad", iconUrl: `${ICON_BASE}/sad.svg`, label: "Sad" },
+  { key: "angry", iconUrl: `${ICON_BASE}/angry.svg`, label: "Angry" },
+  { key: "shocked", iconUrl: `${ICON_BASE}/shocked.svg`, label: "Shocked" },
+  { key: "prayers", iconUrl: `${ICON_BASE}/prayers.svg`, label: "Prayers" },
 ];
+
+function CommentIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="h-4 w-4">
+      <path d="M21 15a2 2 0 0 1-2 2H8l-5 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2Z" strokeLinejoin="round" />
+    </svg>
+  );
+}
 
 export default function CaseReactionBar({
   incidentId,
@@ -87,8 +97,8 @@ export default function CaseReactionBar({
 
   const myReactionInfo = summary?.myReaction ? REACTIONS.find((r) => r.key === summary.myReaction) : null;
 
-  // Which reaction emojis to show as the small summary cluster (most-used
-  // first), matching Facebook's overlapping-icon treatment next to the count.
+  // Which reactions to show as the small summary cluster (most-used first),
+  // matching Facebook's overlapping-icon treatment next to the count.
   const topReactions = summary
     ? REACTIONS.filter((r) => summary.counts[r.key] > 0)
         .sort((a, b) => summary.counts[b.key] - summary.counts[a.key])
@@ -104,9 +114,10 @@ export default function CaseReactionBar({
               {topReactions.map((r) => (
                 <span
                   key={r.key}
-                  className="flex h-5 w-5 items-center justify-center rounded-full border border-[#05070b] bg-[#1a1d24] text-[11px]"
+                  className="flex h-5 w-5 items-center justify-center rounded-full border border-[#05070b] bg-[#1a1d24] p-0.5"
                 >
-                  {r.emoji}
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={r.iconUrl} alt={r.label} className="h-full w-full object-contain" />
                 </span>
               ))}
             </div>
@@ -126,11 +137,7 @@ export default function CaseReactionBar({
       </div>
 
       <div className="mt-3 flex items-center gap-2">
-        <div
-          className="relative flex-1"
-          onMouseEnter={openPicker}
-          onMouseLeave={scheduleClose}
-        >
+        <div className="relative flex-1" onMouseEnter={openPicker} onMouseLeave={scheduleClose}>
           {pickerOpen && (
             <div className="absolute bottom-full left-0 z-20 mb-2 flex gap-1 rounded-2xl border border-white/10 bg-[#0a0d14] p-2 shadow-2xl">
               {REACTIONS.map((r) => (
@@ -138,11 +145,12 @@ export default function CaseReactionBar({
                   key={r.key}
                   onClick={() => react(r.key)}
                   title={r.label}
-                  className={`flex h-10 w-10 items-center justify-center rounded-xl text-xl transition hover:scale-125 hover:bg-white/10 ${
-                    summary?.myReaction === r.key ? "bg-[#C9A24A]/20" : ""
+                  className={`group flex h-11 w-11 items-center justify-center rounded-full p-1.5 transition duration-150 ease-out hover:-translate-y-1.5 hover:scale-125 ${
+                    summary?.myReaction === r.key ? "bg-[#C9A24A]/20" : "hover:bg-white/5"
                   }`}
                 >
-                  {r.emoji}
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={r.iconUrl} alt={r.label} className="h-full w-full object-contain drop-shadow" />
                 </button>
               ))}
             </div>
@@ -153,7 +161,13 @@ export default function CaseReactionBar({
               summary?.myReaction ? "bg-[#C9A24A]/15 text-[#E8D19A]" : "bg-white/5 text-slate-300 hover:bg-white/10"
             }`}
           >
-            <span>{myReactionInfo?.emoji ?? "👍"}</span>
+            {myReactionInfo ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={myReactionInfo.iconUrl} alt="" className="h-5 w-5 object-contain" />
+            ) : (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={REACTIONS[0].iconUrl} alt="" className="h-5 w-5 object-contain opacity-70" />
+            )}
             {myReactionInfo?.label ?? "Support"}
           </button>
         </div>
@@ -162,7 +176,8 @@ export default function CaseReactionBar({
           href={discussionHref}
           className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-white/5 px-4 py-2.5 text-sm font-semibold text-slate-300 transition hover:bg-white/10"
         >
-          💬 Comment
+          <CommentIcon />
+          Comment
         </Link>
 
         <button
