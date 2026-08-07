@@ -107,7 +107,7 @@ export default function LocationZoomReveal({
 
         {deepZoomed && (
           <div
-            className={`absolute inset-0 z-10 transition-opacity duration-700 ${
+            className={`absolute inset-0 z-[1000] transition-opacity duration-700 ${
               streetViewEntered ? "opacity-100" : "opacity-0"
             }`}
           >
