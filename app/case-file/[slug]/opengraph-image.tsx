@@ -4,11 +4,16 @@ import { CATEGORY_LABELS, CATEGORY_COLORS } from "@/lib/labels";
 
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
-// Without this the route has no cache headers at all, so every scrape --
-// including Facebook's -- regenerates the image from scratch through the
-// weserv.nl proxy. One slow or failed attempt then sits in Facebook's own
-// negative cache for that URL until someone manually rescrapes it.
 export const revalidate = 3600;
+
+// next/og's ImageResponse hardcodes "public, max-age=0, must-revalidate" on
+// every response unless overridden here -- meaning every scrape, including
+// Facebook's, re-renders from scratch through the weserv.nl proxy. One slow
+// or failed attempt then sits in Facebook's own negative cache for that URL
+// until someone manually rescrapes it. Explicit headers fix that.
+const CACHE_HEADERS = {
+  "cache-control": "public, max-age=3600, s-maxage=3600, stale-while-revalidate=86400",
+};
 
 const STATUS_LABELS = { active: "ACTIVE", resolved: "RESOLVED", cleared: "CLEARED" } as const;
 
@@ -43,7 +48,7 @@ export default async function Image({ params }: { params: Promise<{ slug: string
           Royal Authority TV
         </div>
       ),
-      { ...size }
+      { ...size, headers: CACHE_HEADERS }
     );
   }
 
@@ -144,6 +149,6 @@ export default async function Image({ params }: { params: Promise<{ slug: string
         </div>
       </div>
     ),
-    { ...size }
+    { ...size, headers: CACHE_HEADERS }
   );
 }
