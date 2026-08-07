@@ -1,5 +1,5 @@
 import { ImageResponse } from "next/og";
-import { getCaseBySlug } from "@/lib/cases";
+import { getCaseOgData } from "@/lib/cases";
 import { CATEGORY_LABELS, CATEGORY_COLORS } from "@/lib/labels";
 
 export const size = { width: 1200, height: 630 };
@@ -22,9 +22,9 @@ function toRenderableImage(url: string): string {
 
 export default async function Image({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const result = await getCaseBySlug(slug);
+  const incident = await getCaseOgData(slug);
 
-  if (!result) {
+  if (!incident) {
     return new ImageResponse(
       (
         <div
@@ -47,7 +47,6 @@ export default async function Image({ params }: { params: Promise<{ slug: string
     );
   }
 
-  const { incident } = result;
   const color = CATEGORY_COLORS[incident.category];
 
   return new ImageResponse(

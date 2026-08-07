@@ -1,6 +1,27 @@
 import 'server-only'
+import { unstable_cache } from 'next/cache'
 import { supabase } from './supabase/server'
 import type { Incident, IncidentUpdate, IncidentPerson, IncidentTranscriptRow, IncidentCourtRecord, IncidentPhoto, IncidentVideo, InterviewQA, PersonConnectedCase, PersonComment, IncidentCourtCase, IncidentCharge, IncidentBondSetting, IncidentFinancialRecord, CaseConnectionNode, CaseConnectionEdge } from './types'
+
+// Supabase's fetch calls are uncached by default, which forces any route
+// touching them to render dynamically -- including opengraph-image.tsx,
+// where that means every scrape (Facebook's included) re-runs the full
+// image render from scratch. This is scoped to only the handful of fields
+// the share card needs, cached separately from getCaseBySlug so the main
+// case page's data (share/view counts, etc.) stays fully live.
+export const getCaseOgData = unstable_cache(
+  async (slug: string): Promise<Pick<Incident, 'title' | 'category' | 'status' | 'location_label' | 'image_url'> | null> => {
+    const db = supabase()
+    const { data } = await db
+      .from('incidents')
+      .select('title, category, status, location_label, image_url')
+      .eq('slug', slug)
+      .maybeSingle()
+    return data
+  },
+  ['case-og-data'],
+  { revalidate: 3600 }
+)
 
 async function attachQAAndCases(db: ReturnType<typeof supabase>, people: IncidentPerson[]): Promise<IncidentPerson[]> {
   if (people.length === 0) return people
