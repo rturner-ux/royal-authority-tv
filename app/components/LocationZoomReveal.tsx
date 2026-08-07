@@ -38,12 +38,18 @@ export default function LocationZoomReveal({
   const [showFlyover, setShowFlyover] = useState(false);
   const [flyoverEntered, setFlyoverEntered] = useState(false);
   const [showTitle, setShowTitle] = useState(false);
+  const [streetViewEntered, setStreetViewEntered] = useState(false);
 
   useEffect(() => {
     if (deepZoomed && isActive && sceneVideoUrl) {
       playSfx("zoom");
       setShowFlyover(true);
     }
+    if (deepZoomed) {
+      const t = setTimeout(() => setStreetViewEntered(true), 400);
+      return () => clearTimeout(t);
+    }
+    setStreetViewEntered(false);
     // Only fire once per case-file visit, right as the close-up view lands
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [deepZoomed]);
@@ -87,7 +93,7 @@ export default function LocationZoomReveal({
 
   return (
     <div>
-      <div className="h-[380px] w-full overflow-hidden rounded-2xl md:h-[440px]">
+      <div className="relative h-[380px] w-full overflow-hidden rounded-2xl md:h-[440px]">
         <CaseMapClient
           lat={lat}
           lng={lng}
@@ -98,15 +104,20 @@ export default function LocationZoomReveal({
           isActive={isActive}
           onDeepZoomChange={setDeepZoomed}
         />
-      </div>
 
-      {deepZoomed && (
-        <StreetViewPanel
-          lat={preciseLat ?? lat}
-          lng={preciseLng ?? lng}
-          label={preciseLabel || label}
-        />
-      )}
+        {deepZoomed && (
+          <div
+            className={`absolute inset-0 z-10 transition-opacity duration-700 ${
+              streetViewEntered ? "opacity-100" : "opacity-0"
+            }`}
+          >
+            <StreetViewPanel lat={preciseLat ?? lat} lng={preciseLng ?? lng} />
+            <div className="pointer-events-none absolute left-3 top-3 rounded-full bg-black/50 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-[#E8D19A] backdrop-blur-sm">
+              Street View
+            </div>
+          </div>
+        )}
+      </div>
 
       {deepZoomed && thenPhotoUrl && (
         <div className="mt-4 rounded-2xl border border-[#C9A24A]/30 bg-[#0a0d14] p-5">
