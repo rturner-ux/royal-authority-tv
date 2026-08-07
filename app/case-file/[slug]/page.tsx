@@ -18,7 +18,7 @@ import RecordLastCase from "../../components/RecordLastCase";
 import CaseEngagementPopup from "../../components/CaseEngagementPopup";
 import InvestigatorToolkit from "../../components/InvestigatorToolkit";
 import CasePartners from "../../components/CasePartners";
-import { getCaseBySlug, getCaseTrackingCount, getCaseConnections } from "@/lib/cases";
+import { getCaseBySlug, getCaseTrackingCount, getCaseConnections, incrementCaseViewCount } from "@/lib/cases";
 import { getCollection } from "@/lib/collections";
 import { getSubscriberStatus } from "@/lib/subscription";
 import { supabaseServerAuth } from "@/lib/supabase/serverAuth";
@@ -114,6 +114,7 @@ export default async function CaseFileSlugPage({
       : result.videos;
   const trackingCount = await getCaseTrackingCount(incident.id);
   const connections = await getCaseConnections(incident.id);
+  incrementCaseViewCount(incident.id).catch(() => {});
   const { user, isActive } = await getSubscriberStatus();
   const accountProps = user
     ? { accountLabel: "My Profile", accountHref: "/account" }
@@ -278,16 +279,26 @@ export default async function CaseFileSlugPage({
               {incident.title}
             </h2>
 
-            {trackingCount > 0 && (
+            <div className="flex flex-wrap items-center gap-x-5 gap-y-1.5">
               <div className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-[0.15em] text-slate-400">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="h-3.5 w-3.5">
-                  <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" strokeLinecap="round" strokeLinejoin="round" />
-                  <circle cx="9" cy="7" r="4" />
-                  <path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75" strokeLinecap="round" strokeLinejoin="round" />
+                  <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z" strokeLinecap="round" strokeLinejoin="round" />
+                  <circle cx="12" cy="12" r="3" />
                 </svg>
-                {trackingCount} {trackingCount === 1 ? "subscriber is" : "subscribers are"} tracking this case
+                {incident.view_count.toLocaleString()} view{incident.view_count === 1 ? "" : "s"}
               </div>
-            )}
+
+              {trackingCount > 0 && (
+                <div className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-[0.15em] text-slate-400">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="h-3.5 w-3.5">
+                    <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" strokeLinecap="round" strokeLinejoin="round" />
+                    <circle cx="9" cy="7" r="4" />
+                    <path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                  {trackingCount} {trackingCount === 1 ? "subscriber is" : "subscribers are"} tracking this case
+                </div>
+              )}
+            </div>
 
             {incident.description && (
               <p className="text-lg leading-8 text-slate-300">

@@ -66,6 +66,7 @@ export type Incident = {
   member_analysis: string | null
   member_analysis_updated_at: string | null
   share_count: number
+  view_count: number
   published_at: string
   created_at: string
   updated_at: string

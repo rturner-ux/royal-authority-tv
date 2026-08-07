@@ -195,6 +195,15 @@ export async function getCaseTrackingCount(incidentId: string): Promise<number> 
   return userIds.size
 }
 
+// Fire-and-forget from the case page on every load -- a simple hit
+// counter, not deduplicated per visitor (matches what most sites mean by
+// a public "views" count). Atomic via the DB function, no read-then-write race.
+export async function incrementCaseViewCount(incidentId: string): Promise<void> {
+  const db = supabase()
+  const { error } = await db.rpc('increment_incident_view_count', { p_incident_id: incidentId })
+  if (error) console.error('incrementCaseViewCount error:', error)
+}
+
 export async function getCaseConnections(incidentId: string): Promise<{
   nodes: CaseConnectionNode[]
   edges: CaseConnectionEdge[]
