@@ -4,6 +4,11 @@ import { CATEGORY_LABELS, CATEGORY_COLORS } from "@/lib/labels";
 
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
+// Without this the route has no cache headers at all, so every scrape --
+// including Facebook's -- regenerates the image from scratch through the
+// weserv.nl proxy. One slow or failed attempt then sits in Facebook's own
+// negative cache for that URL until someone manually rescrapes it.
+export const revalidate = 3600;
 
 const STATUS_LABELS = { active: "ACTIVE", resolved: "RESOLVED", cleared: "CLEARED" } as const;
 
