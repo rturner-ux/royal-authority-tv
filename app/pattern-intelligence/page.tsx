@@ -3,7 +3,9 @@ import Link from "next/link";
 import Navbar from "../components/Navbar";
 import { getSubscriberStatus } from "@/lib/subscription";
 import { getAllVisibleCasesForPatternIntelligence } from "@/lib/cases";
-import { findCaseClusters, findDisputedRulingClusters } from "@/lib/patternIntelligence";
+import { findCaseClusters, findDisputedRulingClusters, findCollectionClusters } from "@/lib/patternIntelligence";
+import type { CaseCluster, CollectionCluster } from "@/lib/patternIntelligence";
+import { getCollection } from "@/lib/collections";
 import { CATEGORY_LABELS, CATEGORY_COLORS } from "@/lib/labels";
 
 const BUCKET_LABELS: Record<string, string> = {
@@ -13,6 +15,10 @@ const BUCKET_LABELS: Record<string, string> = {
   drowning: "Drowning Report Pattern",
 };
 
+function isCollectionCluster(cluster: CaseCluster | CollectionCluster): cluster is CollectionCluster {
+  return "collectionSlug" in cluster;
+}
+
 export default async function PatternIntelligencePage({ embedded }: { embedded?: boolean } = {}) {
   const { user, isActive } = await getSubscriberStatus();
 
@@ -21,12 +27,12 @@ export default async function PatternIntelligencePage({ embedded }: { embedded?:
   }
 
   const allCases = isActive ? await getAllVisibleCasesForPatternIntelligence() : [];
-  // Disputed-ruling clusters go first -- a family or independent account
-  // contradicting the official version of events, in more than one nearby
-  // case, is the highest-signal pattern this tool can surface with current
-  // data, so it leads rather than sorting purely by cluster size.
-  const clusters = isActive
-    ? [...findDisputedRulingClusters(allCases), ...findCaseClusters(allCases)]
+  // Editorially-confirmed collection patterns lead -- a deliberate,
+  // human-curated grouping (e.g. Hanging Death Investigations) is a
+  // stronger signal than anything geo/time coincidence can surface, so it
+  // ranks above disputed-ruling and category clusters, not just by size.
+  const clusters: (CaseCluster | CollectionCluster)[] = isActive
+    ? [...findCollectionClusters(allCases), ...findDisputedRulingClusters(allCases), ...findCaseClusters(allCases)]
     : [];
 
   return (
@@ -83,24 +89,55 @@ export default async function PatternIntelligencePage({ embedded }: { embedded?:
           <div className="space-y-6">
             {clusters.map((cluster, i) => {
               const isDisputed = cluster.bucket === "disputed_ruling";
+              const isCollection = isCollectionCluster(cluster);
+              const collection = isCollectionCluster(cluster) ? getCollection(cluster.collectionSlug) : null;
+              const dominantState = isCollectionCluster(cluster) ? cluster.dominantState : null;
               return (
               <section
                 key={i}
                 className={`rounded-[30px] border p-6 backdrop-blur-sm ${
-                  isDisputed ? "border-amber-500/40 bg-amber-500/[0.04]" : "border-white/10 bg-black/30"
+                  isCollection
+                    ? "border-red-500/50 bg-red-500/[0.06] shadow-[0_0_40px_-12px_rgba(239,68,68,0.35)]"
+                    : isDisputed
+                    ? "border-amber-500/40 bg-amber-500/[0.04]"
+                    : "border-white/10 bg-black/30"
                 }`}
               >
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <div
-                    className={`text-xs uppercase tracking-[0.26em] ${isDisputed ? "text-amber-300" : "text-[#E8D19A]"}`}
+                    className={`flex items-center gap-2 text-xs uppercase tracking-[0.26em] ${
+                      isCollection ? "text-red-400" : isDisputed ? "text-amber-300" : "text-[#E8D19A]"
+                    }`}
                   >
-                    {BUCKET_LABELS[cluster.bucket] || cluster.bucket}
+                    {isCollection && (
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="h-4 w-4 flex-shrink-0">
+                        <path d="M12 9v4m0 4h.01M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                    )}
+                    {isCollection ? collection?.name || BUCKET_LABELS[cluster.bucket] || cluster.bucket : BUCKET_LABELS[cluster.bucket] || cluster.bucket}
                   </div>
                   <div className="text-xs text-slate-500">
-                    {cluster.cases.length} cases &middot; within {cluster.maxDistanceMiles} mi &middot;
-                    spans {cluster.spanMonths} mo
+                    {cluster.cases.length} cases
+                    {!isCollection && (
+                      <>
+                        {" "}&middot; within {cluster.maxDistanceMiles} mi &middot; spans {cluster.spanMonths} mo
+                      </>
+                    )}
                   </div>
                 </div>
+
+                {isCollection && (
+                  <p className="mt-2 text-xs leading-6 text-red-100/80">
+                    {collection?.description}
+                  </p>
+                )}
+
+                {dominantState && (
+                  <p className="mt-3 rounded-2xl border border-red-500/30 bg-red-500/10 px-4 py-2.5 text-xs font-semibold text-red-200">
+                    ⚑ {dominantState.count} of {cluster.cases.length} cases in this pattern are in{" "}
+                    {dominantState.state} -- the largest single-state concentration.
+                  </p>
+                )}
 
                 {isDisputed && (
                   <p className="mt-2 text-xs leading-6 text-amber-100/80">

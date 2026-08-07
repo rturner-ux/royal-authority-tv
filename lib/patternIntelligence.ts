@@ -157,3 +157,68 @@ export function findDisputedRulingClusters(incidents: IncidentWithOccurredAt[]):
     () => 'disputed_ruling'
   )
 }
+
+export type StateConcentration = { state: string; count: number }
+export type CollectionCluster = CaseCluster & {
+  collectionSlug: string
+  dominantState: StateConcentration | null
+}
+
+// A third, stronger lens than geo/time coincidence: cases an editor has
+// deliberately grouped into the same named collection (e.g. Hanging Death
+// Investigations) ARE a confirmed pattern by definition, so this
+// deliberately ignores MAX_DISTANCE_MILES/MAX_MONTHS_APART/MAX_CLUSTER_SIZE
+// -- those exist to filter out coincidental overlap, which doesn't apply
+// here. Also flags when a single state accounts for an outsized share of
+// the cluster, since that's a distinct, additionally notable signal on
+// top of the pattern itself (e.g. a nationwide pattern concentrated in one
+// state).
+export function findCollectionClusters(incidents: IncidentWithOccurredAt[]): CollectionCluster[] {
+  const byCollection = new Map<string, IncidentWithOccurredAt[]>()
+  for (const incident of incidents) {
+    if (!incident.collection_slug) continue
+    const list = byCollection.get(incident.collection_slug) ?? []
+    list.push(incident)
+    byCollection.set(incident.collection_slug, list)
+  }
+
+  const clusters: CollectionCluster[] = []
+  for (const [slug, cases] of byCollection) {
+    if (cases.length < 2) continue
+    const sorted = [...cases].sort((a, b) => new Date(a.occurred_at).getTime() - new Date(b.occurred_at).getTime())
+
+    let maxDistance = 0
+    let maxSpan = 0
+    for (let i = 0; i < sorted.length; i++) {
+      for (let j = i + 1; j < sorted.length; j++) {
+        if (sorted[i].lat && sorted[i].lng && sorted[j].lat && sorted[j].lng) {
+          maxDistance = Math.max(maxDistance, haversineMiles(sorted[i].lat, sorted[i].lng, sorted[j].lat, sorted[j].lng))
+        }
+        maxSpan = Math.max(maxSpan, monthsBetween(sorted[i].occurred_at, sorted[j].occurred_at))
+      }
+    }
+
+    const stateCounts = new Map<string, number>()
+    for (const c of sorted) {
+      if (!c.state) continue
+      stateCounts.set(c.state, (stateCounts.get(c.state) ?? 0) + 1)
+    }
+    let dominantState: StateConcentration | null = null
+    for (const [state, count] of stateCounts) {
+      if (count >= 2 && (!dominantState || count > dominantState.count)) {
+        dominantState = { state, count }
+      }
+    }
+
+    clusters.push({
+      bucket: `collection:${slug}`,
+      collectionSlug: slug,
+      cases: sorted,
+      maxDistanceMiles: Math.round(maxDistance),
+      spanMonths: Math.round(maxSpan),
+      dominantState,
+    })
+  }
+
+  return clusters.sort((a, b) => b.cases.length - a.cases.length)
+}
