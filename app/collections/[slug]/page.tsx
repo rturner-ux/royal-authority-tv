@@ -77,6 +77,14 @@ export default async function CollectionPage({
           </div>
           <h1 className="mt-3 text-4xl font-bold md:text-5xl">{collection.name}</h1>
           <p className="mt-3 max-w-2xl text-gray-400">{collection.description}</p>
+          {slug === "hanging-death-investigations" && (
+            <Link
+              href="/history"
+              className="mt-4 inline-flex items-center gap-2 text-sm text-[#E8D19A] hover:underline"
+            >
+              Read the documented history behind these cases →
+            </Link>
+          )}
         </div>
 
         {genres.length > 0 ? (

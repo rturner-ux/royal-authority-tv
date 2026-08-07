@@ -48,6 +48,9 @@ export default async function PatternIntelligencePage({ embedded }: { embedded?:
             method of death, victim demographics, or category -- and separately flags cases where
             a family or independent account disputes the official ruling.
           </p>
+          <Link href="/history" className="mt-3 inline-flex items-center gap-2 text-sm text-[#E8D19A] hover:underline">
+            Read the documented history behind the disputed-ruling pattern →
+          </Link>
         </div>
 
         <div className="mb-8 max-w-3xl rounded-[24px] border border-amber-500/30 bg-amber-500/[0.06] p-5 text-sm leading-7 text-amber-100/90">
