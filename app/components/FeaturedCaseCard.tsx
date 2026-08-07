@@ -5,6 +5,15 @@ import Image from "next/image";
 import type { Incident } from "@/lib/types";
 import { CATEGORY_LABELS, isActiveAlert, statusBadgeLabel } from "@/lib/labels";
 import { playSfx } from "@/lib/sfx";
+import { formatCompactCount } from "@/lib/format";
+
+function PlayIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" className="h-3.5 w-3.5">
+      <path d="M6 4.5v15l14-7.5-14-7.5Z" />
+    </svg>
+  );
+}
 
 export default function FeaturedCaseCard({
   incident,
@@ -44,6 +53,12 @@ export default function FeaturedCaseCard({
         ) : (
           <div className="flex h-full items-center justify-center text-6xl text-white/10">?</div>
         )}
+
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-black/80 to-transparent" />
+        <div className="absolute bottom-3 left-3 flex items-center gap-1 text-sm font-semibold text-white [text-shadow:0_1px_3px_rgba(0,0,0,0.6)]">
+          <PlayIcon />
+          {formatCompactCount(incident.view_count ?? 0)}
+        </div>
       </div>
 
       <div className="space-y-3 p-5">
