@@ -195,6 +195,16 @@ export async function getCaseTrackingCount(incidentId: string): Promise<number> 
   return userIds.size
 }
 
+export async function getCaseCommentCount(incidentId: string): Promise<number> {
+  const db = supabase()
+  const { count } = await db
+    .from('case_comments')
+    .select('id', { count: 'exact', head: true })
+    .eq('incident_id', incidentId)
+    .eq('status', 'approved')
+  return count ?? 0
+}
+
 // Fire-and-forget from the case page on every load -- a simple hit
 // counter, not deduplicated per visitor (matches what most sites mean by
 // a public "views" count). Atomic via the DB function, no read-then-write race.

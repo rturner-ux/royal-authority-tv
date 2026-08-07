@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import Navbar from "../../components/Navbar";
 import PersonCard from "../../components/PersonCard";
-import ShareButton from "../../components/ShareButton";
+import CaseReactionBar from "../../components/CaseReactionBar";
 import LocationZoomReveal from "../../components/LocationZoomReveal";
 import PhotoGallery from "../../components/PhotoGallery";
 import CaseLog from "../../components/CaseLog";
@@ -18,7 +18,7 @@ import RecordLastCase from "../../components/RecordLastCase";
 import CaseEngagementPopup from "../../components/CaseEngagementPopup";
 import InvestigatorToolkit from "../../components/InvestigatorToolkit";
 import CasePartners from "../../components/CasePartners";
-import { getCaseBySlug, getCaseTrackingCount, getCaseConnections, incrementCaseViewCount } from "@/lib/cases";
+import { getCaseBySlug, getCaseTrackingCount, getCaseConnections, incrementCaseViewCount, getCaseCommentCount } from "@/lib/cases";
 import { getCollection } from "@/lib/collections";
 import { getSubscriberStatus } from "@/lib/subscription";
 import { supabaseServerAuth } from "@/lib/supabase/serverAuth";
@@ -113,6 +113,7 @@ export default async function CaseFileSlugPage({
         ]
       : result.videos;
   const trackingCount = await getCaseTrackingCount(incident.id);
+  const commentCount = await getCaseCommentCount(incident.id);
   const connections = await getCaseConnections(incident.id);
   incrementCaseViewCount(incident.id).catch(() => {});
   const { user, isActive } = await getSubscriberStatus();
@@ -340,15 +341,15 @@ export default async function CaseFileSlugPage({
                 Member Room
               </Link>
 
-              <Link
-                href={`/case-file/${slug}/discussion`}
-                className="rounded-2xl border border-white/15 bg-white/5 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/10"
-              >
-                Open Discussion
-              </Link>
-
-              <ShareButton incidentId={incident.id} initialShareCount={incident.share_count} />
             </div>
+
+            <CaseReactionBar
+              incidentId={incident.id}
+              discussionHref={`/case-file/${slug}/discussion`}
+              commentCount={commentCount}
+              initialShareCount={incident.share_count}
+              isSignedIn={!!user}
+            />
           </div>
         </section>
 

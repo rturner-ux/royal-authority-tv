@@ -218,37 +218,43 @@ export default function CaseComments({
             )}
           </div>
           <p className="mt-1 text-sm leading-6 text-slate-300">{c.body}</p>
-          <div className="mt-2 flex items-center gap-4">
-            <button
-              onClick={() => vote(c.id, 1)}
-              disabled={!isSignedIn}
-              className={`flex items-center gap-1 text-xs transition ${
-                c.myVote === 1 ? "text-[#E8D19A]" : "text-slate-500 hover:text-white"
-              }`}
-            >
-              <svg viewBox="0 0 24 24" fill="currentColor" className="h-4 w-4">
-                <path d="M12 4l8 8h-5v8h-6v-8H4z" />
-              </svg>
-              {c.score > 0 ? c.score : ""}
-            </button>
-            <button
-              onClick={() => vote(c.id, -1)}
-              disabled={!isSignedIn}
-              className={`flex items-center gap-1 text-xs transition ${
-                c.myVote === -1 ? "text-red-400" : "text-slate-500 hover:text-white"
-              }`}
-            >
-              <svg viewBox="0 0 24 24" fill="currentColor" className="h-4 w-4">
-                <path d="M12 20l-8-8h5V4h6v8h5z" />
-              </svg>
-            </button>
-            {!isReply && isSignedIn && (
+          <div className="mt-2 flex items-center justify-between gap-4">
+            <div className="flex items-center gap-4">
               <button
-                onClick={() => setReplyOpenFor(replyOpenFor === c.id ? null : c.id)}
-                className="text-xs font-semibold text-slate-500 transition hover:text-white"
+                onClick={() => vote(c.id, 1)}
+                disabled={!isSignedIn}
+                className={`text-xs font-semibold transition ${
+                  c.myVote === 1 ? "text-[#E8D19A]" : "text-slate-500 hover:text-white"
+                }`}
               >
-                Reply
+                Like
               </button>
+              <button
+                onClick={() => vote(c.id, -1)}
+                disabled={!isSignedIn}
+                className={`text-xs font-semibold transition ${
+                  c.myVote === -1 ? "text-red-400" : "text-slate-500 hover:text-white"
+                }`}
+              >
+                Dislike
+              </button>
+              {!isReply && isSignedIn && (
+                <button
+                  onClick={() => setReplyOpenFor(replyOpenFor === c.id ? null : c.id)}
+                  className="text-xs font-semibold text-slate-500 transition hover:text-white"
+                >
+                  Reply
+                </button>
+              )}
+            </div>
+
+            {c.score > 0 && (
+              <span className="flex items-center gap-1 rounded-full border border-white/10 bg-[#0a0d14] px-2 py-0.5 text-[11px] font-semibold text-slate-300 shadow">
+                <span className="flex h-4 w-4 items-center justify-center rounded-full bg-blue-500 text-[9px] leading-none text-white">
+                  👍
+                </span>
+                {c.score}
+              </span>
             )}
           </div>
 
