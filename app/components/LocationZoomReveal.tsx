@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import CaseMapClient from "./CaseMapClient";
+import StreetViewPanel from "./StreetViewPanel";
 import { playSfx } from "@/lib/sfx";
 
 export default function LocationZoomReveal({
@@ -98,6 +99,14 @@ export default function LocationZoomReveal({
           onDeepZoomChange={setDeepZoomed}
         />
       </div>
+
+      {deepZoomed && (
+        <StreetViewPanel
+          lat={preciseLat ?? lat}
+          lng={preciseLng ?? lng}
+          label={preciseLabel || label}
+        />
+      )}
 
       {deepZoomed && thenPhotoUrl && (
         <div className="mt-4 rounded-2xl border border-[#C9A24A]/30 bg-[#0a0d14] p-5">
