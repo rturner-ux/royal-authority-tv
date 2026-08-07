@@ -49,6 +49,7 @@ export default function MobileTabBar() {
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [roleKey, setRoleKey] = useState<string | null>(null);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [unreadNotifications, setUnreadNotifications] = useState(0);
 
   useEffect(() => {
     fetch("/api/subscriber-status")
@@ -81,6 +82,15 @@ export default function MobileTabBar() {
         if (d.success) {
           const total = d.conversations.reduce((sum: number, c: { unreadCount: number }) => sum + c.unreadCount, 0);
           setUnreadCount(total);
+        }
+      })
+      .catch(() => {});
+
+    fetch("/api/notifications")
+      .then((r) => r.json())
+      .then((d) => {
+        if (d.success) {
+          setUnreadNotifications(d.notifications.filter((n: { read_at: string | null }) => !n.read_at).length);
         }
       })
       .catch(() => {});
@@ -125,8 +135,13 @@ export default function MobileTabBar() {
         <span className="text-[0.6rem] font-semibold">Inbox</span>
       </Link>
 
-      <Link href="/account" className={`flex flex-col items-center gap-0.5 px-3 py-1.5 ${profile ? "text-red-500" : "text-slate-500"}`}>
-        <Avatar avatarUrl={avatarUrl} roleBadge={role?.badge ?? null} name={callsign || "?"} size={24} className={profile ? "ring-2 ring-red-500" : ""} />
+      <Link href="/account" className={`relative flex flex-col items-center gap-0.5 px-3 py-1.5 ${profile ? "text-red-500" : "text-slate-500"}`}>
+        <span className="relative">
+          <Avatar avatarUrl={avatarUrl} roleBadge={role?.badge ?? null} name={callsign || "?"} size={24} className={profile ? "ring-2 ring-red-500" : ""} />
+          {unreadNotifications > 0 && (
+            <span className="absolute right-0.5 top-0 flex h-3.5 w-3.5 items-center justify-center rounded-full border border-[#05070b] bg-red-600" />
+          )}
+        </span>
         <span className="text-[0.6rem] font-semibold">Profile</span>
       </Link>
     </nav>

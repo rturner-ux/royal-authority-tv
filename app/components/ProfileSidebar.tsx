@@ -49,6 +49,14 @@ function MessagesIcon() {
     </svg>
   );
 }
+function NotificationsIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="h-5 w-5 flex-shrink-0">
+      <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M13.73 21a2 2 0 0 1-3.46 0" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
 function DirectoryIcon() {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="h-5 w-5 flex-shrink-0">
@@ -148,6 +156,7 @@ const NAV_ITEMS = [
   { label: "Investigation Map", href: "/account/map", icon: MapIcon },
   { label: "Friends", href: "/account/friends", icon: FriendsIcon },
   { label: "Messages", href: "/account/messages", icon: MessagesIcon },
+  { label: "Notifications", href: "/account/notifications", icon: NotificationsIcon },
   { label: "Directory", href: "/account/directory", icon: DirectoryIcon },
   { label: "My Playlists", href: "/account/playlists", icon: PlaylistIcon },
   { label: "My Video Profile", href: "/account/videos", icon: VideoIcon },
@@ -169,6 +178,7 @@ export default function ProfileSidebar() {
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [isVerified, setIsVerified] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [unreadNotifications, setUnreadNotifications] = useState(0);
 
   useEffect(() => {
     fetch("/api/subscriber-status")
@@ -192,6 +202,15 @@ export default function ProfileSidebar() {
         if (d.success) {
           const total = d.conversations.reduce((sum: number, c: { unreadCount: number }) => sum + c.unreadCount, 0);
           setUnreadCount(total);
+        }
+      })
+      .catch(() => {});
+
+    fetch("/api/notifications")
+      .then((r) => r.json())
+      .then((d) => {
+        if (d.success) {
+          setUnreadNotifications(d.notifications.filter((n: { read_at: string | null }) => !n.read_at).length);
         }
       })
       .catch(() => {});
@@ -234,7 +253,12 @@ export default function ProfileSidebar() {
         {NAV_ITEMS.map((item) => {
           const active = isActive(item.href);
           const Icon = item.icon;
-          const badgeCount = item.href === "/account/messages" ? unreadCount : 0;
+          const badgeCount =
+            item.href === "/account/messages"
+              ? unreadCount
+              : item.href === "/account/notifications"
+              ? unreadNotifications
+              : 0;
           return (
             <Link
               key={item.href}

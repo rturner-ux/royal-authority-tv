@@ -265,6 +265,15 @@ export type DirectMessage = {
   read_at: string | null
 }
 
+export type CaseNotification = {
+  id: string
+  user_id: string
+  incident_id: string
+  read_at: string | null
+  created_at: string
+  incident: Pick<Incident, 'title' | 'slug' | 'image_url' | 'category'> | null
+}
+
 export type DirectoryProfile = {
   user_id: string
   callsign: string
