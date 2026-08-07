@@ -92,6 +92,7 @@ export default function Navbar({
   const [isActive, setIsActive] = useState(false);
   const [roleKey, setRoleKey] = useState<string | null>(null);
   const [callsign, setCallsign] = useState<string | null>(null);
+  const [membersOpen, setMembersOpen] = useState(false);
 
   useEffect(() => {
     setMounted(true);
@@ -220,21 +221,6 @@ export default function Navbar({
               {link.label}
             </Link>
           ))}
-
-          {isActive &&
-            SUBSCRIBER_LINKS.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                className={`rounded-full px-4 py-1.5 transition ${
-                  isLinkActive(link.href)
-                    ? "bg-[#C9A24A]/15 text-[#E8D19A]"
-                    : "text-[#E8D19A]/80 hover:text-[#E8D19A]"
-                }`}
-              >
-                {link.label}
-              </Link>
-            ))}
         </nav>
 
         <div className="min-w-0 flex-1 xl:hidden" />
@@ -274,6 +260,54 @@ export default function Navbar({
             >
               <SearchIcon />
             </button>
+          )}
+
+          {/* Consolidates the 5 subscriber-only tools into one dropdown --
+              previously each rendered as its own pill in the nav above,
+              which crowded out the regular links once a member was signed
+              in. Desktop-only: the mobile hamburger menu already groups
+              these under its own "Subscriber Tools" section. */}
+          {isActive && (
+            <div className="relative hidden flex-shrink-0 xl:block">
+              <button
+                type="button"
+                onClick={() => setMembersOpen((v) => !v)}
+                aria-expanded={membersOpen}
+                className={`flex items-center gap-1.5 rounded-full px-4 py-1.5 text-sm font-semibold transition ${
+                  SUBSCRIBER_LINKS.some((link) => isLinkActive(link.href)) || membersOpen
+                    ? "bg-[#C9A24A]/15 text-[#E8D19A]"
+                    : "text-[#E8D19A]/80 hover:text-[#E8D19A]"
+                }`}
+              >
+                Members
+                <ChevronIcon open={membersOpen} />
+              </button>
+
+              {membersOpen && (
+                <>
+                  <div className="fixed inset-0 z-[9998]" onClick={() => setMembersOpen(false)} />
+                  <div className="absolute right-0 top-full z-[9999] mt-3 w-56 overflow-hidden rounded-2xl border border-[#C9A24A]/30 bg-[#0a0d14] shadow-2xl">
+                    <div className="border-b border-[#C9A24A]/20 px-4 py-2.5 text-[10px] font-bold uppercase tracking-[0.2em] text-[#E8D19A]">
+                      Subscriber Access
+                    </div>
+                    {SUBSCRIBER_LINKS.map((link) => (
+                      <Link
+                        key={link.href}
+                        href={link.href}
+                        onClick={() => setMembersOpen(false)}
+                        className={`block px-4 py-3 text-sm transition ${
+                          isLinkActive(link.href)
+                            ? "bg-[#C9A24A]/10 text-[#E8D19A]"
+                            : "text-slate-300 hover:bg-white/5 hover:text-[#E8D19A]"
+                        }`}
+                      >
+                        {link.label}
+                      </Link>
+                    ))}
+                  </div>
+                </>
+              )}
+            </div>
           )}
 
           {accountLabel && accountHref && (
