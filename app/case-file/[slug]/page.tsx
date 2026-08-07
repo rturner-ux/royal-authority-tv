@@ -285,7 +285,7 @@ export default async function CaseFileSlugPage({
                   <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z" strokeLinecap="round" strokeLinejoin="round" />
                   <circle cx="12" cy="12" r="3" />
                 </svg>
-                {incident.view_count.toLocaleString()} view{incident.view_count === 1 ? "" : "s"}
+                {(incident.view_count ?? 0).toLocaleString()} view{(incident.view_count ?? 0) === 1 ? "" : "s"}
               </div>
 
               {trackingCount > 0 && (
