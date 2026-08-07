@@ -581,7 +581,7 @@ export default function HomeClient({
                 <div className="mt-1 text-4xl font-black text-[#E8D19A]">
                   <LiveClickCount initialCount={totalClicks} />
                 </div>
-                <div className="mt-2 text-sm text-white/60">Total Clicks on the Site</div>
+                <div className="mt-2 text-sm text-white/60">Total Visits to the Site</div>
               </motion.div>
             )}
           </motion.div>

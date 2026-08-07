@@ -1,55 +1,29 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 
-const FLUSH_INTERVAL_MS = 4000;
+// A "visit" is one browsing session, not one click -- matches the standard
+// 30-minute inactivity window most analytics tools use for a session, so
+// browsing around the site for the next half hour only counts once.
+const SESSION_MAX_AGE_SECONDS = 60 * 30;
 
-// Mounted once in the root layout. Counts every click anywhere on the site
-// and batches them into one request every few seconds instead of firing an
-// API call per click, then flushes whatever's left when the tab is hidden
-// or closed via sendBeacon (fetch gets cancelled on unload, sendBeacon
-// doesn't). Renders nothing.
+function getCookie(name: string): string | null {
+  const match = document.cookie.match(new RegExp(`(?:^|; )${name}=([^;]*)`));
+  return match ? decodeURIComponent(match[1]) : null;
+}
+
+// Mounted once in the root layout. Fires at most once per session (and
+// never for a browser that's visited /api/track/optout) instead of once
+// per click -- the old per-click counter padded the total with every
+// click a visitor made, including our own testing traffic.
 export default function SiteClickTracker() {
-  const pending = useRef(0);
-
   useEffect(() => {
-    function onClick() {
-      pending.current += 1;
-    }
+    if (getCookie("ra_notrack")) return;
+    if (getCookie("ra_visited")) return;
 
-    function flush(useBeacon = false) {
-      if (pending.current === 0) return;
-      const count = pending.current;
-      pending.current = 0;
-      const body = JSON.stringify({ count });
+    document.cookie = `ra_visited=1; max-age=${SESSION_MAX_AGE_SECONDS}; path=/; samesite=lax`;
 
-      if (useBeacon && navigator.sendBeacon) {
-        navigator.sendBeacon("/api/clicks/increment", new Blob([body], { type: "application/json" }));
-      } else {
-        fetch("/api/clicks/increment", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body,
-          keepalive: true,
-        }).catch(() => {});
-      }
-    }
-
-    document.addEventListener("click", onClick);
-    const interval = setInterval(() => flush(false), FLUSH_INTERVAL_MS);
-
-    function onVisibilityChange() {
-      if (document.visibilityState === "hidden") flush(true);
-    }
-    document.addEventListener("visibilitychange", onVisibilityChange);
-    window.addEventListener("pagehide", () => flush(true));
-
-    return () => {
-      document.removeEventListener("click", onClick);
-      document.removeEventListener("visibilitychange", onVisibilityChange);
-      clearInterval(interval);
-      flush(true);
-    };
+    fetch("/api/clicks/increment", { method: "POST", keepalive: true }).catch(() => {});
   }, []);
 
   return null;

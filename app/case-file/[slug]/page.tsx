@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import Navbar from "../../components/Navbar";
@@ -115,7 +116,10 @@ export default async function CaseFileSlugPage({
   const trackingCount = await getCaseTrackingCount(incident.id);
   const commentCount = await getCaseCommentCount(incident.id);
   const connections = await getCaseConnections(incident.id);
-  incrementCaseViewCount(incident.id).catch(() => {});
+  const cookieStore = await cookies();
+  if (!cookieStore.get("ra_notrack")) {
+    incrementCaseViewCount(incident.id).catch(() => {});
+  }
   const { user, isActive } = await getSubscriberStatus();
   const accountProps = user
     ? { accountLabel: "My Profile", accountHref: "/account" }
