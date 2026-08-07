@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { MUSIC_GENRE_LABELS, TRACKS, trackUrl, type MusicGenre, type Track } from "@/lib/music";
+import { MUSIC_GENRE_LABELS, TRACKS, type MusicGenre } from "@/lib/music";
+import { useMusicPlayer } from "./MusicPlayerContext";
 
 const GENRES: MusicGenre[] = ["mystery", "suspense", "dark_ambient", "investigation"];
 
@@ -24,11 +24,10 @@ function PauseIcon() {
 
 function NoteIcon() {
   return (
-    <svg viewBox="0 0 24 24" fill="currentColor" className="h-4 w-4">
-      <path d="M9 18V5l12-2v13" strokeWidth={0} />
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6} className="h-4 w-4">
       <circle cx="6" cy="18" r="3" />
       <circle cx="18" cy="16" r="3" />
-      <path d="M9 5l12-2v13M9 18V5" fill="none" stroke="currentColor" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M9 18V5l12-2v13" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
 }
@@ -36,66 +35,14 @@ function NoteIcon() {
 // Mounted once in the root layout. Case-scoped sound effects (lib/sfx.ts)
 // stay separate from this -- this is ambient mood music the listener
 // chooses and keeps playing across pages, not short interaction stings.
+// All playback state lives in MusicPlayerContext so the account
+// sidebar's "Music" nav entry can drive the same player.
 export default function MusicPlayer() {
-  const audioRef = useRef<HTMLAudioElement | null>(null);
-  const [expanded, setExpanded] = useState(false);
-  const [activeGenre, setActiveGenre] = useState<MusicGenre>("mystery");
-  const [current, setCurrent] = useState<Track | null>(null);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [volume, setVolume] = useState(0.5);
-
-  useEffect(() => {
-    if (audioRef.current) audioRef.current.volume = volume;
-  }, [volume]);
-
-  function playTrack(track: Track) {
-    setCurrent(track);
-    setIsPlaying(true);
-    // Actual playback starts from the src-change effect below, once the
-    // element has the new source loaded.
-  }
-
-  useEffect(() => {
-    if (!current || !audioRef.current) return;
-    const audio = audioRef.current;
-    audio.src = trackUrl(current);
-    audio.volume = volume;
-    audio.play().catch(() => setIsPlaying(false));
-    // Only re-run when the track itself changes, not on every volume tick
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [current]);
-
-  function togglePlay() {
-    if (!current) {
-      const first = TRACKS.find((t) => t.genre === activeGenre) ?? TRACKS[0];
-      playTrack(first);
-      return;
-    }
-    if (!audioRef.current) return;
-    if (isPlaying) {
-      audioRef.current.pause();
-      setIsPlaying(false);
-    } else {
-      audioRef.current.play().catch(() => {});
-      setIsPlaying(true);
-    }
-  }
-
-  function playNext() {
-    const inGenre = TRACKS.filter((t) => t.genre === (current?.genre ?? activeGenre));
-    const idx = current ? inGenre.findIndex((t) => t.slug === current.slug) : -1;
-    playTrack(inGenre[(idx + 1) % inGenre.length]);
-  }
+  const { expanded, setExpanded, activeGenre, setActiveGenre, current, isPlaying, volume, setVolume, playTrack, togglePlay } =
+    useMusicPlayer();
 
   return (
     <div className="fixed inset-x-0 bottom-14 z-[998] lg:bottom-0">
-      <audio
-        ref={audioRef}
-        onEnded={playNext}
-        onPlay={() => setIsPlaying(true)}
-        onPause={() => setIsPlaying(false)}
-      />
-
       {expanded && (
         <div className="max-h-[60vh] overflow-y-auto border-t border-[#C9A24A]/30 bg-[#05070b]/98 backdrop-blur-xl">
           <div className="mx-auto max-w-3xl px-5 py-5">

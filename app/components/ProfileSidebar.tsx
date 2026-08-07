@@ -8,6 +8,7 @@ import { getRole } from "@/lib/roles";
 import { supabaseBrowser } from "@/lib/supabase/browser";
 import Avatar from "./Avatar";
 import VerifiedBadge from "./VerifiedBadge";
+import { useMusicPlayer } from "./MusicPlayerContext";
 
 function HomeIcon() {
   return (
@@ -148,8 +149,19 @@ function ScanIcon() {
     </svg>
   );
 }
+function MusicIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="h-5 w-5 flex-shrink-0">
+      <circle cx="6" cy="18" r="3" />
+      <circle cx="18" cy="16" r="3" />
+      <path d="M9 18V5l12-2v13" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
 
-const NAV_ITEMS = [
+// Most items navigate (href); "Music" instead opens the persistent
+// player's panel in place, since there's no dedicated music page.
+const NAV_ITEMS: { label: string; href?: string; action?: "music"; icon: () => React.JSX.Element }[] = [
   { label: "Home", href: "/account/home", icon: HomeIcon },
   { label: "Case Files", href: "/account/case-file", icon: FilesIcon },
   { label: "Live", href: "/account/live", icon: LiveIcon },
@@ -160,6 +172,7 @@ const NAV_ITEMS = [
   { label: "Directory", href: "/account/directory", icon: DirectoryIcon },
   { label: "My Playlists", href: "/account/playlists", icon: PlaylistIcon },
   { label: "My Video Profile", href: "/account/videos", icon: VideoIcon },
+  { label: "Music", action: "music", icon: MusicIcon },
   { label: "Transcript Archive", href: "/account/transcript", icon: TranscriptIcon },
   { label: "Investigation Board", href: "/account/investigation-board", icon: BoardIcon },
   { label: "Pattern Intelligence", href: "/account/pattern-intelligence", icon: PatternIcon },
@@ -179,6 +192,7 @@ export default function ProfileSidebar() {
   const [isVerified, setIsVerified] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
   const [unreadNotifications, setUnreadNotifications] = useState(0);
+  const { expanded: musicExpanded, setExpanded: setMusicExpanded, current: currentTrack, isPlaying } = useMusicPlayer();
 
   useEffect(() => {
     fetch("/api/subscriber-status")
@@ -251,8 +265,29 @@ export default function ProfileSidebar() {
 
       <nav className="mt-6 flex flex-1 flex-col gap-1">
         {NAV_ITEMS.map((item) => {
-          const active = isActive(item.href);
           const Icon = item.icon;
+
+          if (item.action === "music") {
+            return (
+              <button
+                key="music"
+                onClick={() => setMusicExpanded((v) => !v)}
+                className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-semibold transition ${
+                  musicExpanded ? "text-red-500" : "text-slate-300 hover:bg-white/5 hover:text-white"
+                }`}
+              >
+                <span className="relative flex-shrink-0">
+                  <Icon />
+                  {isPlaying && (
+                    <span className="absolute -right-1 -top-1 h-2 w-2 rounded-full bg-emerald-400" />
+                  )}
+                </span>
+                <span className="min-w-0 flex-1 truncate">{currentTrack ? currentTrack.title : item.label}</span>
+              </button>
+            );
+          }
+
+          const active = isActive(item.href!);
           const badgeCount =
             item.href === "/account/messages"
               ? unreadCount
@@ -262,7 +297,7 @@ export default function ProfileSidebar() {
           return (
             <Link
               key={item.href}
-              href={item.href}
+              href={item.href!}
               className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold transition ${
                 active ? "text-red-500" : "text-slate-300 hover:bg-white/5 hover:text-white"
               }`}
