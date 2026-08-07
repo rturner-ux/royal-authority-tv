@@ -125,7 +125,13 @@ export async function getRandomSpotlightCases(count: number): Promise<Incident[]
   return shuffled.slice(0, count) as Incident[]
 }
 
-export type IncidentWithOccurredAt = Incident & { occurred_at: string; hasDisputedRuling: boolean }
+export type VictimProfile = { age: number | null; race: string | null; sex: string | null }
+
+export type IncidentWithOccurredAt = Incident & {
+  occurred_at: string
+  hasDisputedRuling: boolean
+  victim: VictimProfile
+}
 
 const DISPUTED_CLAIM_TYPES = new Set(['disputed_allegation', 'family_claim'])
 
@@ -145,13 +151,19 @@ const DISPUTED_CLAIM_TYPES = new Set(['disputed_allegation', 'family_claim'])
 // not just cases with a dedicated case-file page.
 export async function getAllVisibleCasesForPatternIntelligence(): Promise<IncidentWithOccurredAt[]> {
   const db = supabase()
-  const [{ data: incidents, error: incidentsError }, { data: updates, error: updatesError }] = await Promise.all([
+  const [
+    { data: incidents, error: incidentsError },
+    { data: updates, error: updatesError },
+    { data: victims, error: victimsError },
+  ] = await Promise.all([
     db.from('incidents').select('*').eq('is_hidden', false),
     db.from('incident_updates').select('incident_id, event_date, claim_type'),
+    db.from('incident_people').select('incident_id, age, race, sex, sequence').eq('role', 'victim').order('sequence', { ascending: true }),
   ])
 
   if (incidentsError) throw incidentsError
   if (updatesError) throw updatesError
+  if (victimsError) throw victimsError
 
   const earliestByIncident = new Map<string, string>()
   const disputedIncidentIds = new Set<string>()
@@ -163,9 +175,21 @@ export async function getAllVisibleCasesForPatternIntelligence(): Promise<Incide
     if (DISPUTED_CLAIM_TYPES.has(u.claim_type)) disputedIncidentIds.add(u.incident_id)
   }
 
+  // First (lowest-sequence) victim row per incident stands in for "the
+  // victim" -- multi-victim cases are rare enough in this data that this
+  // is a reasonable simplification rather than trying to match every
+  // victim pairing across two multi-victim cases.
+  const victimByIncident = new Map<string, VictimProfile>()
+  for (const v of victims ?? []) {
+    if (!victimByIncident.has(v.incident_id)) {
+      victimByIncident.set(v.incident_id, { age: v.age, race: v.race, sex: v.sex })
+    }
+  }
+
   return ((incidents ?? []) as Incident[]).map((incident) => ({
     ...incident,
     occurred_at: earliestByIncident.get(incident.id) ?? incident.published_at,
+    victim: victimByIncident.get(incident.id) ?? { age: null, race: null, sex: null },
     hasDisputedRuling: disputedIncidentIds.has(incident.id),
   }))
 }
