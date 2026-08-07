@@ -6,6 +6,7 @@ import SubscribePrompt from "./components/SubscribePrompt";
 import Footer from "./components/Footer";
 import PresenceProvider from "./components/PresenceProvider";
 import SiteClickTracker from "./components/SiteClickTracker";
+import MusicPlayer from "./components/MusicPlayer";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -69,6 +70,7 @@ export default function RootLayout({
           <div className="flex-1">{children}</div>
           <Footer />
           <SubscribePrompt />
+          <MusicPlayer />
         </PresenceProvider>
       </body>
     </html>
