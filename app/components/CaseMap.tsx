@@ -29,12 +29,26 @@ function AutoZoomIn({ lat, lng }: { lat: number; lng: number }) {
 
 // Fires the deep "drone view" zoom whenever `trigger` increments -- kept
 // declarative (like AutoZoomIn above) instead of grabbing a map ref.
-function DeepZoomTrigger({ lat, lng, trigger }: { lat: number; lng: number; trigger: number }) {
+// `onArrived` fires once the flyTo animation actually finishes (not on
+// click), so anything layered on top -- Street View, the flyover video --
+// doesn't appear until the camera has actually landed on the spot.
+function DeepZoomTrigger({
+  lat,
+  lng,
+  trigger,
+  onArrived,
+}: {
+  lat: number;
+  lng: number;
+  trigger: number;
+  onArrived?: () => void;
+}) {
   const map = useMap();
 
   useEffect(() => {
     if (trigger > 0) {
       map.flyTo([lat, lng], DEEP_ZOOM, { duration: 1.8, easeLinearity: 0.2 });
+      map.once("moveend", () => onArrived?.());
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [trigger]);
@@ -89,7 +103,6 @@ export default function CaseMap({
     }
     playSfx("zoom");
     setDeepZoomed(true);
-    onDeepZoomChange?.(true);
     setDeepZoomTrigger((n) => n + 1);
   }
 
@@ -117,7 +130,12 @@ export default function CaseMap({
           maxZoom={21}
         />
         <AutoZoomIn lat={lat} lng={lng} />
-        <DeepZoomTrigger lat={targetLat} lng={targetLng} trigger={deepZoomTrigger} />
+        <DeepZoomTrigger
+          lat={targetLat}
+          lng={targetLng}
+          trigger={deepZoomTrigger}
+          onArrived={() => onDeepZoomChange?.(true)}
+        />
         <Marker
           position={[lat, lng]}
           icon={markerIcon()}
