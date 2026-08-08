@@ -366,6 +366,8 @@ export default function HomeClient({
 
   return (
     <main className="relative min-h-screen overflow-hidden bg-[#020617] text-white">
+      <Navbar accountLabel={accountLabel} accountHref={accountHref} embedded={embedded} />
+
       {/* Hero */}
       <section className="relative overflow-hidden">
         <div className="absolute inset-0">
@@ -417,10 +419,6 @@ export default function HomeClient({
             mixBlendMode: "screen",
           }}
         />
-
-        <div className="relative z-10 mx-auto max-w-6xl px-6 pt-6 lg:px-16">
-          <Navbar accountLabel={accountLabel} accountHref={accountHref} embedded={embedded} />
-        </div>
 
         {welcome && (
           <motion.div
