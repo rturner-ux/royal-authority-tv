@@ -7,6 +7,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { getRole } from "@/lib/roles";
 import { supabaseBrowser } from "@/lib/supabase/browser";
+import Wordmark from "./Wordmark";
 
 export type Crumb = { label: string; href?: string };
 
@@ -195,14 +196,7 @@ export default function Navbar({
         </div>
 
         <Link href="/" className="flex-shrink-0">
-          <Image
-            src="/royal-authority-wordmark.png"
-            alt="Royal Authority TV"
-            width={65}
-            height={60}
-            unoptimized
-            className="h-9 w-auto sm:h-11"
-          />
+          <Wordmark className="text-lg sm:text-xl" />
         </Link>
 
         {/* Pill nav: only shown once there's room for all of them in one line;

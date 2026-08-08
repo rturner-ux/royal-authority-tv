@@ -2,12 +2,12 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { getRole } from "@/lib/roles";
 import { supabaseBrowser } from "@/lib/supabase/browser";
 import Avatar from "./Avatar";
 import VerifiedBadge from "./VerifiedBadge";
+import Wordmark from "./Wordmark";
 
 function HomeIcon() {
   return (
@@ -281,14 +281,7 @@ export default function ProfileSidebar() {
   return (
     <aside className="sticky top-0 hidden h-screen w-60 flex-shrink-0 flex-col overflow-y-auto border-r border-white/10 bg-[#05070b] px-3 py-6 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden lg:flex">
       <Link href="/account/home" className="flex items-center px-3">
-        <Image
-          src="/royal-authority-wordmark.png"
-          alt="Royal Authority TV"
-          width={130}
-          height={30}
-          unoptimized
-          className="h-7 w-auto"
-        />
+        <Wordmark className="text-lg" />
       </Link>
 
       <Link

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import FilmGrain from "./FilmGrain";
+import Wordmark from "./Wordmark";
 
 export default function JoinLanding() {
   const router = useRouter();
@@ -25,7 +26,7 @@ export default function JoinLanding() {
 
       <div className="relative z-10 mx-auto flex max-w-6xl items-center justify-between px-6 py-6 lg:px-16">
         <Link href="/">
-          <Image src="/royal-authority-wordmark.png" alt="Royal Authority TV" width={80} height={74} unoptimized className="h-14 w-auto" />
+          <Wordmark className="text-2xl" />
         </Link>
         <Link
           href="/login"
