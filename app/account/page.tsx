@@ -4,7 +4,6 @@ import Navbar from "../components/Navbar";
 import AccountActions from "./AccountActions";
 import InvestigatorProfile from "./InvestigatorProfile";
 import EmailAlertsToggle from "./EmailAlertsToggle";
-import DirectoryVisibleToggle from "./DirectoryVisibleToggle";
 import InterestsPicker from "./InterestsPicker";
 import AvatarUpload from "./AvatarUpload";
 import VerifiedBadge from "../components/VerifiedBadge";
@@ -28,7 +27,7 @@ export default async function AccountPage() {
     db.from("subscribers").select("status, current_period_end").eq("user_id", user.id).maybeSingle(),
     db
       .from("subscriber_profiles")
-      .select("role, callsign, email_alerts_enabled, directory_visible, avatar_url, is_verified, interests")
+      .select("role, callsign, email_alerts_enabled, avatar_url, is_verified, interests")
       .eq("user_id", user.id)
       .maybeSingle(),
   ]);
@@ -164,13 +163,6 @@ export default async function AccountPage() {
                     <span className="text-white/50">→</span>
                   </Link>
                 </div>
-              )}
-
-              {isActive && (
-                <DirectoryVisibleToggle
-                  userId={user.id}
-                  initialVisible={profile?.directory_visible ?? false}
-                />
               )}
 
               {isActive && (

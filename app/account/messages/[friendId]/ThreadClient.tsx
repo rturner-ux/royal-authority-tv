@@ -227,7 +227,7 @@ export default function ThreadClient({
               return (
                 <div key={m.id} className={`flex ${mine ? "justify-end" : "justify-start"}`}>
                   <div
-                    className={`max-w-[75%] rounded-2xl px-4 py-2.5 text-sm leading-6 ${
+                    className={`max-w-[75%] whitespace-pre-wrap rounded-2xl px-4 py-2.5 text-sm leading-6 ${
                       mine ? "bg-[#C9A24A] text-black" : "bg-white/10 text-white"
                     }`}
                   >

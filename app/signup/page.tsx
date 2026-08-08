@@ -11,6 +11,7 @@ function SignupForm() {
   const searchParams = useSearchParams();
 
   const [email, setEmail] = useState(searchParams.get("email") || "");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -25,10 +26,18 @@ function SignupForm() {
     setError(null);
     setLoading(true);
 
+    const check = await fetch(`/api/check-username?username=${encodeURIComponent(username)}`).then((r) => r.json());
+    if (!check.available) {
+      setLoading(false);
+      setError(check.reason || "That username is already taken.");
+      return;
+    }
+
     const { data, error } = await supabaseBrowser().auth.signUp({
       email,
       password,
       options: {
+        data: { callsign: username },
         emailRedirectTo: `${window.location.origin}/login?next=${encodeURIComponent(next)}`,
       },
     });
@@ -99,6 +108,23 @@ function SignupForm() {
                 className="w-full rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-white outline-none placeholder:text-slate-500 focus:border-[#C9A24A]/40"
                 required
               />
+              <div>
+                <input
+                  type="text"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  placeholder="Username"
+                  minLength={3}
+                  maxLength={20}
+                  pattern="[a-zA-Z0-9_]+"
+                  title="3-20 characters, letters, numbers, and underscores only."
+                  className="w-full rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-white outline-none placeholder:text-slate-500 focus:border-[#C9A24A]/40"
+                  required
+                />
+                <p className="mt-1.5 px-1 text-xs text-slate-500">
+                  How other members will see you. 3-20 characters, letters, numbers, and underscores.
+                </p>
+              </div>
               <input
                 type="password"
                 value={password}

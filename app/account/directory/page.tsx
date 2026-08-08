@@ -29,8 +29,7 @@ export default async function DirectoryPage() {
 
         <h1 className="font-serif text-3xl font-bold text-white">Subscriber Directory</h1>
         <p className="mt-2 text-sm leading-6 text-slate-400">
-          Other investigators who&apos;ve opted in to being found by callsign. Send a friend request to
-          start a conversation.
+          Every member with a callsign. Send a friend request to start a conversation.
         </p>
 
         {!profile?.callsign && (
@@ -39,7 +38,7 @@ export default async function DirectoryPage() {
             <a href="/account" className="text-[#E8D19A] hover:underline">
               profile
             </a>{" "}
-            before you can appear in the directory yourself.
+            to appear in the directory.
           </p>
         )}
 

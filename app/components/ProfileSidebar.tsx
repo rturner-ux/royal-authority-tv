@@ -158,6 +158,13 @@ function MusicIcon() {
     </svg>
   );
 }
+function AdminIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="h-5 w-5 flex-shrink-0">
+      <path d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6l7-3Z" strokeLinejoin="round" />
+    </svg>
+  );
+}
 
 // Most items navigate (href); "Music" instead opens the persistent
 // player's panel in place, since there's no dedicated music page.
@@ -192,6 +199,7 @@ export default function ProfileSidebar() {
   const [isVerified, setIsVerified] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
   const [unreadNotifications, setUnreadNotifications] = useState(0);
+  const [isAdmin, setIsAdmin] = useState(false);
   const { expanded: musicExpanded, setExpanded: setMusicExpanded, current: currentTrack, isPlaying } = useMusicPlayer();
 
   useEffect(() => {
@@ -202,6 +210,7 @@ export default function ProfileSidebar() {
         setCallsign(d.callsign ?? null);
         setAvatarUrl(d.avatarUrl ?? null);
         setIsVerified(Boolean(d.isVerified));
+        setIsAdmin(Boolean(d.isAdmin));
       })
       .catch(() => {});
   }, []);
@@ -314,6 +323,18 @@ export default function ProfileSidebar() {
             </Link>
           );
         })}
+
+        {isAdmin && (
+          <Link
+            href="/account/admin/moderators"
+            className={`mt-2 flex items-center gap-3 rounded-xl border border-[#C9A24A]/20 bg-[#C9A24A]/[0.04] px-3 py-2.5 text-sm font-semibold transition ${
+              isActive("/account/admin/moderators") ? "text-red-500" : "text-[#E8D19A] hover:bg-[#C9A24A]/10"
+            }`}
+          >
+            <AdminIcon />
+            Moderators
+          </Link>
+        )}
       </nav>
 
       <div className="mt-auto flex flex-col gap-1 border-t border-white/10 pt-3">

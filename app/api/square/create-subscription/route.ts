@@ -4,6 +4,7 @@ import { supabaseServerAuth } from '@/lib/supabase/serverAuth'
 import { supabase } from '@/lib/supabase/server'
 import { squareClient, mapSquareStatus } from '@/lib/square/client'
 import { verifyRecaptcha } from '@/lib/recaptcha'
+import { sendWelcomeMessage } from '@/lib/welcomeMessage'
 
 export async function POST(req: NextRequest) {
   const authDb = await supabaseServerAuth()
@@ -91,6 +92,12 @@ export async function POST(req: NextRequest) {
     if (upsertError) {
       console.error('Failed to persist subscriber row:', upsertError)
       return NextResponse.json({ error: 'Subscription created but failed to save status' }, { status: 500 })
+    }
+
+    // Only the first time -- `existing` was fetched before the upsert
+    // above, so its absence means this user never had a subscribers row.
+    if (!existing) {
+      sendWelcomeMessage(user.id).catch((err) => console.error('Failed to send welcome message:', err))
     }
 
     return NextResponse.json({ success: true })

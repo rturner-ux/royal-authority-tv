@@ -105,7 +105,7 @@ export default function DirectoryClient() {
 
       {!loading && profiles.length === 0 && (
         <p className="mt-6 text-sm leading-7 text-slate-400">
-          {query ? "No one matches that search." : "No one has opted into the directory yet."}
+          {query ? "No one matches that search." : "No members with a callsign yet."}
         </p>
       )}
     </div>
