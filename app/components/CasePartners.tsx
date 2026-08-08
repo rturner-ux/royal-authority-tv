@@ -55,6 +55,7 @@ export default function CasePartners({
   const [busy, setBusy] = useState<string | null>(null);
   const [openNotesFor, setOpenNotesFor] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [inviteQuery, setInviteQuery] = useState("");
 
   function load() {
     Promise.all([
@@ -141,6 +142,11 @@ export default function CasePartners({
     ...outgoing.map((p) => p.otherUser.user_id),
   ]);
   const invitable = friends.filter((f) => !partneredIds.has(f.otherUser.user_id));
+  const invitableFiltered = inviteQuery.trim()
+    ? invitable.filter((f) =>
+        (f.otherUser.callsign || "").toLowerCase().includes(inviteQuery.trim().toLowerCase())
+      )
+    : invitable;
 
   return (
     <section className="rounded-[32px] border border-[#C9A24A]/20 bg-gradient-to-br from-[#C9A24A]/[0.07] to-transparent p-7 backdrop-blur-sm">
@@ -223,19 +229,34 @@ export default function CasePartners({
               <div className="mb-2 text-xs font-bold uppercase tracking-[0.2em] text-slate-500">
                 Invite a friend to partner on this case
               </div>
-              <div className="space-y-2">
-                {invitable.map((f) => (
-                  <div key={f.otherUser.user_id} className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.03] p-3.5">
-                    <Person otherUser={f.otherUser} />
-                    <button
-                      onClick={() => invite(f.otherUser.user_id)}
-                      disabled={busy === f.otherUser.user_id}
-                      className="flex-shrink-0 rounded-full bg-[#C9A24A] px-3 py-1.5 text-xs font-bold text-black transition hover:bg-[#E8D19A] disabled:opacity-50"
-                    >
-                      Partner Up
-                    </button>
-                  </div>
-                ))}
+              {invitable.length > 5 && (
+                <input
+                  value={inviteQuery}
+                  onChange={(e) => setInviteQuery(e.target.value)}
+                  placeholder="Search your friends..."
+                  className="mb-2 w-full rounded-xl border border-white/10 bg-white/[0.03] px-3.5 py-2 text-sm text-white outline-none placeholder:text-slate-500 focus:border-[#C9A24A]/40"
+                />
+              )}
+              {/* Fixed-height scroll instead of rendering every friend inline --
+                  otherwise this list grows with the subscriber's entire friend
+                  count on every single case page, regardless of case. */}
+              <div className="max-h-64 space-y-2 overflow-y-auto pr-1">
+                {invitableFiltered.length === 0 ? (
+                  <p className="text-xs text-slate-500">No friends match &ldquo;{inviteQuery}&rdquo;.</p>
+                ) : (
+                  invitableFiltered.map((f) => (
+                    <div key={f.otherUser.user_id} className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.03] p-3.5">
+                      <Person otherUser={f.otherUser} />
+                      <button
+                        onClick={() => invite(f.otherUser.user_id)}
+                        disabled={busy === f.otherUser.user_id}
+                        className="flex-shrink-0 rounded-full bg-[#C9A24A] px-3 py-1.5 text-xs font-bold text-black transition hover:bg-[#E8D19A] disabled:opacity-50"
+                      >
+                        Partner Up
+                      </button>
+                    </div>
+                  ))
+                )}
               </div>
             </div>
           )}
