@@ -8,6 +8,7 @@ import InterestsPicker from "./InterestsPicker";
 import AvatarUpload from "./AvatarUpload";
 import VerifiedBadge from "../components/VerifiedBadge";
 import AccountTabs from "./AccountTabs";
+import FollowStatChips from "./FollowStatChips";
 import { supabaseServerAuth } from "@/lib/supabase/serverAuth";
 import { supabase } from "@/lib/supabase/server";
 import { getRole } from "@/lib/roles";
@@ -51,23 +52,21 @@ export default async function AccountPage() {
   // RLS-scoped session.
   const svc = supabase();
 
-  const [{ data: myRequestsRaw }, { previews: playlistPreviews, savedIncidentIds: allSavedIncidentIds }, { count: friendsCount }] =
-    await Promise.all([
-      svc
-        .from("member_questions")
-        .select("id, topic, message, created_at, incidents(title, slug)")
-        .eq("user_id", user.id)
-        .order("created_at", { ascending: false }),
-      getPlaylistPreviews(user.id),
-      // Friends is a mutual relationship (both sides accept), so "people
-      // following you" and "people you're following" are the same count --
-      // there's no one-way follow model on this site.
-      db
-        .from("friend_requests")
-        .select("id", { count: "exact", head: true })
-        .eq("status", "accepted")
-        .or(`sender_id.eq.${user.id},recipient_id.eq.${user.id}`),
-    ]);
+  const [
+    { data: myRequestsRaw },
+    { previews: playlistPreviews, savedIncidentIds: allSavedIncidentIds },
+    { count: followingCount },
+    { count: followerCount },
+  ] = await Promise.all([
+    svc
+      .from("member_questions")
+      .select("id, topic, message, created_at, incidents(title, slug)")
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: false }),
+    getPlaylistPreviews(user.id),
+    db.from("subscriber_follows").select("id", { count: "exact", head: true }).eq("follower_id", user.id),
+    db.from("subscriber_follows").select("id", { count: "exact", head: true }).eq("followed_id", user.id),
+  ]);
 
   const myRequests = (myRequestsRaw ?? []).map((r) => ({
     ...r,
@@ -134,14 +133,7 @@ export default async function AccountPage() {
 
               {/* Stat chips */}
               <div className="mt-5 flex flex-wrap gap-6 border-t border-white/10 pt-4">
-                <Link href="/account/friends">
-                  <div className="text-lg font-bold text-white">{friendsCount ?? 0}</div>
-                  <div className="text-xs uppercase tracking-[0.15em] text-slate-500">Followers</div>
-                </Link>
-                <Link href="/account/friends">
-                  <div className="text-lg font-bold text-white">{friendsCount ?? 0}</div>
-                  <div className="text-xs uppercase tracking-[0.15em] text-slate-500">Following</div>
-                </Link>
+                <FollowStatChips followingCount={followingCount ?? 0} followerCount={followerCount ?? 0} />
                 <div>
                   <div className="text-lg font-bold text-white">{playlistPreviews.length}</div>
                   <div className="text-xs uppercase tracking-[0.15em] text-slate-500">Playlists</div>
