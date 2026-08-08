@@ -158,6 +158,14 @@ function MusicIcon() {
     </svg>
   );
 }
+function ActivityIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="h-5 w-5 flex-shrink-0">
+      <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M13.73 21a2 2 0 0 1-3.46 0" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
 function AdminIcon() {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="h-5 w-5 flex-shrink-0">
@@ -217,6 +225,7 @@ export default function ProfileSidebar() {
   const [unreadNotifications, setUnreadNotifications] = useState(0);
   const [isAdmin, setIsAdmin] = useState(false);
   const [moderatorPermissions, setModeratorPermissions] = useState<string[]>([]);
+  const [adminUnreadCount, setAdminUnreadCount] = useState(0);
   const { expanded: musicExpanded, setExpanded: setMusicExpanded, current: currentTrack, isPlaying } = useMusicPlayer();
 
   useEffect(() => {
@@ -258,7 +267,18 @@ export default function ProfileSidebar() {
         }
       })
       .catch(() => {});
-  }, [pathname]);
+
+    if (isAdmin) {
+      fetch("/api/admin/notifications")
+        .then((r) => r.json())
+        .then((d) => {
+          if (d.success) {
+            setAdminUnreadCount(d.notifications.filter((n: { read_at: string | null }) => !n.read_at).length);
+          }
+        })
+        .catch(() => {});
+    }
+  }, [pathname, isAdmin]);
 
   const role = getRole(roleKey);
 
@@ -344,6 +364,25 @@ export default function ProfileSidebar() {
             </Link>
           );
         })}
+
+        {isAdmin && (
+          <Link
+            href="/account/admin/activity"
+            className={`mt-2 flex items-center gap-3 rounded-xl border border-[#C9A24A]/20 bg-[#C9A24A]/[0.04] px-3 py-2.5 text-sm font-semibold transition ${
+              isActive("/account/admin/activity") ? "text-red-500" : "text-[#E8D19A] hover:bg-[#C9A24A]/10"
+            }`}
+          >
+            <span className="relative flex-shrink-0">
+              <ActivityIcon />
+              {adminUnreadCount > 0 && (
+                <span className="absolute -right-1.5 -top-1.5 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-red-600 px-1 text-[0.6rem] font-bold text-white">
+                  {adminUnreadCount > 99 ? "99+" : adminUnreadCount}
+                </span>
+              )}
+            </span>
+            Activity
+          </Link>
+        )}
 
         {isAdmin && (
           <Link

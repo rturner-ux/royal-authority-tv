@@ -5,6 +5,7 @@ import { supabase } from '@/lib/supabase/server'
 import { squareClient, mapSquareStatus } from '@/lib/square/client'
 import { verifyRecaptcha } from '@/lib/recaptcha'
 import { sendWelcomeMessage } from '@/lib/welcomeMessage'
+import { notifyAdmin } from '@/lib/adminNotify'
 
 export async function POST(req: NextRequest) {
   const authDb = await supabaseServerAuth()
@@ -98,6 +99,11 @@ export async function POST(req: NextRequest) {
     // above, so its absence means this user never had a subscribers row.
     if (!existing) {
       sendWelcomeMessage(user.id).catch((err) => console.error('Failed to send welcome message:', err))
+      ;(async () => {
+        const { data: profile } = await db.from('subscriber_profiles').select('callsign').eq('user_id', user.id).maybeSingle()
+        const who = profile?.callsign || user.email || 'A new member'
+        await notifyAdmin(`${who} just subscribed.`, '/account/admin/moderators')
+      })().catch((err) => console.error('Failed to notify admin of new subscriber:', err))
     }
 
     return NextResponse.json({ success: true })
