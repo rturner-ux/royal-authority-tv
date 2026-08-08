@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { getRole } from "@/lib/roles";
 import Avatar from "../../components/Avatar";
 import VerifiedBadge from "../../components/VerifiedBadge";
+import { useOnlineUserIds } from "../../components/PresenceProvider";
 
 type Profile = {
   user_id: string;
@@ -19,6 +20,7 @@ export default function DirectoryClient() {
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState("");
   const [sending, setSending] = useState<string | null>(null);
+  const onlineIds = useOnlineUserIds();
 
   function load(q?: string) {
     setLoading(true);
@@ -67,18 +69,28 @@ export default function DirectoryClient() {
       <div className="mt-6 grid gap-3 sm:grid-cols-2">
         {profiles.map((p) => {
           const role = getRole(p.role);
+          const online = onlineIds.has(p.user_id);
           return (
             <div
               key={p.user_id}
               className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.03] p-4"
             >
-              <Avatar avatarUrl={p.avatar_url} roleBadge={role?.badge ?? null} name={p.callsign} size={44} />
+              <div className="relative flex-shrink-0">
+                <Avatar avatarUrl={p.avatar_url} roleBadge={role?.badge ?? null} name={p.callsign} size={44} />
+                {online && (
+                  <span className="absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-[#05070b] bg-emerald-400" />
+                )}
+              </div>
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-1.5">
                   <span className="truncate text-sm font-semibold text-white">{p.callsign}</span>
                   {p.is_verified && <VerifiedBadge className="h-3.5 w-3.5" />}
                 </div>
-                {role && <div className="truncate text-xs text-slate-500">{role.title}</div>}
+                {role ? (
+                  <div className="truncate text-xs text-slate-500">{role.title}</div>
+                ) : online ? (
+                  <div className="truncate text-xs text-emerald-400">Online</div>
+                ) : null}
               </div>
 
               {p.friendStatus === "friends" ? (

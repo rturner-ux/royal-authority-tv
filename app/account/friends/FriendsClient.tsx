@@ -5,6 +5,7 @@ import Link from "next/link";
 import { getRole } from "@/lib/roles";
 import Avatar from "../../components/Avatar";
 import VerifiedBadge from "../../components/VerifiedBadge";
+import { useOnlineUserIds } from "../../components/PresenceProvider";
 
 type OtherUser = {
   user_id: string;
@@ -21,18 +22,27 @@ type Row = {
   otherUser: OtherUser;
 };
 
-function Person({ otherUser }: { otherUser: OtherUser }) {
+function Person({ otherUser, online }: { otherUser: OtherUser; online: boolean }) {
   const role = getRole(otherUser.role);
   const name = otherUser.callsign || "Unnamed Investigator";
   return (
     <div className="flex min-w-0 flex-1 items-center gap-3">
-      <Avatar avatarUrl={otherUser.avatar_url} roleBadge={role?.badge ?? null} name={name} size={44} />
+      <div className="relative flex-shrink-0">
+        <Avatar avatarUrl={otherUser.avatar_url} roleBadge={role?.badge ?? null} name={name} size={44} />
+        {online && (
+          <span className="absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-[#05070b] bg-emerald-400" />
+        )}
+      </div>
       <div className="min-w-0">
         <div className="flex items-center gap-1.5">
           <span className="truncate text-sm font-semibold text-white">{name}</span>
           {otherUser.is_verified && <VerifiedBadge className="h-3.5 w-3.5" />}
         </div>
-        {role && <div className="truncate text-xs text-slate-500">{role.title}</div>}
+        {role ? (
+          <div className="truncate text-xs text-slate-500">{role.title}</div>
+        ) : online ? (
+          <div className="truncate text-xs text-emerald-400">Online</div>
+        ) : null}
       </div>
     </div>
   );
@@ -44,6 +54,7 @@ export default function FriendsClient() {
   const [outgoing, setOutgoing] = useState<Row[]>([]);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState<string | null>(null);
+  const onlineIds = useOnlineUserIds();
 
   function load() {
     fetch("/api/friends")
@@ -92,7 +103,7 @@ export default function FriendsClient() {
           <div className="space-y-2">
             {incoming.map((r) => (
               <div key={r.id} className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.03] p-4">
-                <Person otherUser={r.otherUser} />
+                <Person otherUser={r.otherUser} online={onlineIds.has(r.otherUser.user_id)} />
                 <div className="flex flex-shrink-0 gap-2">
                   <button
                     onClick={() => respond(r.id, "accept")}
@@ -135,7 +146,7 @@ export default function FriendsClient() {
                 href={`/account/messages/${r.otherUser.user_id}`}
                 className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.03] p-4 transition hover:border-white/25"
               >
-                <Person otherUser={r.otherUser} />
+                <Person otherUser={r.otherUser} online={onlineIds.has(r.otherUser.user_id)} />
                 <span className="flex-shrink-0 text-xs font-semibold text-[#E8D19A]">Message →</span>
               </Link>
             ))}
@@ -151,7 +162,7 @@ export default function FriendsClient() {
           <div className="space-y-2">
             {outgoing.map((r) => (
               <div key={r.id} className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.03] p-4">
-                <Person otherUser={r.otherUser} />
+                <Person otherUser={r.otherUser} online={onlineIds.has(r.otherUser.user_id)} />
                 <button
                   onClick={() => cancel(r.id)}
                   disabled={busy === r.id}
