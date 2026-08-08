@@ -29,11 +29,13 @@ export default function CaseVideoLibrary({
     <div>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {videos.map((video) => {
-          // youtube_url isn't always YouTube -- news station embeds, etc.
-          // fall back to the case's own thumbnail when there's no video ID
-          // to build a YouTube thumbnail from.
+          // youtube_url isn't always YouTube -- TikTok embed URLs, news
+          // station embeds, etc. Prefer a stored thumbnail (pulled from
+          // that platform's own oembed response) over guessing, and only
+          // fall back to the case's own photo when neither is available.
           const videoId = extractYouTubeId(video.youtube_url);
-          const thumbnail = videoId ? `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg` : fallbackThumbnail;
+          const thumbnail =
+            video.thumbnail_url || (videoId ? `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg` : fallbackThumbnail);
 
           return (
             <button

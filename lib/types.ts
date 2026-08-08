@@ -333,6 +333,7 @@ export type IncidentVideo = {
   title: string
   source_label: string | null
   youtube_url: string
+  thumbnail_url: string | null
   sequence: number
   view_count: number
   like_count: number

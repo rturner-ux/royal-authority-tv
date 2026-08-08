@@ -105,6 +105,7 @@ export default async function CaseFileSlugPage({
             title: `${incident.title} video`,
             source_label: null,
             youtube_url: incident.video_embed_url,
+            thumbnail_url: null,
             sequence: -1,
             view_count: 0,
             like_count: 0,
