@@ -8,7 +8,7 @@ export const ADMIN_USER_ID = 'f9792a46-9b72-4199-a338-e074d86421c7'
 const WELCOME_BODY =
   "Welcome to Royal Authority TV! Thank you for subscribing. I'm really glad to have you here " +
   "as part of this community. If you ever have questions, spot something worth digging into, or " +
-  "just want to talk about a case, my inbox is open. Glad you're here.\n\n- Robby"
+  "just want to talk about a case, my inbox is open. Glad you're here.\n\n- Royal"
 
 // Messages only render between accepted friends, so this creates that
 // friendship first if it doesn't already exist, then sends the welcome DM.
