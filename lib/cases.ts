@@ -100,6 +100,7 @@ export async function getAllCaseFiles(): Promise<Incident[]> {
     .select('*')
     .eq('is_hidden', false)
     .not('slug', 'is', null)
+    .order('view_count', { ascending: false, nullsFirst: false })
     .order('published_at', { ascending: false })
 
   if (error) throw error
