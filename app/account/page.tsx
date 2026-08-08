@@ -83,56 +83,47 @@ export default async function AccountPage() {
       <div className="absolute top-0 left-0 h-[500px] w-[500px] rounded-full bg-red-700/10 blur-[140px]" />
       <div className="absolute right-0 top-40 h-[450px] w-[450px] rounded-full bg-[#C9A24A]/10 blur-[140px]" />
 
-      <div className="relative z-10 mx-auto max-w-7xl px-6 py-6 lg:px-10">
+      <div className="relative z-10 mx-auto max-w-5xl px-6 py-6 lg:px-10">
         <div className="lg:hidden">
           <Navbar breadcrumbs={[{ label: "Home", href: "/" }, { label: "Profile" }]} />
         </div>
 
-        {/* Two-column social-profile layout: a compact left profile card,
-            a wider right content area -- fills the screen on desktop
-            instead of one narrow centered card, and stacks to a single
-            column on mobile. */}
-        <div className="grid gap-6 lg:grid-cols-[340px_1fr] lg:items-start">
-          <div className="overflow-hidden rounded-[30px] border border-white/10 bg-black/30 backdrop-blur-sm lg:sticky lg:top-24">
-            <div className="h-24 bg-gradient-to-r from-[#C9A24A]/25 via-red-700/15 to-transparent" />
-            <div className="px-6 pb-6">
-              <div className="-mt-12 flex items-end gap-4">
-                <AvatarUpload
-                  userId={user.id}
-                  initialAvatarUrl={profile?.avatar_url ?? null}
-                  roleBadge={role?.badge ?? null}
-                  name={profile?.callsign || user.email || "?"}
-                  size={96}
-                />
-                <div
-                  className={`mb-1 rounded-full border px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] ${
+        {/* Single-column, TikTok-style profile header: large avatar beside
+            the name/handle/stats/actions block, full width, instead of the
+            old narrow sidebar card -- so it reads as one profile page, not
+            a card-plus-content split. */}
+        <div className="rounded-[30px] border border-white/10 bg-black/30 backdrop-blur-sm">
+          <div className="flex flex-col gap-6 p-6 sm:flex-row sm:items-start sm:p-8">
+            <AvatarUpload
+              userId={user.id}
+              initialAvatarUrl={profile?.avatar_url ?? null}
+              roleBadge={role?.badge ?? null}
+              name={profile?.callsign || user.email || "?"}
+              size={120}
+            />
+
+            <div className="min-w-0 flex-1">
+              <div className="flex flex-wrap items-center gap-2">
+                <h1 className="font-serif text-2xl font-bold text-white sm:text-3xl">
+                  {profile?.callsign || "Unnamed Investigator"}
+                </h1>
+                {profile?.is_verified && <VerifiedBadge className="h-5 w-5" />}
+              </div>
+              <div className="mt-1 flex flex-wrap items-center gap-2 text-sm text-slate-500">
+                {role && <span>{role.title}</span>}
+                <span
+                  className={`rounded-full border px-2.5 py-0.5 text-xs font-semibold uppercase tracking-[0.15em] ${
                     isActive
                       ? "border-green-500/30 bg-green-500/10 text-green-300"
                       : "border-white/15 bg-white/5 text-slate-300"
                   }`}
                 >
                   {subscriber?.status ?? "None"}
-                </div>
+                </span>
               </div>
 
-              <div className="mt-4">
-                <div className="flex flex-wrap items-center gap-2">
-                  <h1 className="font-serif text-3xl text-white">
-                    {profile?.callsign || "Unnamed Investigator"}
-                  </h1>
-                  {profile?.is_verified && <VerifiedBadge className="h-5 w-5" />}
-                  {role && (
-                    <span className="rounded-full border border-[#C9A24A]/30 bg-[#C9A24A]/10 px-2.5 py-0.5 text-xs font-semibold uppercase tracking-[0.15em] text-[#E8D19A]">
-                      {role.title}
-                    </span>
-                  )}
-                </div>
-                {role && <p className="mt-3 text-sm leading-6 text-slate-400">{role.tagline}</p>}
-                {memberSince && <p className="mt-2 text-xs text-slate-600">Member since {memberSince}</p>}
-              </div>
-
-              {/* Stat chips */}
-              <div className="mt-5 flex flex-wrap gap-6 border-t border-white/10 pt-4">
+              {/* Stats row */}
+              <div className="mt-5 flex flex-wrap gap-6">
                 <FollowStatChips followingCount={followingCount ?? 0} followerCount={followerCount ?? 0} />
                 <div>
                   <div className="text-lg font-bold text-white">{playlistPreviews.length}</div>
@@ -148,74 +139,73 @@ export default async function AccountPage() {
                 </div>
               </div>
 
-              {isActive && (
-                <div className="mt-5 grid gap-2">
-                  <Link
-                    href="/account/videos"
-                    className="flex items-center justify-between gap-3 rounded-2xl border border-[#C9A24A]/30 bg-gradient-to-r from-[#C9A24A]/[0.1] to-transparent px-4 py-3 transition hover:border-[#C9A24A]/50"
-                  >
-                    <span className="text-sm font-semibold text-[#E8D19A]">My Video Profile</span>
-                    <span className="text-[#E8D19A]">→</span>
-                  </Link>
-                  <Link
-                    href="/account/directory"
-                    className="flex items-center justify-between gap-3 rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 transition hover:border-white/25"
-                  >
-                    <span className="text-sm font-semibold text-white">Subscriber Directory</span>
-                    <span className="text-white/50">→</span>
-                  </Link>
-                  <Link
-                    href="/account/friends"
-                    className="flex items-center justify-between gap-3 rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 transition hover:border-white/25"
-                  >
-                    <span className="text-sm font-semibold text-white">Friends & Requests</span>
-                    <span className="text-white/50">→</span>
-                  </Link>
-                  <Link
-                    href="/account/messages"
-                    className="flex items-center justify-between gap-3 rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 transition hover:border-white/25"
-                  >
-                    <span className="text-sm font-semibold text-white">Messages</span>
-                    <span className="text-white/50">→</span>
-                  </Link>
-                </div>
-              )}
+              {/* Action buttons row -- TikTok's "Edit profile" equivalent */}
+              <div className="mt-5 flex flex-wrap items-center gap-3">
+                {isActive && (
+                  <InvestigatorProfile
+                    userId={user.id}
+                    initialRole={profile?.role ?? null}
+                    initialCallsign={profile?.callsign ?? null}
+                  />
+                )}
+              </div>
 
-              {isActive && (
-                <InterestsPicker userId={user.id} initialInterests={profile?.interests ?? []} />
-              )}
-
-              <AccountActions isActive={isActive} />
-
-              {subscriber?.current_period_end && (
-                <p className="mt-4 text-xs text-slate-500">
-                  Renews {new Date(subscriber.current_period_end).toLocaleDateString()}.
-                </p>
-              )}
-
-              {isActive && (
-                <InvestigatorProfile
-                  userId={user.id}
-                  initialRole={profile?.role ?? null}
-                  initialCallsign={profile?.callsign ?? null}
-                />
-              )}
-
-              {isActive && (
-                <EmailAlertsToggle
-                  userId={user.id}
-                  initialEnabled={profile?.email_alerts_enabled ?? true}
-                />
-              )}
+              {role && <p className="mt-4 max-w-xl text-sm leading-6 text-slate-400">{role.tagline}</p>}
+              {memberSince && <p className="mt-2 text-xs text-slate-600">Member since {memberSince}</p>}
             </div>
           </div>
-
-          {isActive && (
-            <div className="min-w-0">
-              <AccountTabs playlists={playlistPreviews} caseRequests={myRequests} />
-            </div>
-          )}
         </div>
+
+        {isActive && (
+          <div className="mt-4 flex flex-wrap gap-2">
+            <Link
+              href="/account/videos"
+              className="flex items-center gap-2 rounded-full border border-[#C9A24A]/30 bg-gradient-to-r from-[#C9A24A]/[0.1] to-transparent px-4 py-2 text-sm font-semibold text-[#E8D19A] transition hover:border-[#C9A24A]/50"
+            >
+              My Video Profile
+            </Link>
+            <Link
+              href="/account/directory"
+              className="flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-4 py-2 text-sm font-semibold text-white transition hover:border-white/25"
+            >
+              Subscriber Directory
+            </Link>
+            <Link
+              href="/account/friends"
+              className="flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-4 py-2 text-sm font-semibold text-white transition hover:border-white/25"
+            >
+              Friends & Requests
+            </Link>
+            <Link
+              href="/account/messages"
+              className="flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-4 py-2 text-sm font-semibold text-white transition hover:border-white/25"
+            >
+              Messages
+            </Link>
+          </div>
+        )}
+
+        {isActive && <InterestsPicker userId={user.id} initialInterests={profile?.interests ?? []} />}
+
+        {isActive && (
+          <div className="mt-4">
+            <EmailAlertsToggle userId={user.id} initialEnabled={profile?.email_alerts_enabled ?? true} />
+          </div>
+        )}
+
+        <AccountActions isActive={isActive} />
+
+        {subscriber?.current_period_end && (
+          <p className="mt-2 text-xs text-slate-500">
+            Renews {new Date(subscriber.current_period_end).toLocaleDateString()}.
+          </p>
+        )}
+
+        {isActive && (
+          <div className="min-w-0">
+            <AccountTabs playlists={playlistPreviews} caseRequests={myRequests} />
+          </div>
+        )}
       </div>
     </main>
   );
