@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { createPortal } from "react-dom";
 import { usePathname, useRouter } from "next/navigation";
@@ -8,6 +7,7 @@ import { useEffect, useState } from "react";
 import { getRole } from "@/lib/roles";
 import { supabaseBrowser } from "@/lib/supabase/browser";
 import Wordmark from "./Wordmark";
+import Avatar from "./Avatar";
 
 export type Crumb = { label: string; href?: string };
 
@@ -93,6 +93,7 @@ export default function Navbar({
   const [isActive, setIsActive] = useState(false);
   const [roleKey, setRoleKey] = useState<string | null>(null);
   const [callsign, setCallsign] = useState<string | null>(null);
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [membersOpen, setMembersOpen] = useState(false);
 
   useEffect(() => {
@@ -103,6 +104,7 @@ export default function Navbar({
         setIsActive(Boolean(d.isActive));
         setRoleKey(d.role ?? null);
         setCallsign(d.callsign ?? null);
+        setAvatarUrl(d.avatarUrl ?? null);
       })
       .catch(() => setIsActive(false));
   }, []);
@@ -312,15 +314,12 @@ export default function Navbar({
                 aria-expanded={accountOpen}
                 className="flex items-center gap-2 text-xs font-semibold text-[#C9A24A] transition hover:text-[#E8D19A]"
               >
-                {role ? (
-                  <span className="relative h-7 w-7 flex-shrink-0 overflow-hidden rounded-md">
-                    <Image src={role.badge} alt="" fill unoptimized className="object-contain" />
-                  </span>
-                ) : (
-                  <span className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-md bg-white/10 text-sm">
-                    👤
-                  </span>
-                )}
+                <Avatar
+                  avatarUrl={avatarUrl}
+                  roleBadge={role?.badge ?? null}
+                  name={callsign || accountLabel || "?"}
+                  size={28}
+                />
                 <span className="hidden uppercase tracking-[0.1em] sm:inline">
                   {role ? callsign || role.title : accountLabel}
                 </span>
