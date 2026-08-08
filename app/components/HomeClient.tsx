@@ -365,7 +365,7 @@ export default function HomeClient({
   }, []);
 
   return (
-    <main className="relative min-h-screen overflow-hidden bg-[#020617] text-white">
+    <main className="relative min-h-screen overflow-x-hidden bg-[#020617] text-white">
       <Navbar accountLabel={accountLabel} accountHref={accountHref} embedded={embedded} />
 
       {/* Hero */}
