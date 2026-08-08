@@ -42,12 +42,12 @@ export default function EmailAlertsToggle({
         onClick={toggle}
         disabled={saving}
         aria-pressed={enabled}
-        className={`relative h-7 w-12 flex-shrink-0 rounded-full transition ${
-          enabled ? "bg-[#C9A24A]" : "bg-white/15"
+        className={`relative inline-flex h-7 w-12 flex-shrink-0 items-center rounded-full p-0 shadow-inner transition-colors duration-200 ease-in-out ${
+          enabled ? "bg-[#C9A24A]" : "bg-white/10 ring-1 ring-inset ring-white/15"
         } disabled:opacity-60`}
       >
         <span
-          className={`absolute top-1 h-5 w-5 rounded-full bg-white transition-transform ${
+          className={`inline-block h-5 w-5 transform rounded-full bg-white shadow-md transition-transform duration-200 ease-in-out ${
             enabled ? "translate-x-6" : "translate-x-1"
           }`}
         />

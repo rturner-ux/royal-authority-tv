@@ -57,6 +57,7 @@ export default async function AccountPage() {
     { previews: playlistPreviews, savedIncidentIds: allSavedIncidentIds },
     { count: followingCount },
     { count: followerCount },
+    { count: friendsCount },
   ] = await Promise.all([
     svc
       .from("member_questions")
@@ -66,6 +67,11 @@ export default async function AccountPage() {
     getPlaylistPreviews(user.id),
     db.from("subscriber_follows").select("id", { count: "exact", head: true }).eq("follower_id", user.id),
     db.from("subscriber_follows").select("id", { count: "exact", head: true }).eq("followed_id", user.id),
+    db
+      .from("friend_requests")
+      .select("id", { count: "exact", head: true })
+      .eq("status", "accepted")
+      .or(`sender_id.eq.${user.id},recipient_id.eq.${user.id}`),
   ]);
 
   const myRequests = (myRequestsRaw ?? []).map((r) => ({
@@ -125,6 +131,10 @@ export default async function AccountPage() {
               {/* Stats row */}
               <div className="mt-5 flex flex-wrap gap-6">
                 <FollowStatChips followingCount={followingCount ?? 0} followerCount={followerCount ?? 0} />
+                <Link href="/account/friends">
+                  <div className="text-lg font-bold text-white">{friendsCount ?? 0}</div>
+                  <div className="text-xs uppercase tracking-[0.15em] text-slate-500">Friends</div>
+                </Link>
                 <div>
                   <div className="text-lg font-bold text-white">{playlistPreviews.length}</div>
                   <div className="text-xs uppercase tracking-[0.15em] text-slate-500">Playlists</div>
