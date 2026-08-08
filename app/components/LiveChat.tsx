@@ -28,7 +28,27 @@ export default function LiveChat({ streamId, isSignedIn }: { streamId: string; i
   const [draft, setDraft] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [canModerate, setCanModerate] = useState(false);
+  const [banning, setBanning] = useState<string | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    fetch("/api/subscriber-status")
+      .then((r) => r.json())
+      .then((d) => setCanModerate(Boolean(d.isAdmin) || (d.moderatorPermissions ?? []).includes("moderate_chat")))
+      .catch(() => {});
+  }, []);
+
+  async function banUser(userId: string, displayName: string) {
+    if (!window.confirm(`Remove ${displayName} from chat?`)) return;
+    setBanning(userId);
+    await fetch("/api/moderation/chat-bans", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ userId, displayName }),
+    });
+    setBanning(null);
+  }
 
   useEffect(() => {
     fetch(`/api/live-chat?streamId=${streamId}`)
@@ -99,19 +119,28 @@ export default function LiveChat({ streamId, isSignedIn }: { streamId: string; i
           <p className="px-2 py-3 text-sm text-slate-500">No messages yet. Be the first to say something.</p>
         ) : (
           messages.map((m) => (
-            <div key={m.id} className="flex items-start gap-2 rounded-md px-2 py-1 hover:bg-white/5">
+            <div key={m.id} className="group flex items-start gap-2 rounded-md px-2 py-1 hover:bg-white/5">
               <div
                 className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[11px] font-bold text-black"
                 style={{ backgroundColor: nameColor(m.display_name) }}
               >
                 {m.display_name.charAt(0).toUpperCase()}
               </div>
-              <p className="min-w-0 break-words text-[13px] leading-5">
+              <p className="min-w-0 flex-1 break-words text-[13px] leading-5">
                 <span className="mr-1 font-medium" style={{ color: nameColor(m.display_name) }}>
                   {m.display_name}
                 </span>
                 <span className="text-white/90">{m.body}</span>
               </p>
+              {canModerate && (
+                <button
+                  onClick={() => banUser(m.user_id, m.display_name)}
+                  disabled={banning === m.user_id}
+                  className="flex-shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold text-red-400 opacity-0 transition hover:bg-red-500/10 group-hover:opacity-100 disabled:opacity-50"
+                >
+                  Remove
+                </button>
+              )}
             </div>
           ))
         )}

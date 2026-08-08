@@ -16,12 +16,13 @@ export async function GET() {
   let interests: string[] = []
   let isAdmin = false
   let isModerator = false
+  let moderatorPermissions: string[] = []
 
   if (user && isActive) {
     const db = await supabaseServerAuth()
     const { data } = await db
       .from('subscriber_profiles')
-      .select('role, callsign, avatar_url, is_verified, interests, is_admin, is_moderator')
+      .select('role, callsign, avatar_url, is_verified, interests, is_admin, is_moderator, moderator_permissions')
       .eq('user_id', user.id)
       .maybeSingle()
     role = data?.role ?? null
@@ -31,7 +32,18 @@ export async function GET() {
     interests = data?.interests ?? []
     isAdmin = data?.is_admin ?? false
     isModerator = data?.is_moderator ?? false
+    moderatorPermissions = data?.moderator_permissions ?? []
   }
 
-  return NextResponse.json({ isActive, role, callsign, avatarUrl, isVerified, interests, isAdmin, isModerator })
+  return NextResponse.json({
+    isActive,
+    role,
+    callsign,
+    avatarUrl,
+    isVerified,
+    interests,
+    isAdmin,
+    isModerator,
+    moderatorPermissions,
+  })
 }

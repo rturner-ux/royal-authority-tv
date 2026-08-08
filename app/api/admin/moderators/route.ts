@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseServerAuth } from '@/lib/supabase/serverAuth'
 import { supabase } from '@/lib/supabase/server'
+import { ALL_MODERATOR_PERMISSIONS } from '@/lib/moderatorPermissions'
 
 async function requireAdmin() {
   const authDb = await supabaseServerAuth()
@@ -24,7 +25,7 @@ export async function GET(req: NextRequest) {
   const db = supabase()
   let query = db
     .from('subscriber_profiles')
-    .select('user_id, callsign, avatar_url, is_verified, is_admin, is_moderator')
+    .select('user_id, callsign, avatar_url, is_verified, is_admin, is_moderator, moderator_permissions')
     .not('callsign', 'is', null)
     .order('callsign', { ascending: true })
     .limit(50)
@@ -37,8 +38,11 @@ export async function GET(req: NextRequest) {
   return NextResponse.json({ success: true, members: data })
 }
 
-// Toggle moderator status for a member. Admin status itself is not
-// grantable here -- deliberately left as a direct-database action only.
+// Toggle moderator status for a member. Turning it off clears their
+// permissions too, so re-promoting someone later starts from a clean
+// slate instead of silently restoring whatever they had before. Admin
+// status itself is not grantable here -- deliberately left as a
+// direct-database action only.
 export async function POST(req: NextRequest) {
   const admin = await requireAdmin()
   if (!admin) return NextResponse.json({ error: 'Admin access required' }, { status: 403 })
@@ -49,7 +53,29 @@ export async function POST(req: NextRequest) {
   }
 
   const db = supabase()
-  const { error } = await db.from('subscriber_profiles').update({ is_moderator: isModerator }).eq('user_id', userId)
+  const { error } = await db
+    .from('subscriber_profiles')
+    .update({ is_moderator: isModerator, ...(isModerator ? {} : { moderator_permissions: [] }) })
+    .eq('user_id', userId)
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+
+  return NextResponse.json({ success: true })
+}
+
+// Sets the exact permission list for a moderator (replaces, not merges --
+// the client always sends the full checked set).
+export async function PATCH(req: NextRequest) {
+  const admin = await requireAdmin()
+  if (!admin) return NextResponse.json({ error: 'Admin access required' }, { status: 403 })
+
+  const { userId, permissions } = await req.json()
+  if (!userId || !Array.isArray(permissions)) {
+    return NextResponse.json({ error: 'Missing userId or permissions' }, { status: 400 })
+  }
+  const valid = permissions.filter((p) => (ALL_MODERATOR_PERMISSIONS as string[]).includes(p))
+
+  const db = supabase()
+  const { error } = await db.from('subscriber_profiles').update({ moderator_permissions: valid }).eq('user_id', userId)
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
   return NextResponse.json({ success: true })

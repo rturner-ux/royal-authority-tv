@@ -165,6 +165,22 @@ function AdminIcon() {
     </svg>
   );
 }
+function ModerateCommentsIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="h-5 w-5 flex-shrink-0">
+      <path d="M21 15a2 2 0 0 1-2 2H8l-5 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2Z" strokeLinejoin="round" />
+      <path d="M8 10l2.5 2.5L16 7" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+function ModerateChatIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="h-5 w-5 flex-shrink-0">
+      <circle cx="12" cy="12" r="9" />
+      <path d="M6 6l12 12" strokeLinecap="round" />
+    </svg>
+  );
+}
 
 // Most items navigate (href); "Music" instead opens the persistent
 // player's panel in place, since there's no dedicated music page.
@@ -200,6 +216,7 @@ export default function ProfileSidebar() {
   const [unreadCount, setUnreadCount] = useState(0);
   const [unreadNotifications, setUnreadNotifications] = useState(0);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [moderatorPermissions, setModeratorPermissions] = useState<string[]>([]);
   const { expanded: musicExpanded, setExpanded: setMusicExpanded, current: currentTrack, isPlaying } = useMusicPlayer();
 
   useEffect(() => {
@@ -211,9 +228,13 @@ export default function ProfileSidebar() {
         setAvatarUrl(d.avatarUrl ?? null);
         setIsVerified(Boolean(d.isVerified));
         setIsAdmin(Boolean(d.isAdmin));
+        setModeratorPermissions(d.moderatorPermissions ?? []);
       })
       .catch(() => {});
   }, []);
+
+  const canModerateComments = isAdmin || moderatorPermissions.includes("moderate_comments");
+  const canModerateChat = isAdmin || moderatorPermissions.includes("moderate_chat");
 
   // Opening a thread marks its messages read server-side, but that only
   // updates this badge if we refetch -- rerun on every route change (not
@@ -333,6 +354,30 @@ export default function ProfileSidebar() {
           >
             <AdminIcon />
             Moderators
+          </Link>
+        )}
+
+        {canModerateComments && (
+          <Link
+            href="/account/moderate/comments"
+            className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold transition ${
+              isActive("/account/moderate/comments") ? "text-red-500" : "text-slate-300 hover:bg-white/5 hover:text-white"
+            }`}
+          >
+            <ModerateCommentsIcon />
+            Pending Comments
+          </Link>
+        )}
+
+        {canModerateChat && (
+          <Link
+            href="/account/moderate/chat-bans"
+            className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold transition ${
+              isActive("/account/moderate/chat-bans") ? "text-red-500" : "text-slate-300 hover:bg-white/5 hover:text-white"
+            }`}
+          >
+            <ModerateChatIcon />
+            Chat Bans
           </Link>
         )}
       </nav>
