@@ -33,6 +33,16 @@ export default async function AccountPage() {
   ]);
 
   const isActive = subscriber?.status === "active";
+
+  // A signed-in, non-subscribed visitor lands here after confirming their
+  // email and logging in -- without this, the account page just showed a
+  // small buried "Subscribe for $4.99/mo" note among otherwise-empty
+  // sections, and real users read that as "I'm done" and never reached the
+  // card form. Send them straight to checkout instead.
+  if (!isActive) {
+    redirect("/subscribe");
+  }
+
   const role = getRole(profile?.role);
 
   // incidents/subscriber_playlists/playlist_cases have no authenticated-role
@@ -43,14 +53,12 @@ export default async function AccountPage() {
 
   const [{ data: myRequestsRaw }, { previews: playlistPreviews, savedIncidentIds: allSavedIncidentIds }] =
     await Promise.all([
-      isActive
-        ? svc
-            .from("member_questions")
-            .select("id, topic, message, created_at, incidents(title, slug)")
-            .eq("user_id", user.id)
-            .order("created_at", { ascending: false })
-        : Promise.resolve({ data: [] }),
-      isActive ? getPlaylistPreviews(user.id) : Promise.resolve({ previews: [], savedIncidentIds: new Set<string>() }),
+      svc
+        .from("member_questions")
+        .select("id, topic, message, created_at, incidents(title, slug)")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false }),
+      getPlaylistPreviews(user.id),
     ]);
 
   const myRequests = (myRequestsRaw ?? []).map((r) => ({
@@ -171,17 +179,7 @@ export default async function AccountPage() {
 
               <AccountActions isActive={isActive} />
 
-              {!isActive && (
-                <p className="mt-4 rounded-2xl border border-[#C9A24A]/20 bg-[#C9A24A]/[0.05] p-4 text-sm leading-7 text-slate-300">
-                  You don&apos;t have an active subscription yet.{" "}
-                  <a href="/subscribe" className="text-[#E8D19A] hover:underline">
-                    Subscribe for $4.99/mo
-                  </a>{" "}
-                  to unlock the Member Room, deeper case content, playlists, and early access to new
-                  cases.
-                </p>
-              )}
-              {isActive && subscriber?.current_period_end && (
+              {subscriber?.current_period_end && (
                 <p className="mt-4 text-xs text-slate-500">
                   Renews {new Date(subscriber.current_period_end).toLocaleDateString()}.
                 </p>
