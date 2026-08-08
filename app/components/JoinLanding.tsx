@@ -17,7 +17,7 @@ export default function JoinLanding() {
   }
 
   return (
-    <main className="relative min-h-screen overflow-x-hidden bg-[#020617] text-white">
+    <main className="relative min-h-screen bg-[#020617] text-white">
       <div className="absolute inset-0">
         <Image src="/hero-wallpaper.webp" alt="" fill priority className="object-cover opacity-[0.6]" />
       </div>

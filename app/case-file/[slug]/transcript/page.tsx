@@ -16,7 +16,7 @@ export default async function CaseTranscriptPage({
   const isDualLanguage = transcript.some((r) => r.translated_text);
 
   return (
-    <main className="relative min-h-screen bg-[#05070b] text-white overflow-x-hidden">
+    <main className="relative min-h-screen bg-[#05070b] text-white">
       <div className="absolute inset-0 bg-gradient-to-br from-[#05070b] via-[#08111d] to-black" />
       <div className="absolute top-0 right-0 h-[400px] w-[400px] rounded-full bg-[#C9A24A]/10 blur-[140px]" />
 

@@ -9,7 +9,7 @@ export default async function ModerateCommentsPage() {
   if (!allowed) redirect("/account");
 
   return (
-    <main className="relative min-h-screen overflow-x-hidden bg-[#05070b] text-white">
+    <main className="relative min-h-screen bg-[#05070b] text-white">
       <div className="absolute inset-0 bg-gradient-to-br from-[#05070b] via-[#08111d] to-black" />
       <div className="absolute top-0 left-0 h-[500px] w-[500px] rounded-full bg-red-700/10 blur-[140px]" />
       <div className="absolute right-0 top-40 h-[450px] w-[450px] rounded-full bg-[#C9A24A]/10 blur-[140px]" />
