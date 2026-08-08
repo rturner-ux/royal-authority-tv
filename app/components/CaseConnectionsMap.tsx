@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import Image from "next/image";
 import {
   ReactFlow,
@@ -104,46 +104,65 @@ export default function CaseConnectionsMap({
     [rawEdges]
   );
 
+  const [expanded, setExpanded] = useState(false);
+
   if (rawNodes.length === 0) return null;
 
   return (
     <section className="mt-10 rounded-[32px] border border-white/10 bg-black/30 p-6 backdrop-blur-sm">
-      <div className="text-xs uppercase tracking-[0.26em] text-[#E8D19A]">Connections Map</div>
-      <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-400">
-        Drag to rearrange, scroll to zoom. Dashed lines mark relationships that have not been confirmed.
-      </p>
-
-      <div className="mt-5 h-[520px] w-full overflow-hidden rounded-2xl border border-white/10">
-        <ReactFlow
-          nodes={nodes}
-          edges={edges}
-          nodeTypes={nodeTypes}
-          fitView
-          proOptions={{ hideAttribution: true }}
+      <div className="flex items-center justify-between gap-4">
+        <div className="text-xs uppercase tracking-[0.26em] text-[#E8D19A]">Connections Map</div>
+        <button
+          onClick={() => setExpanded((v) => !v)}
+          className="flex-shrink-0 rounded-full border border-white/15 px-3 py-1.5 text-xs font-semibold text-slate-300 transition hover:bg-white/5"
         >
-          <Background color="#ffffff10" gap={24} />
-          <Controls showInteractive={false} />
-        </ReactFlow>
+          {expanded ? "Minimize" : "Expand"}
+        </button>
       </div>
 
-      {usedRelationships.length > 0 && (
-        <div className="mt-4 flex flex-wrap gap-4">
-          {usedRelationships.map((r) => {
-            const style = RELATIONSHIP_STYLE[r];
-            return (
-              <div key={r} className="flex items-center gap-2 text-xs text-slate-400">
-                <span
-                  className="inline-block h-0.5 w-6"
-                  style={{
-                    backgroundColor: style.dashed ? "transparent" : style.color,
-                    borderTop: style.dashed ? `2px dashed ${style.color}` : undefined,
-                  }}
-                />
-                {style.label}
-              </div>
-            );
-          })}
-        </div>
+      {expanded ? (
+        <>
+          <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-400">
+            Drag to rearrange, scroll to zoom. Dashed lines mark relationships that have not been confirmed.
+          </p>
+
+          <div className="mt-5 h-[520px] w-full overflow-hidden rounded-2xl border border-white/10">
+            <ReactFlow
+              nodes={nodes}
+              edges={edges}
+              nodeTypes={nodeTypes}
+              fitView
+              proOptions={{ hideAttribution: true }}
+            >
+              <Background color="#ffffff10" gap={24} />
+              <Controls showInteractive={false} />
+            </ReactFlow>
+          </div>
+
+          {usedRelationships.length > 0 && (
+            <div className="mt-4 flex flex-wrap gap-4">
+              {usedRelationships.map((r) => {
+                const style = RELATIONSHIP_STYLE[r];
+                return (
+                  <div key={r} className="flex items-center gap-2 text-xs text-slate-400">
+                    <span
+                      className="inline-block h-0.5 w-6"
+                      style={{
+                        backgroundColor: style.dashed ? "transparent" : style.color,
+                        borderTop: style.dashed ? `2px dashed ${style.color}` : undefined,
+                      }}
+                    />
+                    {style.label}
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </>
+      ) : (
+        <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-400">
+          {rawNodes.length} {rawNodes.length === 1 ? "person" : "people"} mapped in this case's relationship diagram.
+        </p>
       )}
     </section>
   );
