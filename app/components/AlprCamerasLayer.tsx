@@ -5,6 +5,7 @@ import { Marker, Popup, useMap, useMapEvents } from "react-leaflet";
 import MarkerClusterGroup from "react-leaflet-cluster";
 import L from "leaflet";
 import AlprDeckLayer from "./AlprDeckLayer";
+import AlprRoutePlanner from "./AlprRoutePlanner";
 
 type AlprCamera = {
   id: number;
@@ -125,6 +126,7 @@ function SearchBox({ onResolved }: { onResolved: (lat: number, lng: number, labe
 
 export default function AlprCamerasLayer() {
   const map = useMap();
+  const [tab, setTab] = useState<"cameras" | "route">("cameras");
   const [cameras, setCameras] = useState<AlprCamera[]>([]);
   const [lightPoints, setLightPoints] = useState<LightPoint[]>([]);
   const [detailed, setDetailed] = useState(map.getZoom() >= RAW_POINT_ZOOM);
@@ -203,63 +205,93 @@ export default function AlprCamerasLayer() {
           </p>
         </div>
 
-        <SearchBox onResolved={(lat, lng) => goTo(lat, lng)} />
-
-        <div style={{ marginTop: 10, paddingTop: 10, borderTop: "1px solid rgba(255,255,255,0.1)" }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
-            <span style={{ color: "#94a3b8", textTransform: "uppercase", fontSize: 10, letterSpacing: 0.05 }}>
-              Cameras in view
-            </span>
-            <span style={{ color: "#38bdf8", fontWeight: 700, fontSize: 18 }}>{totalInView.toLocaleString()}</span>
-          </div>
-
-          {!detailed ? (
-            <div style={{ marginTop: 8, color: "#94a3b8", fontSize: 11 }}>
-              Zoom in for individual camera details and manufacturer breakdown.
-            </div>
-          ) : (
-            manufacturerBreakdown.length > 0 && (
-              <>
-                <div
-                  style={{
-                    marginTop: 8,
-                    height: 6,
-                    borderRadius: 3,
-                    overflow: "hidden",
-                    display: "flex",
-                    background: "rgba(255,255,255,0.08)",
-                  }}
-                >
-                  {manufacturerBreakdown.map((m, i) => (
-                    <div
-                      key={m.name}
-                      style={{ width: `${m.pct}%`, background: MANUFACTURER_COLORS[i % MANUFACTURER_COLORS.length] }}
-                    />
-                  ))}
-                </div>
-                <div style={{ marginTop: 8, display: "flex", flexDirection: "column", gap: 4 }}>
-                  {manufacturerBreakdown.map((m, i) => (
-                    <div key={m.name} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", fontSize: 11 }}>
-                      <span style={{ display: "flex", alignItems: "center", gap: 6, color: "#e2e8f0" }}>
-                        <span
-                          style={{
-                            width: 7,
-                            height: 7,
-                            borderRadius: "50%",
-                            background: MANUFACTURER_COLORS[i % MANUFACTURER_COLORS.length],
-                            flexShrink: 0,
-                          }}
-                        />
-                        {m.name}
-                      </span>
-                      <span style={{ color: "#94a3b8" }}>{m.pct}%</span>
-                    </div>
-                  ))}
-                </div>
-              </>
-            )
-          )}
+        <div style={{ display: "flex", gap: 4, marginBottom: 10 }}>
+          {(["cameras", "route"] as const).map((t) => (
+            <button
+              key={t}
+              onClick={() => setTab(t)}
+              style={{
+                flex: 1,
+                background: tab === t ? "#0c4a6e" : "rgba(255,255,255,0.05)",
+                border: `1px solid ${tab === t ? "rgba(56,189,248,0.5)" : "rgba(255,255,255,0.1)"}`,
+                borderRadius: 6,
+                padding: "5px 0",
+                fontSize: 11,
+                fontWeight: 700,
+                color: tab === t ? "#38bdf8" : "#94a3b8",
+                cursor: "pointer",
+                textTransform: "uppercase",
+                letterSpacing: 0.05,
+              }}
+            >
+              {t === "cameras" ? "Map" : "Route"}
+            </button>
+          ))}
         </div>
+
+        {tab === "cameras" ? (
+          <>
+            <SearchBox onResolved={(lat, lng) => goTo(lat, lng)} />
+
+            <div style={{ marginTop: 10, paddingTop: 10, borderTop: "1px solid rgba(255,255,255,0.1)" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
+                <span style={{ color: "#94a3b8", textTransform: "uppercase", fontSize: 10, letterSpacing: 0.05 }}>
+                  Cameras in view
+                </span>
+                <span style={{ color: "#38bdf8", fontWeight: 700, fontSize: 18 }}>{totalInView.toLocaleString()}</span>
+              </div>
+
+              {!detailed ? (
+                <div style={{ marginTop: 8, color: "#94a3b8", fontSize: 11 }}>
+                  Zoom in for individual camera details and manufacturer breakdown.
+                </div>
+              ) : (
+                manufacturerBreakdown.length > 0 && (
+                  <>
+                    <div
+                      style={{
+                        marginTop: 8,
+                        height: 6,
+                        borderRadius: 3,
+                        overflow: "hidden",
+                        display: "flex",
+                        background: "rgba(255,255,255,0.08)",
+                      }}
+                    >
+                      {manufacturerBreakdown.map((m, i) => (
+                        <div
+                          key={m.name}
+                          style={{ width: `${m.pct}%`, background: MANUFACTURER_COLORS[i % MANUFACTURER_COLORS.length] }}
+                        />
+                      ))}
+                    </div>
+                    <div style={{ marginTop: 8, display: "flex", flexDirection: "column", gap: 4 }}>
+                      {manufacturerBreakdown.map((m, i) => (
+                        <div key={m.name} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", fontSize: 11 }}>
+                          <span style={{ display: "flex", alignItems: "center", gap: 6, color: "#e2e8f0" }}>
+                            <span
+                              style={{
+                                width: 7,
+                                height: 7,
+                                borderRadius: "50%",
+                                background: MANUFACTURER_COLORS[i % MANUFACTURER_COLORS.length],
+                                flexShrink: 0,
+                              }}
+                            />
+                            {m.name}
+                          </span>
+                          <span style={{ color: "#94a3b8" }}>{m.pct}%</span>
+                        </div>
+                      ))}
+                    </div>
+                  </>
+                )
+              )}
+            </div>
+          </>
+        ) : (
+          <AlprRoutePlanner />
+        )}
       </div>
 
       {!detailed ? (

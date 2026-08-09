@@ -389,6 +389,17 @@ export default function SiteMap({ isActive = false }: { isActive?: boolean }) {
           70% { transform: scale(1.6); opacity: 0; }
           100% { transform: scale(1.6); opacity: 0; }
         }
+        .county-tooltip {
+          background: rgba(10,12,18,0.92) !important;
+          border: 1px solid rgba(56,189,248,0.35) !important;
+          color: #e2e8f0 !important;
+          font-size: 11px !important;
+          padding: 3px 8px !important;
+          box-shadow: none !important;
+        }
+        .county-tooltip::before {
+          display: none !important;
+        }
       `}</style>
       <MapContainer center={DFW_CENTER} zoom={9} minZoom={4} style={{ width: "100%", height: "100%" }}>
         {mapStyle === "satellite" ? (
