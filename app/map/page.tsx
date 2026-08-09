@@ -1,6 +1,5 @@
-import "leaflet/dist/leaflet.css";
 import Navbar from "../components/Navbar";
-import SiteMapClient from "../components/SiteMapClient";
+import SiteMapClient from "../components/SiteMapClientGL";
 import { getSubscriberStatus } from "@/lib/subscription";
 
 export default async function MapPage({ embedded }: { embedded?: boolean } = {}) {
