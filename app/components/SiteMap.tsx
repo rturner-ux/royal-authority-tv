@@ -351,6 +351,7 @@ export default function SiteMap({ isActive = false }: { isActive?: boolean }) {
   const [showAlprCameras, setShowAlprCameras] = useState(false);
   const [boundaryMode, setBoundaryMode] = useState<BoundaryMode>("county");
   const [mapStyle, setMapStyle] = useState<"satellite" | "dark">("satellite");
+  const [mobileLayersOpen, setMobileLayersOpen] = useState(false);
 
   useEffect(() => {
     fetch("/api/incidents", { cache: "no-store" })
@@ -418,16 +419,16 @@ export default function SiteMap({ isActive = false }: { isActive?: boolean }) {
         )}
         {mapStyle === "dark" && <BoundariesLayer mode={boundaryMode} />}
         <MapLegend hidden={hidden} onToggle={toggleCategory} />
+
+        {/* Desktop: always-visible stack, unchanged. On a narrow phone
+            viewport these 5 full-width pills were wide enough to collide
+            with the Filter Cases button and cover a large share of the
+            map underneath, so below sm they're collapsed behind a single
+            trigger instead -- same pattern Filter Cases itself already
+            uses for the same reason. */}
         <div
-          style={{
-            position: "absolute",
-            top: 10,
-            right: 10,
-            zIndex: 1000,
-            display: "flex",
-            flexDirection: "column",
-            gap: 8,
-          }}
+          className="hidden sm:flex"
+          style={{ position: "absolute", top: 10, right: 10, zIndex: 1000, flexDirection: "column", gap: 8 }}
         >
           <ViewAllCasesButton incidents={visibleIncidents} />
           <TraffickingHotspotsToggle
@@ -447,6 +448,37 @@ export default function SiteMap({ isActive = false }: { isActive?: boolean }) {
             mapStyle={mapStyle}
             onToggle={() => setMapStyle((v) => (v === "satellite" ? "dark" : "satellite"))}
           />
+        </div>
+
+        <div className="sm:hidden" style={{ position: "absolute", top: 10, right: 10, zIndex: 1000 }}>
+          <button
+            onClick={() => setMobileLayersOpen((v) => !v)}
+            className="flex items-center gap-2 rounded-xl border border-white/10 bg-[#0f172a]/95 px-3 py-2 text-xs font-black uppercase tracking-[0.15em] text-[#E8D19A] backdrop-blur-sm"
+          >
+            Map Layers {mobileLayersOpen ? "▾" : "▸"}
+          </button>
+          {mobileLayersOpen && (
+            <div style={{ marginTop: 8, display: "flex", flexDirection: "column", gap: 8, maxWidth: "70vw" }}>
+              <ViewAllCasesButton incidents={visibleIncidents} />
+              <TraffickingHotspotsToggle
+                isActive={isActive}
+                showHotspots={showHotspots}
+                onToggle={() => setShowHotspots((v) => !v)}
+              />
+              <SundownTownsToggle
+                showSundownTowns={showSundownTowns}
+                onToggle={() => setShowSundownTowns((v) => !v)}
+              />
+              <AlprCamerasToggle
+                showAlprCameras={showAlprCameras}
+                onToggle={() => setShowAlprCameras((v) => !v)}
+              />
+              <MapStyleToggle
+                mapStyle={mapStyle}
+                onToggle={() => setMapStyle((v) => (v === "satellite" ? "dark" : "satellite"))}
+              />
+            </div>
+          )}
         </div>
         {isActive && showHotspots && <TraffickingHotspotsLayer />}
         {showAlprCameras && (
