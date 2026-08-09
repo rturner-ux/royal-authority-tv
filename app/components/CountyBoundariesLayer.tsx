@@ -1,8 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { GeoJSON } from "react-leaflet";
-import L from "leaflet";
 
 // Subtle county-line texture under the dark basemap, matching the look of
 // DeFlock's own map. Source: US Census county boundaries (Plotly's public
@@ -11,7 +10,6 @@ import L from "leaflet";
 export default function CountyBoundariesLayer() {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [data, setData] = useState<any>(null);
-  const canvasRenderer = useMemo(() => L.canvas({ padding: 0.5 }), []);
 
   useEffect(() => {
     fetch("/data/us-counties.geojson")
@@ -27,7 +25,6 @@ export default function CountyBoundariesLayer() {
   return (
     <GeoJSON
       data={data}
-      renderer={canvasRenderer}
       interactive={false}
       style={{
         color: "rgba(255,255,255,0.16)",
