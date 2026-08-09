@@ -70,6 +70,8 @@ export async function GET(req: NextRequest) {
       lng: el.lon,
       manufacturer: el.tags?.manufacturer || null,
       direction: el.tags?.direction || null,
+      operator: el.tags?.operator || null,
+      zone: el.tags?.['surveillance:zone'] || null,
     }))
 
     return NextResponse.json({ success: true, cameras })
