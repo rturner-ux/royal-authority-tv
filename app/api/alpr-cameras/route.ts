@@ -1,82 +1,89 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { supabase } from '@/lib/supabase/server'
 
-// Proxies the public Overpass API (OpenStreetMap's query service) for
-// nodes tagged surveillance:type=ALPR -- the same tag DeFlock's own map
-// (maps.deflock.org) reads from, since DeFlock is a crowdsourcing front
-// end for this OSM data rather than a separate database. Server-side so
-// we can cap query size and avoid CORS issues calling Overpass directly
-// from the browser.
-const OVERPASS_URL = 'https://overpass-api.de/api/interpreter'
+// Serves from the alpr_cameras table (synced daily from data.dontgetflocked.com
+// by /api/cron/sync-alpr-cameras) instead of querying Overpass live -- faster,
+// richer per-camera fields, and not subject to Overpass's shared rate limits.
+export const dynamic = 'force-dynamic'
 
-// A real metro-area query against a dense tag like this can legitimately
-// take Overpass a while to compute -- Vercel's default function timeout
-// (10s) was cutting the request off well before Overpass ever responded,
-// surfacing as a 502 even though the exact same query succeeds when
-// called directly. Give it real headroom, capped just under the
-// in-query [timeout:25] passed to Overpass itself below.
-export const maxDuration = 30
+// Below this zoom, returning 100k+ individual rows would be both a huge
+// payload and unrenderable as DOM markers. Above it, callers get raw,
+// individually-poppable camera points.
+const RAW_POINT_ZOOM = 11
+const RAW_POINT_LIMIT = 8000
 
-// Above this bbox area (deg^2), an Overpass query for a tag this dense
-// nationally would be slow and return more points than a map can usefully
-// render -- callers should zoom in instead. ~1.5deg^2 is roughly a large
-// metro region.
-const MAX_BBOX_AREA = 1.5
+function clusterPrecision(zoom: number): number {
+  const precision = 40 / Math.pow(2, zoom)
+  return Math.min(4, Math.max(0.02, precision))
+}
 
 export async function GET(req: NextRequest) {
   const south = parseFloat(req.nextUrl.searchParams.get('south') || '')
   const west = parseFloat(req.nextUrl.searchParams.get('west') || '')
   const north = parseFloat(req.nextUrl.searchParams.get('north') || '')
   const east = parseFloat(req.nextUrl.searchParams.get('east') || '')
+  const zoom = parseFloat(req.nextUrl.searchParams.get('zoom') || '9')
 
   if ([south, west, north, east].some((n) => Number.isNaN(n))) {
     return NextResponse.json({ error: 'Missing or invalid bbox params' }, { status: 400 })
   }
 
-  const area = Math.abs(north - south) * Math.abs(east - west)
-  if (area > MAX_BBOX_AREA) {
-    return NextResponse.json({ success: true, cameras: [], tooLarge: true })
-  }
-
-  const query = `[out:json][timeout:25];node["surveillance:type"="ALPR"](${south},${west},${north},${east});out body;`
+  const db = supabase()
 
   try {
-    const res = await fetch(OVERPASS_URL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-        // Overpass's usage policy asks clients to identify themselves --
-        // without this, Apache in front of it was rejecting every request
-        // from Vercel's serverless environment with a 406, even though
-        // the identical query worked fine called directly (curl sends its
-        // own default User-Agent; Next.js's fetch sends none).
-        'User-Agent': 'RoyalAuthorityTV/1.0 (+https://royalauthorityofficial.com)',
-      },
-      body: `data=${encodeURIComponent(query)}`,
-      // Overpass is a shared community resource -- cache results for a
-      // while so repeated pans over the same area don't hammer it.
-      next: { revalidate: 3600 },
-    })
+    if (zoom >= RAW_POINT_ZOOM) {
+      const { data, error } = await db
+        .from('alpr_cameras')
+        .select('osm_id, lat, lng, brand, operator, direction, zone, mount_type, osm_timestamp')
+        .gte('lat', south)
+        .lte('lat', north)
+        .gte('lng', west)
+        .lte('lng', east)
+        .limit(RAW_POINT_LIMIT)
 
-    if (!res.ok) {
-      const detail = await res.text().catch(() => '')
-      console.error('Overpass query failed:', res.status, detail.slice(0, 500))
-      return NextResponse.json({ error: 'Overpass query failed' }, { status: 502 })
+      if (error) {
+        console.error('ALPR cameras query failed:', error.message)
+        return NextResponse.json({ error: 'Query failed' }, { status: 500 })
+      }
+
+      const cameras = (data || []).map((row) => ({
+        id: row.osm_id,
+        lat: row.lat,
+        lng: row.lng,
+        manufacturer: row.brand,
+        direction: row.direction != null ? String(row.direction) : null,
+        operator: row.operator,
+        zone: row.zone,
+        mountType: row.mount_type,
+        osmTimestamp: row.osm_timestamp,
+      }))
+
+      return NextResponse.json({ success: true, clustered: false, cameras })
     }
 
-    const data = await res.json()
-    const cameras = (data.elements || []).map((el: { id: number; lat: number; lon: number; tags?: Record<string, string> }) => ({
-      id: el.id,
-      lat: el.lat,
-      lng: el.lon,
-      manufacturer: el.tags?.manufacturer || null,
-      direction: el.tags?.direction || null,
-      operator: el.tags?.operator || null,
-      zone: el.tags?.['surveillance:zone'] || null,
+    const precision = clusterPrecision(zoom)
+    const { data, error } = await db.rpc('alpr_camera_clusters', {
+      p_south: south,
+      p_west: west,
+      p_north: north,
+      p_east: east,
+      p_precision: precision,
+    })
+
+    if (error) {
+      console.error('ALPR cluster query failed:', error.message)
+      return NextResponse.json({ error: 'Query failed' }, { status: 500 })
+    }
+
+    const points = (data || []).map((row: { lat: number; lng: number; camera_count: number }) => ({
+      lat: row.lat,
+      lng: row.lng,
+      count: row.camera_count,
     }))
 
-    return NextResponse.json({ success: true, cameras })
+    return NextResponse.json({ success: true, clustered: true, points })
   } catch (err) {
     console.error('ALPR camera fetch error:', err)
-    return NextResponse.json({ error: 'Could not reach Overpass API' }, { status: 502 })
+    return NextResponse.json({ error: 'Could not query camera data' }, { status: 500 })
   }
 }
