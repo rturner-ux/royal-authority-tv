@@ -37,15 +37,19 @@ const PANEL_STYLE: React.CSSProperties = {
   bottom: 10,
   left: 10,
   zIndex: 1000,
-  width: 240,
+  width: 250,
   maxWidth: "calc(100vw - 2.5rem)",
   background: "rgba(10,12,18,0.94)",
+  backdropFilter: "blur(6px)",
   border: "1px solid rgba(56,189,248,0.35)",
-  borderRadius: 10,
-  padding: "12px 14px",
+  borderRadius: 12,
+  padding: "14px 16px",
   fontSize: 12,
   color: "#cbd5e1",
+  boxShadow: "0 8px 24px rgba(0,0,0,0.35)",
 };
+
+const MANUFACTURER_COLORS = ["#38bdf8", "#a78bfa", "#34d399", "#fbbf24", "#f87171", "#94a3b8"];
 
 function SearchBox({ onResolved }: { onResolved: (lat: number, lng: number, label: string) => void }) {
   const [query, setQuery] = useState("");
@@ -192,6 +196,17 @@ export default function AlprCamerasLayer() {
   return (
     <>
       <div style={PANEL_STYLE}>
+        <div style={{ marginBottom: 10 }}>
+          <div style={{ fontSize: 14, fontWeight: 800, color: "#fff", letterSpacing: -0.2 }}>ALPR Cameras</div>
+          <p style={{ margin: "3px 0 0", fontSize: 11, lineHeight: 1.5, color: "#94a3b8" }}>
+            Crowdsourced automated license plate reader locations from{" "}
+            <a href="https://deflock.org" target="_blank" rel="noopener noreferrer" style={{ color: "#38bdf8" }}>
+              DeFlock
+            </a>{" "}
+            / OpenStreetMap.
+          </p>
+        </div>
+
         <SearchBox onResolved={(lat, lng) => goTo(lat, lng)} />
 
         <div style={{ marginTop: 10, paddingTop: 10, borderTop: "1px solid rgba(255,255,255,0.1)" }}>
@@ -199,34 +214,53 @@ export default function AlprCamerasLayer() {
             <span style={{ color: "#94a3b8", textTransform: "uppercase", fontSize: 10, letterSpacing: 0.05 }}>
               Cameras in view
             </span>
-            <span style={{ color: "#38bdf8", fontWeight: 700, fontSize: 16 }}>{totalInView.toLocaleString()}</span>
+            <span style={{ color: "#38bdf8", fontWeight: 700, fontSize: 18 }}>{totalInView.toLocaleString()}</span>
           </div>
+
           {clustered ? (
-            <div style={{ marginTop: 6, color: "#94a3b8", fontSize: 11 }}>
-              Zoom in for individual camera details.
+            <div style={{ marginTop: 8, color: "#94a3b8", fontSize: 11 }}>
+              Zoom in for individual camera details and manufacturer breakdown.
             </div>
           ) : (
             manufacturerBreakdown.length > 0 && (
-              <div style={{ marginTop: 8, display: "flex", flexDirection: "column", gap: 5 }}>
-                {manufacturerBreakdown.map((m) => (
-                  <div key={m.name}>
-                    <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11 }}>
-                      <span style={{ color: "#e2e8f0" }}>{m.name}</span>
+              <>
+                <div
+                  style={{
+                    marginTop: 8,
+                    height: 6,
+                    borderRadius: 3,
+                    overflow: "hidden",
+                    display: "flex",
+                    background: "rgba(255,255,255,0.08)",
+                  }}
+                >
+                  {manufacturerBreakdown.map((m, i) => (
+                    <div
+                      key={m.name}
+                      style={{ width: `${m.pct}%`, background: MANUFACTURER_COLORS[i % MANUFACTURER_COLORS.length] }}
+                    />
+                  ))}
+                </div>
+                <div style={{ marginTop: 8, display: "flex", flexDirection: "column", gap: 4 }}>
+                  {manufacturerBreakdown.map((m, i) => (
+                    <div key={m.name} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", fontSize: 11 }}>
+                      <span style={{ display: "flex", alignItems: "center", gap: 6, color: "#e2e8f0" }}>
+                        <span
+                          style={{
+                            width: 7,
+                            height: 7,
+                            borderRadius: "50%",
+                            background: MANUFACTURER_COLORS[i % MANUFACTURER_COLORS.length],
+                            flexShrink: 0,
+                          }}
+                        />
+                        {m.name}
+                      </span>
                       <span style={{ color: "#94a3b8" }}>{m.pct}%</span>
                     </div>
-                    <div style={{ height: 4, background: "rgba(255,255,255,0.08)", borderRadius: 2, marginTop: 2 }}>
-                      <div
-                        style={{
-                          height: "100%",
-                          width: `${m.pct}%`,
-                          background: "#38bdf8",
-                          borderRadius: 2,
-                        }}
-                      />
-                    </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              </>
             )
           )}
         </div>

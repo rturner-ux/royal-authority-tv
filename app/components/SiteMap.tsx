@@ -13,6 +13,7 @@ import { CATEGORY_SHAPES, shapeSvg } from "@/lib/mapShapes";
 import MapLegend from "./MapLegend";
 import TraffickingHotspotsLayer from "./TraffickingHotspotsLayer";
 import AlprCamerasLayer from "./AlprCamerasLayer";
+import CountyBoundariesLayer from "./CountyBoundariesLayer";
 
 const DFW_CENTER: [number, number] = [32.85, -97.05];
 
@@ -403,6 +404,7 @@ export default function SiteMap({ isActive = false }: { isActive?: boolean }) {
             url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
           />
         )}
+        {mapStyle === "dark" && <CountyBoundariesLayer />}
         <MapLegend hidden={hidden} onToggle={toggleCategory} />
         <div
           style={{
