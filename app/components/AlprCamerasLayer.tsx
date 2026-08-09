@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Marker, Popup, useMap, useMapEvents } from "react-leaflet";
 import MarkerClusterGroup from "react-leaflet-cluster";
 import L from "leaflet";
+import AlprDeckLayer from "./AlprDeckLayer";
 
 type AlprCamera = {
   id: number;
@@ -121,46 +122,6 @@ function SearchBox({ onResolved }: { onResolved: (lat: number, lng: number, labe
   );
 }
 
-// Renders raw camera coordinates as a dense point cloud. Built with plain
-// Leaflet objects added imperatively rather than one <CircleMarker> React
-// element per point -- at up to ~127k points, React's reconciler would
-// choke trying to mount/diff that many elements, where a plain loop
-// creating lightweight Leaflet objects on a shared canvas renderer doesn't.
-function LightPointsLayer({ points }: { points: LightPoint[] }) {
-  const map = useMap();
-  const rendererRef = useRef<L.Canvas | null>(null);
-
-  useEffect(() => {
-    if (!rendererRef.current) rendererRef.current = L.canvas({ padding: 0.5 });
-    const renderer = rendererRef.current;
-    const layer = L.layerGroup();
-
-    // Small radius and low opacity so overlapping points in dense areas
-    // build up a graduated density texture instead of saturating into a
-    // solid glowing wash -- a fixed high-opacity dot loses exactly the
-    // detail that makes this look like real data instead of a heatmap.
-    const zoom = map.getZoom();
-    const radius = Math.min(1.6, Math.max(0.9, 0.7 + zoom * 0.06));
-
-    for (const [lat, lng] of points) {
-      L.circleMarker([lat, lng], {
-        renderer,
-        radius,
-        stroke: false,
-        fillColor: "#38bdf8",
-        fillOpacity: 0.45,
-        interactive: false,
-      }).addTo(layer);
-    }
-
-    layer.addTo(map);
-    return () => {
-      map.removeLayer(layer);
-    };
-  }, [points, map]);
-
-  return null;
-}
 
 export default function AlprCamerasLayer() {
   const map = useMap();
@@ -302,7 +263,7 @@ export default function AlprCamerasLayer() {
       </div>
 
       {!detailed ? (
-        <LightPointsLayer points={lightPoints} />
+        <AlprDeckLayer points={lightPoints} />
       ) : (
         <MarkerClusterGroup chunkedLoading maxClusterRadius={40}>
           {cameras.map((cam) => (

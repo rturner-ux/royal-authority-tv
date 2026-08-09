@@ -9,6 +9,8 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@deck.gl/core": "^9.3.9",
+    "@deck.gl/layers": "^9.3.9",
     "@mux/mux-player-react": "^3.13.2",
     "@supabase/ssr": "^0.12.3",
     "@supabase/supabase-js": "^2.45.4",
