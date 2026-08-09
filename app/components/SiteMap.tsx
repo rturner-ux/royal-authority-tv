@@ -12,6 +12,7 @@ import { CATEGORY_LABELS, CATEGORY_COLORS, SUNDOWN_CONFIDENCE_COLORS, SUNDOWN_CO
 import { CATEGORY_SHAPES, shapeSvg } from "@/lib/mapShapes";
 import MapLegend from "./MapLegend";
 import TraffickingHotspotsLayer from "./TraffickingHotspotsLayer";
+import AlprCamerasLayer from "./AlprCamerasLayer";
 
 const DFW_CENTER: [number, number] = [32.85, -97.05];
 
@@ -274,6 +275,55 @@ function MapStyleToggle({
   );
 }
 
+function AlprCamerasToggle({
+  showAlprCameras,
+  onToggle,
+}: {
+  showAlprCameras: boolean;
+  onToggle: () => void;
+}) {
+  return (
+    <div style={{ maxWidth: 260 }}>
+      <button
+        onClick={onToggle}
+        style={{
+          background: showAlprCameras ? "#0c4a6e" : "#0f172a",
+          color: "#fff",
+          border: "1px solid rgba(56,189,248,0.5)",
+          borderRadius: 8,
+          padding: "8px 14px",
+          fontSize: 13,
+          fontWeight: 600,
+          cursor: "pointer",
+          width: "100%",
+        }}
+      >
+        {showAlprCameras ? "Hide" : "Show"} ALPR Cameras
+      </button>
+      {showAlprCameras && (
+        <div
+          style={{
+            marginTop: 8,
+            background: "rgba(10,12,18,0.92)",
+            border: "1px solid rgba(56,189,248,0.3)",
+            borderRadius: 8,
+            padding: "10px 12px",
+            fontSize: 11,
+            lineHeight: 1.5,
+            color: "#cbd5e1",
+          }}
+        >
+          Automated license plate reader locations, crowdsourced from{" "}
+          <a href="https://deflock.org" target="_blank" rel="noopener noreferrer" style={{ color: "#38bdf8" }}>
+            DeFlock
+          </a>{" "}
+          / OpenStreetMap. Community-reported, not independently verified.
+        </div>
+      )}
+    </div>
+  );
+}
+
 function clusterIcon(cluster: { getChildCount: () => number }): L.DivIcon {
   const count = cluster.getChildCount();
   const size = count >= 20 ? 52 : count >= 8 ? 44 : 36;
@@ -297,6 +347,7 @@ export default function SiteMap({ isActive = false }: { isActive?: boolean }) {
   const [showHotspots, setShowHotspots] = useState(false);
   const [sundownTowns, setSundownTowns] = useState<SundownTown[]>([]);
   const [showSundownTowns, setShowSundownTowns] = useState(false);
+  const [showAlprCameras, setShowAlprCameras] = useState(false);
   const [mapStyle, setMapStyle] = useState<"satellite" | "dark">("satellite");
 
   useEffect(() => {
@@ -374,12 +425,17 @@ export default function SiteMap({ isActive = false }: { isActive?: boolean }) {
             showSundownTowns={showSundownTowns}
             onToggle={() => setShowSundownTowns((v) => !v)}
           />
+          <AlprCamerasToggle
+            showAlprCameras={showAlprCameras}
+            onToggle={() => setShowAlprCameras((v) => !v)}
+          />
           <MapStyleToggle
             mapStyle={mapStyle}
             onToggle={() => setMapStyle((v) => (v === "satellite" ? "dark" : "satellite"))}
           />
         </div>
         {isActive && showHotspots && <TraffickingHotspotsLayer />}
+        {showAlprCameras && <AlprCamerasLayer />}
         {showSundownTowns &&
           sundownTowns.map((town) => (
             <Marker key={town.id} position={[town.lat, town.lng]} icon={sundownTownIcon(town)}>
