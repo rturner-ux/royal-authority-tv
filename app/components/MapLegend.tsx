@@ -37,7 +37,7 @@ export default function MapLegend({
           transition: "transform 220ms ease-out, opacity 180ms ease-out",
           pointerEvents: expanded ? "auto" : "none",
         }}
-        className="rounded-xl border border-white/10 bg-[#0f172a]/70 p-4 text-xs text-slate-200 backdrop-blur-sm"
+        className="rounded-xl border border-white/10 bg-[#0f172a]/55 p-4 text-xs text-slate-200 backdrop-blur-sm"
       >
         <div className="max-h-[50vh] space-y-2 overflow-y-auto">
           {categories.map((c) => (
