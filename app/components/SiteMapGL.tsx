@@ -9,6 +9,7 @@ import { CATEGORY_COLORS } from "@/lib/labels";
 import MapLegend from "./MapLegend";
 import IncidentMarkersGL from "./IncidentMarkersGL";
 import BoundariesLayerGL, { type BoundaryMode } from "./BoundariesLayerGL";
+import AlprCamerasLayerGL from "./AlprCamerasLayerGL";
 
 const DFW_CENTER = { longitude: -97.05, latitude: 32.85 };
 
@@ -31,6 +32,49 @@ function MapStyleToggle({ mapStyle, onToggle }: { mapStyle: MapStyleKey; onToggl
       >
         {mapStyle === "satellite" ? "Switch to Dark Map" : "Switch to Satellite"}
       </button>
+    </div>
+  );
+}
+
+function AlprCamerasToggle({ showAlprCameras, onToggle }: { showAlprCameras: boolean; onToggle: () => void }) {
+  return (
+    <div style={{ maxWidth: 260 }}>
+      <button
+        onClick={onToggle}
+        style={{
+          background: showAlprCameras ? "#0c4a6e" : "#0f172a",
+          color: "#fff",
+          border: "1px solid rgba(56,189,248,0.5)",
+          borderRadius: 8,
+          padding: "8px 14px",
+          fontSize: 13,
+          fontWeight: 600,
+          cursor: "pointer",
+          width: "100%",
+        }}
+      >
+        {showAlprCameras ? "Hide" : "Show"} ALPR Cameras
+      </button>
+      {showAlprCameras && (
+        <div
+          style={{
+            marginTop: 8,
+            background: "rgba(10,12,18,0.92)",
+            border: "1px solid rgba(56,189,248,0.3)",
+            borderRadius: 8,
+            padding: "10px 12px",
+            fontSize: 11,
+            lineHeight: 1.5,
+            color: "#cbd5e1",
+          }}
+        >
+          Automated license plate reader locations, crowdsourced from{" "}
+          <a href="https://deflock.org" target="_blank" rel="noopener noreferrer" style={{ color: "#38bdf8" }}>
+            DeFlock
+          </a>{" "}
+          / OpenStreetMap. Community-reported, not independently verified.
+        </div>
+      )}
     </div>
   );
 }
@@ -80,9 +124,12 @@ export default function SiteMapGL({ isActive = false }: { isActive?: boolean }) 
   const [hidden, setHidden] = useState<Set<IncidentCategory>>(
     new Set(Object.keys(CATEGORY_COLORS) as IncidentCategory[])
   );
-  // Phase 3 verification default (all three on); Phase 4 resets this to
-  // ["county"] once the real ALPR-panel switch UI exists to control it.
-  const [activeBoundaryModes, setActiveBoundaryModes] = useState<BoundaryMode[]>(["county", "state", "municipality"]);
+  const [activeBoundaryModes, setActiveBoundaryModes] = useState<BoundaryMode[]>(["county"]);
+  function toggleBoundaryMode(mode: BoundaryMode) {
+    setActiveBoundaryModes((prev) => (prev.includes(mode) ? prev.filter((m) => m !== mode) : [...prev, mode]));
+  }
+  const [showAlprCameras, setShowAlprCameras] = useState(false);
+  const [, setLightPoints] = useState<[number, number][]>([]);
 
   useEffect(() => {
     fetch("/api/incidents", { cache: "no-store" })
@@ -160,6 +207,14 @@ export default function SiteMapGL({ isActive = false }: { isActive?: boolean }) 
           <BoundariesLayerGL map={mapRef.current} activeModes={activeBoundaryModes} />
         )}
         {mapLoaded && mapRef.current && <IncidentMarkersGL map={mapRef.current} incidents={visibleIncidents} />}
+        {mapLoaded && mapRef.current && showAlprCameras && (
+          <AlprCamerasLayerGL
+            map={mapRef.current}
+            activeBoundaryModes={activeBoundaryModes}
+            onToggleBoundaryMode={toggleBoundaryMode}
+            onLightPointsChange={setLightPoints}
+          />
+        )}
       </Map>
 
       {/* NavigationControl is top:10, ~87px tall (3 stacked buttons vs
@@ -171,6 +226,7 @@ export default function SiteMapGL({ isActive = false }: { isActive?: boolean }) 
         style={{ position: "absolute", top: 10, right: 10, zIndex: 1000, flexDirection: "column", gap: 8 }}
       >
         {mapLoaded && mapRef.current && <ViewAllCasesButton map={mapRef.current} incidents={visibleIncidents} />}
+        <AlprCamerasToggle showAlprCameras={showAlprCameras} onToggle={() => setShowAlprCameras((v) => !v)} />
         <MapStyleToggle mapStyle={mapStyle} onToggle={switchStyle} />
       </div>
     </div>

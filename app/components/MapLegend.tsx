@@ -24,9 +24,16 @@ export default function MapLegend({
   const categories = Object.keys(CATEGORY_COLORS) as IncidentCategory[];
 
   return (
-    <div style={{ position: "absolute", top: topOffset, left: 10, zIndex: 1000 }}>
+    // pointerEvents:"none" on the outer wrapper, re-enabled explicitly on
+    // the button and (conditionally) the panel below -- CSS `transform`
+    // doesn't shrink an element's layout box, so the collapsed panel's
+    // full height was still hit-testable even while invisible, silently
+    // intercepting clicks on whatever sits underneath it in DOM order
+    // (confirmed via elementFromPoint against the GL map's ALPR panel).
+    <div style={{ position: "absolute", top: topOffset, left: 10, zIndex: 1000, pointerEvents: "none" }}>
       <button
         onClick={() => setExpanded((v) => !v)}
+        style={{ pointerEvents: "auto" }}
         className="flex items-center gap-2 rounded-xl border border-white/10 bg-[#0f172a]/80 px-3 py-2 text-xs font-black uppercase tracking-[0.15em] text-[#E8D19A] backdrop-blur-sm"
       >
         Filter Cases <span>{expanded ? "▾" : "▸"}</span>
