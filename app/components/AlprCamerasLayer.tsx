@@ -59,7 +59,15 @@ export default function AlprCamerasLayer() {
   }
 
   useEffect(() => {
-    load();
+    // Turning the layer on at a zoomed-out view used to just print a small
+    // "zoom in" note in the opposite corner from the toggle button --
+    // indistinguishable from the click doing nothing. Zoom the map in for
+    // them instead, so the toggle visibly does something immediately.
+    if (map.getZoom() < MIN_ZOOM) {
+      map.flyTo(map.getCenter(), MIN_ZOOM, { duration: 1 });
+    } else {
+      load();
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
