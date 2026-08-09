@@ -27,7 +27,7 @@ export default function CountyBoundariesLayer() {
       data={data}
       interactive={false}
       style={{
-        color: "rgba(255,255,255,0.16)",
+        color: "rgba(255,255,255,0.07)",
         weight: 1,
         fillOpacity: 0,
       }}

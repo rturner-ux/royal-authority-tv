@@ -135,13 +135,20 @@ function LightPointsLayer({ points }: { points: LightPoint[] }) {
     const renderer = rendererRef.current;
     const layer = L.layerGroup();
 
+    // Small radius and low opacity so overlapping points in dense areas
+    // build up a graduated density texture instead of saturating into a
+    // solid glowing wash -- a fixed high-opacity dot loses exactly the
+    // detail that makes this look like real data instead of a heatmap.
+    const zoom = map.getZoom();
+    const radius = Math.min(1.6, Math.max(0.9, 0.7 + zoom * 0.06));
+
     for (const [lat, lng] of points) {
       L.circleMarker([lat, lng], {
         renderer,
-        radius: 1.6,
+        radius,
         stroke: false,
         fillColor: "#38bdf8",
-        fillOpacity: 0.75,
+        fillOpacity: 0.45,
         interactive: false,
       }).addTo(layer);
     }
