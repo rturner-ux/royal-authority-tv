@@ -1,9 +1,13 @@
 "use client";
 
 import "maplibre-gl/dist/maplibre-gl.css";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Map, NavigationControl, type MapRef } from "react-map-gl/maplibre";
 import { resolveMapStyle, type MapStyleKey } from "@/lib/mapStyles";
+import type { Incident, IncidentCategory } from "@/lib/types";
+import { CATEGORY_COLORS } from "@/lib/labels";
+import MapLegend from "./MapLegend";
+import IncidentMarkersGL from "./IncidentMarkersGL";
 
 const DFW_CENTER = { longitude: -97.05, latitude: 32.85 };
 
@@ -30,16 +34,70 @@ function MapStyleToggle({ mapStyle, onToggle }: { mapStyle: MapStyleKey; onToggl
   );
 }
 
-// Phase 1 scaffold: base MapLibre map + satellite/dark style toggle +
-// NavigationControl (pan/zoom/compass -- this is what delivers the
-// drag-to-tilt/rotate 3D interaction Leaflet could never do). Incident
-// markers, boundaries, ALPR, sundown towns, and trafficking corridors are
-// added in later phases -- see the migration plan for the phase breakdown.
+function ViewAllCasesButton({ map, incidents }: { map: MapRef; incidents: Incident[] }) {
+  if (incidents.length === 0) return null;
+
+  return (
+    <button
+      onClick={() => {
+        const lats = incidents.map((i) => i.lat);
+        const lngs = incidents.map((i) => i.lng);
+        const bounds: [[number, number], [number, number]] = [
+          [Math.min(...lngs), Math.min(...lats)],
+          [Math.max(...lngs), Math.max(...lats)],
+        ];
+        map.getMap().fitBounds(bounds, { padding: 60, maxZoom: 10 });
+      }}
+      style={{
+        background: "#0f172a",
+        color: "#E8D19A",
+        border: "1px solid rgba(201,162,74,0.4)",
+        borderRadius: 8,
+        padding: "8px 14px",
+        fontSize: 13,
+        fontWeight: 600,
+        cursor: "pointer",
+      }}
+    >
+      View All Cases
+    </button>
+  );
+}
+
+// Phase 2: incident markers + clustering + Filter Cases panel + View All
+// Cases, on top of the Phase 1 base map/style toggle. Boundaries, ALPR,
+// sundown towns, and trafficking corridors are added in later phases -- see
+// the migration plan for the phase breakdown.
 export default function SiteMapGL({ isActive = false }: { isActive?: boolean }) {
   void isActive;
   const [mapStyle, setMapStyle] = useState<MapStyleKey>("satellite");
   const mapRef = useRef<MapRef | null>(null);
   const lastViewState = useRef({ ...DFW_CENTER, zoom: 9, pitch: 0, bearing: 0 });
+  const [mapLoaded, setMapLoaded] = useState(false);
+
+  const [incidents, setIncidents] = useState<Incident[]>([]);
+  const [hidden, setHidden] = useState<Set<IncidentCategory>>(
+    new Set(Object.keys(CATEGORY_COLORS) as IncidentCategory[])
+  );
+
+  useEffect(() => {
+    fetch("/api/incidents", { cache: "no-store" })
+      .then((r) => r.json())
+      .then((d) => {
+        if (d.success) setIncidents(d.incidents);
+      });
+  }, []);
+
+  function toggleCategory(category: IncidentCategory) {
+    setHidden((prev) => {
+      const next = new Set(prev);
+      if (next.has(category)) next.delete(category);
+      else next.add(category);
+      return next;
+    });
+  }
+
+  const visibleIncidents = incidents.filter((i) => !hidden.has(i.category));
 
   function switchStyle() {
     const map = mapRef.current?.getMap();
@@ -52,11 +110,20 @@ export default function SiteMapGL({ isActive = false }: { isActive?: boolean }) 
         bearing: map.getBearing(),
       };
     }
+    setMapLoaded(false);
     setMapStyle((v) => (v === "satellite" ? "dark" : "satellite"));
   }
 
   return (
     <div style={{ position: "relative", width: "100%", height: "100%" }}>
+      <style>{`
+        @keyframes ra-flash {
+          0% { transform: scale(0.6); opacity: 1; }
+          70% { transform: scale(1.6); opacity: 0; }
+          100% { transform: scale(1.6); opacity: 0; }
+        }
+      `}</style>
+
       {/* key={mapStyle} forces a clean remount on style switch instead of
           relying on MapLibre's default diffed setStyle() -- switching
           between a raster-only style and a vector style with its own
@@ -71,14 +138,21 @@ export default function SiteMapGL({ isActive = false }: { isActive?: boolean }) 
         minZoom={4}
         mapStyle={resolveMapStyle(mapStyle)}
         style={{ width: "100%", height: "100%" }}
+        onLoad={() => setMapLoaded(true)}
       >
         <NavigationControl position="top-left" />
+        {mapLoaded && mapRef.current && <IncidentMarkersGL map={mapRef.current} incidents={visibleIncidents} />}
       </Map>
+
+      {/* NavigationControl is top:10, ~87px tall (3 stacked buttons vs
+          Leaflet's 2) -- measured empirically via Playwright, not guessed. */}
+      <MapLegend hidden={hidden} onToggle={toggleCategory} topOffset={107} />
 
       <div
         className="hidden sm:flex"
         style={{ position: "absolute", top: 10, right: 10, zIndex: 1000, flexDirection: "column", gap: 8 }}
       >
+        {mapLoaded && mapRef.current && <ViewAllCasesButton map={mapRef.current} incidents={visibleIncidents} />}
         <MapStyleToggle mapStyle={mapStyle} onToggle={switchStyle} />
       </div>
     </div>

@@ -8,18 +8,23 @@ import { CATEGORY_SHAPES, shapeSvg } from "@/lib/mapShapes";
 export default function MapLegend({
   hidden,
   onToggle,
+  topOffset = 84,
 }: {
   hidden: Set<IncidentCategory>;
   onToggle: (category: IncidentCategory) => void;
+  // Default (84) clears Leaflet's default zoom control (top:10, ~64px
+  // tall) on the legacy map -- this used to sit at top:10 too and
+  // physically overlap/intercept clicks on the zoom-in button. MapLibre's
+  // NavigationControl is taller (top:10, ~87px -- 3 stacked buttons
+  // instead of 2), so the GL map passes a larger measured value instead of
+  // relying on this default.
+  topOffset?: number;
 }) {
   const [expanded, setExpanded] = useState(false);
   const categories = Object.keys(CATEGORY_COLORS) as IncidentCategory[];
 
   return (
-    // top:84 clears Leaflet's default zoom control (top:10, ~64px tall) --
-    // this used to sit at top:10 too and physically overlap/intercept
-    // clicks on the zoom-in button.
-    <div style={{ position: "absolute", top: 84, left: 10, zIndex: 1000 }}>
+    <div style={{ position: "absolute", top: topOffset, left: 10, zIndex: 1000 }}>
       <button
         onClick={() => setExpanded((v) => !v)}
         className="flex items-center gap-2 rounded-xl border border-white/10 bg-[#0f172a]/80 px-3 py-2 text-xs font-black uppercase tracking-[0.15em] text-[#E8D19A] backdrop-blur-sm"
