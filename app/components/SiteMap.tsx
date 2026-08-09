@@ -349,7 +349,12 @@ export default function SiteMap({ isActive = false }: { isActive?: boolean }) {
   const [sundownTowns, setSundownTowns] = useState<SundownTown[]>([]);
   const [showSundownTowns, setShowSundownTowns] = useState(false);
   const [showAlprCameras, setShowAlprCameras] = useState(false);
-  const [boundaryMode, setBoundaryMode] = useState<BoundaryMode>("county");
+  const [activeBoundaryModes, setActiveBoundaryModes] = useState<BoundaryMode[]>(["county"]);
+  function toggleBoundaryMode(mode: BoundaryMode) {
+    setActiveBoundaryModes((prev) =>
+      prev.includes(mode) ? prev.filter((m) => m !== mode) : [...prev, mode]
+    );
+  }
   const [mapStyle, setMapStyle] = useState<"satellite" | "dark">("satellite");
   const [mobileLayersOpen, setMobileLayersOpen] = useState(false);
 
@@ -417,7 +422,7 @@ export default function SiteMap({ isActive = false }: { isActive?: boolean }) {
             url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
           />
         )}
-        {mapStyle === "dark" && <BoundariesLayer mode={boundaryMode} />}
+        {mapStyle === "dark" && <BoundariesLayer activeModes={activeBoundaryModes} />}
         <MapLegend hidden={hidden} onToggle={toggleCategory} />
 
         {/* Desktop: always-visible stack, unchanged. On a narrow phone
@@ -482,7 +487,7 @@ export default function SiteMap({ isActive = false }: { isActive?: boolean }) {
         </div>
         {isActive && showHotspots && <TraffickingHotspotsLayer />}
         {showAlprCameras && (
-          <AlprCamerasLayer boundaryMode={boundaryMode} onBoundaryModeChange={setBoundaryMode} />
+          <AlprCamerasLayer activeBoundaryModes={activeBoundaryModes} onToggleBoundaryMode={toggleBoundaryMode} />
         )}
         {showSundownTowns &&
           sundownTowns.map((town) => (

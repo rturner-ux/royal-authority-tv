@@ -126,11 +126,11 @@ function SearchBox({ onResolved }: { onResolved: (lat: number, lng: number, labe
 
 
 export default function AlprCamerasLayer({
-  boundaryMode,
-  onBoundaryModeChange,
+  activeBoundaryModes,
+  onToggleBoundaryMode,
 }: {
-  boundaryMode: BoundaryMode;
-  onBoundaryModeChange: (mode: BoundaryMode) => void;
+  activeBoundaryModes: BoundaryMode[];
+  onToggleBoundaryMode: (mode: BoundaryMode) => void;
 }) {
   const map = useMap();
   const [tab, setTab] = useState<"cameras" | "route">("cameras");
@@ -246,30 +246,56 @@ export default function AlprCamerasLayer({
 
             <div style={{ marginTop: 10, paddingTop: 10, borderTop: "1px solid rgba(255,255,255,0.1)" }}>
               <span style={{ color: "#94a3b8", textTransform: "uppercase", fontSize: 10, letterSpacing: 0.05 }}>
-                Boundary lines
+                Boundaries
               </span>
-              <div style={{ display: "flex", gap: 4, marginTop: 6 }}>
-                {(["county", "state"] as const).map((m) => (
-                  <button
-                    key={m}
-                    onClick={() => onBoundaryModeChange(m)}
-                    style={{
-                      flex: 1,
-                      background: boundaryMode === m ? "#0c4a6e" : "rgba(255,255,255,0.05)",
-                      border: `1px solid ${boundaryMode === m ? "rgba(56,189,248,0.5)" : "rgba(255,255,255,0.1)"}`,
-                      borderRadius: 6,
-                      padding: "5px 0",
-                      fontSize: 11,
-                      fontWeight: 700,
-                      color: boundaryMode === m ? "#38bdf8" : "#94a3b8",
-                      cursor: "pointer",
-                      textTransform: "capitalize",
-                    }}
-                  >
-                    {m}
-                  </button>
-                ))}
+              <div style={{ display: "flex", flexDirection: "column", gap: 6, marginTop: 8 }}>
+                {([
+                  ["state", "States"],
+                  ["county", "Counties"],
+                  ["municipality", "Municipalities"],
+                ] as const).map(([m, label]) => {
+                  const active = activeBoundaryModes.includes(m);
+                  return (
+                    <div key={m} style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                      <span style={{ fontSize: 12, color: active ? "#e2e8f0" : "#94a3b8" }}>{label}</span>
+                      <button
+                        type="button"
+                        onClick={() => onToggleBoundaryMode(m)}
+                        aria-pressed={active}
+                        style={{
+                          position: "relative",
+                          width: 34,
+                          height: 18,
+                          borderRadius: 999,
+                          border: "none",
+                          padding: 0,
+                          cursor: "pointer",
+                          background: active ? "#0c4a6e" : "rgba(255,255,255,0.1)",
+                          transition: "background 150ms ease-in-out",
+                        }}
+                      >
+                        <span
+                          style={{
+                            position: "absolute",
+                            top: 2,
+                            left: active ? 18 : 2,
+                            width: 14,
+                            height: 14,
+                            borderRadius: "50%",
+                            background: active ? "#38bdf8" : "#94a3b8",
+                            transition: "left 150ms ease-in-out",
+                          }}
+                        />
+                      </button>
+                    </div>
+                  );
+                })}
               </div>
+              {activeBoundaryModes.includes("municipality") && (
+                <p style={{ margin: "8px 0 0", fontSize: 10, lineHeight: 1.4, color: "#64748b" }}>
+                  Municipality lines appear once you zoom in close enough.
+                </p>
+              )}
             </div>
 
             <div style={{ marginTop: 10, paddingTop: 10, borderTop: "1px solid rgba(255,255,255,0.1)" }}>
