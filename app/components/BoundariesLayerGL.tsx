@@ -86,7 +86,12 @@ function BoundaryTooltip({ hoverInfo }: { hoverInfo: HoverInfo | null }) {
 }
 
 function CountyLayer({ map }: { map: MapRef }) {
-  const hoverInfo = useBoundaryHover(map, "counties", "county-line", (f) => {
+  // Hover is bound to the invisible fill layer (whole polygon), not the
+  // 1-2px line -- Leaflet's original GeoJSON layer hovered the entire
+  // shape by default (fillOpacity:0 there still keeps a hit-testable fill
+  // area), so binding to the thin line here made hover flicker on/off as
+  // the cursor crossed in and out of a hair-width target.
+  const hoverInfo = useBoundaryHover(map, "counties", "county-fill", (f) => {
     const name = f.properties?.NAME;
     const lsad = f.properties?.LSAD;
     return name ? (lsad ? `${name} ${lsad}` : name) : null;
@@ -94,6 +99,7 @@ function CountyLayer({ map }: { map: MapRef }) {
   return (
     <>
       <Source id="counties" type="geojson" data="/data/us-counties.geojson" generateId>
+        <Layer id="county-fill" type="fill" paint={{ "fill-color": "#000", "fill-opacity": 0 }} />
         <Layer id="county-line" type="line" paint={hoverLinePaint(BASE_COLOR, HOVER_COLOR)} />
       </Source>
       <BoundaryTooltip hoverInfo={hoverInfo} />
@@ -102,10 +108,11 @@ function CountyLayer({ map }: { map: MapRef }) {
 }
 
 function StateLayer({ map }: { map: MapRef }) {
-  const hoverInfo = useBoundaryHover(map, "states", "state-line", (f) => f.properties?.name || null);
+  const hoverInfo = useBoundaryHover(map, "states", "state-fill", (f) => f.properties?.name || null);
   return (
     <>
       <Source id="states" type="geojson" data="/data/us-states.geojson" generateId>
+        <Layer id="state-fill" type="fill" paint={{ "fill-color": "#000", "fill-opacity": 0 }} />
         <Layer id="state-line" type="line" paint={hoverLinePaint(BASE_COLOR, HOVER_COLOR)} />
       </Source>
       <BoundaryTooltip hoverInfo={hoverInfo} />
@@ -156,7 +163,7 @@ function MunicipalityLayer({ map }: { map: MapRef }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [map]);
 
-  const hoverInfo = useBoundaryHover(map, "municipalities", "municipality-line", (f) => f.properties?.NAMELSAD || f.properties?.NAME || null);
+  const hoverInfo = useBoundaryHover(map, "municipalities", "municipality-fill", (f) => f.properties?.NAMELSAD || f.properties?.NAME || null);
 
   return (
     <>
@@ -166,6 +173,7 @@ function MunicipalityLayer({ map }: { map: MapRef }) {
           changes, so there's no need for the old Leaflet layer's
           key={fetchKey} forced-remount workaround. */}
       <Source id="municipalities" type="geojson" data={data} generateId>
+        <Layer id="municipality-fill" type="fill" paint={{ "fill-color": "#000", "fill-opacity": 0 }} />
         <Layer id="municipality-line" type="line" paint={hoverLinePaint(MUNICIPALITY_BASE_COLOR, MUNICIPALITY_HOVER_COLOR)} />
       </Source>
       <BoundaryTooltip hoverInfo={hoverInfo} />
