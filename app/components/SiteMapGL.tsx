@@ -8,6 +8,7 @@ import type { Incident, IncidentCategory } from "@/lib/types";
 import { CATEGORY_COLORS } from "@/lib/labels";
 import MapLegend from "./MapLegend";
 import IncidentMarkersGL from "./IncidentMarkersGL";
+import BoundariesLayerGL, { type BoundaryMode } from "./BoundariesLayerGL";
 
 const DFW_CENTER = { longitude: -97.05, latitude: 32.85 };
 
@@ -79,6 +80,9 @@ export default function SiteMapGL({ isActive = false }: { isActive?: boolean }) 
   const [hidden, setHidden] = useState<Set<IncidentCategory>>(
     new Set(Object.keys(CATEGORY_COLORS) as IncidentCategory[])
   );
+  // Phase 3 verification default (all three on); Phase 4 resets this to
+  // ["county"] once the real ALPR-panel switch UI exists to control it.
+  const [activeBoundaryModes, setActiveBoundaryModes] = useState<BoundaryMode[]>(["county", "state", "municipality"]);
 
   useEffect(() => {
     fetch("/api/incidents", { cache: "no-store" })
@@ -122,6 +126,17 @@ export default function SiteMapGL({ isActive = false }: { isActive?: boolean }) 
           70% { transform: scale(1.6); opacity: 0; }
           100% { transform: scale(1.6); opacity: 0; }
         }
+        .county-tooltip .maplibregl-popup-content {
+          background: rgba(10,12,18,0.92);
+          border: 1px solid rgba(56,189,248,0.35);
+          color: #e2e8f0;
+          font-size: 11px;
+          padding: 3px 8px;
+          box-shadow: none;
+        }
+        .county-tooltip .maplibregl-popup-tip {
+          display: none;
+        }
       `}</style>
 
       {/* key={mapStyle} forces a clean remount on style switch instead of
@@ -141,6 +156,9 @@ export default function SiteMapGL({ isActive = false }: { isActive?: boolean }) 
         onLoad={() => setMapLoaded(true)}
       >
         <NavigationControl position="top-left" />
+        {mapLoaded && mapRef.current && mapStyle === "dark" && (
+          <BoundariesLayerGL map={mapRef.current} activeModes={activeBoundaryModes} />
+        )}
         {mapLoaded && mapRef.current && <IncidentMarkersGL map={mapRef.current} incidents={visibleIncidents} />}
       </Map>
 
