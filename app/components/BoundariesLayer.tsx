@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import { GeoJSON } from "react-leaflet";
 import type { Layer, StyleFunction } from "leaflet";
 
+export type BoundaryMode = "county" | "state";
+
 const BASE_STYLE = {
   color: "rgba(255,255,255,0.07)",
   weight: 1,
@@ -16,31 +18,38 @@ const HOVER_STYLE = {
   fillOpacity: 0,
 };
 
-// Subtle county-line texture under the dark basemap, matching the look of
-// DeFlock's own map, with a bold-outline hover highlight per county.
-// Source: US Census county boundaries (Plotly's public GeoJSON mirror of
-// the Census cartographic boundary files), self-hosted in /public so this
-// doesn't depend on GitHub's raw CDN at request time.
-export default function CountyBoundariesLayer() {
+const SOURCES: Record<BoundaryMode, string> = {
+  county: "/data/us-counties.geojson",
+  state: "/data/us-states.geojson",
+};
+
+// Subtle boundary-line texture under the dark basemap, matching the look of
+// DeFlock's own map, with a bold-outline hover highlight per county/state.
+// Sources: US Census county boundaries and PublicaMundi's public US states
+// GeoJSON, self-hosted in /public so this doesn't depend on GitHub's raw
+// CDN at request time.
+export default function BoundariesLayer({ mode }: { mode: BoundaryMode }) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [data, setData] = useState<any>(null);
 
   useEffect(() => {
-    fetch("/data/us-counties.geojson")
+    setData(null);
+    fetch(SOURCES[mode])
       .then((r) => r.json())
       .then(setData)
       .catch(() => {
         // Purely decorative; fail silently rather than break the map.
       });
-  }, []);
+  }, [mode]);
 
   if (!data) return null;
 
   const style: StyleFunction = () => BASE_STYLE;
 
   function onEachFeature(feature: GeoJSON.Feature, layer: Layer) {
-    const name = feature.properties?.NAME;
-    const lsad = feature.properties?.LSAD;
+    const name =
+      mode === "state" ? feature.properties?.name : feature.properties?.NAME;
+    const lsad = mode === "county" ? feature.properties?.LSAD : null;
     if (name) {
       layer.bindTooltip(lsad ? `${name} ${lsad}` : name, { sticky: true, className: "county-tooltip" });
     }
@@ -56,5 +65,7 @@ export default function CountyBoundariesLayer() {
     });
   }
 
-  return <GeoJSON data={data} style={style} onEachFeature={onEachFeature} />;
+  // key={mode} forces a clean remount when switching modes instead of
+  // react-leaflet trying to diff two structurally unrelated GeoJSON trees.
+  return <GeoJSON key={mode} data={data} style={style} onEachFeature={onEachFeature} />;
 }

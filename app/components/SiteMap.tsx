@@ -13,7 +13,7 @@ import { CATEGORY_SHAPES, shapeSvg } from "@/lib/mapShapes";
 import MapLegend from "./MapLegend";
 import TraffickingHotspotsLayer from "./TraffickingHotspotsLayer";
 import AlprCamerasLayer from "./AlprCamerasLayer";
-import CountyBoundariesLayer from "./CountyBoundariesLayer";
+import BoundariesLayer, { type BoundaryMode } from "./BoundariesLayer";
 
 const DFW_CENTER: [number, number] = [32.85, -97.05];
 
@@ -349,6 +349,7 @@ export default function SiteMap({ isActive = false }: { isActive?: boolean }) {
   const [sundownTowns, setSundownTowns] = useState<SundownTown[]>([]);
   const [showSundownTowns, setShowSundownTowns] = useState(false);
   const [showAlprCameras, setShowAlprCameras] = useState(false);
+  const [boundaryMode, setBoundaryMode] = useState<BoundaryMode>("county");
   const [mapStyle, setMapStyle] = useState<"satellite" | "dark">("satellite");
 
   useEffect(() => {
@@ -415,7 +416,7 @@ export default function SiteMap({ isActive = false }: { isActive?: boolean }) {
             url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
           />
         )}
-        {mapStyle === "dark" && <CountyBoundariesLayer />}
+        {mapStyle === "dark" && <BoundariesLayer mode={boundaryMode} />}
         <MapLegend hidden={hidden} onToggle={toggleCategory} />
         <div
           style={{
@@ -448,7 +449,9 @@ export default function SiteMap({ isActive = false }: { isActive?: boolean }) {
           />
         </div>
         {isActive && showHotspots && <TraffickingHotspotsLayer />}
-        {showAlprCameras && <AlprCamerasLayer />}
+        {showAlprCameras && (
+          <AlprCamerasLayer boundaryMode={boundaryMode} onBoundaryModeChange={setBoundaryMode} />
+        )}
         {showSundownTowns &&
           sundownTowns.map((town) => (
             <Marker key={town.id} position={[town.lat, town.lng]} icon={sundownTownIcon(town)}>

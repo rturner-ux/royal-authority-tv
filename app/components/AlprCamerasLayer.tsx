@@ -6,6 +6,7 @@ import MarkerClusterGroup from "react-leaflet-cluster";
 import L from "leaflet";
 import AlprDeckLayer from "./AlprDeckLayer";
 import AlprRoutePlanner from "./AlprRoutePlanner";
+import type { BoundaryMode } from "./BoundariesLayer";
 
 type AlprCamera = {
   id: number;
@@ -124,7 +125,13 @@ function SearchBox({ onResolved }: { onResolved: (lat: number, lng: number, labe
 }
 
 
-export default function AlprCamerasLayer() {
+export default function AlprCamerasLayer({
+  boundaryMode,
+  onBoundaryModeChange,
+}: {
+  boundaryMode: BoundaryMode;
+  onBoundaryModeChange: (mode: BoundaryMode) => void;
+}) {
   const map = useMap();
   const [tab, setTab] = useState<"cameras" | "route">("cameras");
   const [cameras, setCameras] = useState<AlprCamera[]>([]);
@@ -236,6 +243,34 @@ export default function AlprCamerasLayer() {
         {tab === "cameras" ? (
           <>
             <SearchBox onResolved={(lat, lng) => goTo(lat, lng)} />
+
+            <div style={{ marginTop: 10, paddingTop: 10, borderTop: "1px solid rgba(255,255,255,0.1)" }}>
+              <span style={{ color: "#94a3b8", textTransform: "uppercase", fontSize: 10, letterSpacing: 0.05 }}>
+                Boundary lines
+              </span>
+              <div style={{ display: "flex", gap: 4, marginTop: 6 }}>
+                {(["county", "state"] as const).map((m) => (
+                  <button
+                    key={m}
+                    onClick={() => onBoundaryModeChange(m)}
+                    style={{
+                      flex: 1,
+                      background: boundaryMode === m ? "#0c4a6e" : "rgba(255,255,255,0.05)",
+                      border: `1px solid ${boundaryMode === m ? "rgba(56,189,248,0.5)" : "rgba(255,255,255,0.1)"}`,
+                      borderRadius: 6,
+                      padding: "5px 0",
+                      fontSize: 11,
+                      fontWeight: 700,
+                      color: boundaryMode === m ? "#38bdf8" : "#94a3b8",
+                      cursor: "pointer",
+                      textTransform: "capitalize",
+                    }}
+                  >
+                    {m}
+                  </button>
+                ))}
+              </div>
+            </div>
 
             <div style={{ marginTop: 10, paddingTop: 10, borderTop: "1px solid rgba(255,255,255,0.1)" }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
