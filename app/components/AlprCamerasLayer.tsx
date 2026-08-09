@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { CircleMarker, Marker, Popup, useMap, useMapEvents } from "react-leaflet";
+import { Marker, Popup, useMap, useMapEvents } from "react-leaflet";
 import MarkerClusterGroup from "react-leaflet-cluster";
 import L from "leaflet";
 
@@ -15,11 +15,8 @@ type AlprCamera = {
   zone: string | null;
 };
 
-type ClusterPoint = {
-  lat: number;
-  lng: number;
-  count: number;
-};
+// [lat, lng] tuples, matching the API's compact response shape.
+type LightPoint = [number, number];
 
 const CAMERA_ICON = L.divIcon({
   html: `<div style="width:12px;height:12px;background:#38bdf8;border:2px solid rgba(255,255,255,0.85);border-radius:3px;box-shadow:0 0 6px rgba(56,189,248,0.8);"></div>`,
@@ -29,7 +26,9 @@ const CAMERA_ICON = L.divIcon({
 });
 
 // At or above this zoom, the API returns individually-poppable raw camera
-// points instead of grid-aggregated cluster counts.
+// points with full detail. Below it, it returns every camera's bare
+// coordinates, rendered as small fixed-size dots -- a real point cloud
+// (like DeFlock's own map) instead of synthetic count-sized cluster blobs.
 const RAW_POINT_ZOOM = 11;
 
 const PANEL_STYLE: React.CSSProperties = {
@@ -122,17 +121,46 @@ function SearchBox({ onResolved }: { onResolved: (lat: number, lng: number, labe
   );
 }
 
-function clusterRadius(count: number): number {
-  return Math.min(20, 3 + Math.log2(count + 1) * 2);
+// Renders raw camera coordinates as a dense point cloud. Built with plain
+// Leaflet objects added imperatively rather than one <CircleMarker> React
+// element per point -- at up to ~127k points, React's reconciler would
+// choke trying to mount/diff that many elements, where a plain loop
+// creating lightweight Leaflet objects on a shared canvas renderer doesn't.
+function LightPointsLayer({ points }: { points: LightPoint[] }) {
+  const map = useMap();
+  const rendererRef = useRef<L.Canvas | null>(null);
+
+  useEffect(() => {
+    if (!rendererRef.current) rendererRef.current = L.canvas({ padding: 0.5 });
+    const renderer = rendererRef.current;
+    const layer = L.layerGroup();
+
+    for (const [lat, lng] of points) {
+      L.circleMarker([lat, lng], {
+        renderer,
+        radius: 1.6,
+        stroke: false,
+        fillColor: "#38bdf8",
+        fillOpacity: 0.75,
+        interactive: false,
+      }).addTo(layer);
+    }
+
+    layer.addTo(map);
+    return () => {
+      map.removeLayer(layer);
+    };
+  }, [points, map]);
+
+  return null;
 }
 
 export default function AlprCamerasLayer() {
   const map = useMap();
   const [cameras, setCameras] = useState<AlprCamera[]>([]);
-  const [clusterPoints, setClusterPoints] = useState<ClusterPoint[]>([]);
-  const [clustered, setClustered] = useState(map.getZoom() < RAW_POINT_ZOOM);
+  const [lightPoints, setLightPoints] = useState<LightPoint[]>([]);
+  const [detailed, setDetailed] = useState(map.getZoom() >= RAW_POINT_ZOOM);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const canvasRenderer = useMemo(() => L.canvas({ padding: 0.5 }), []);
 
   function load() {
     const zoom = map.getZoom();
@@ -149,13 +177,13 @@ export default function AlprCamerasLayer() {
       .then((r) => r.json())
       .then((d) => {
         if (!d.success) return;
-        setClustered(Boolean(d.clustered));
-        if (d.clustered) {
-          setClusterPoints(d.points);
-          setCameras([]);
-        } else {
+        setDetailed(Boolean(d.detailed));
+        if (d.detailed) {
           setCameras(d.cameras);
-          setClusterPoints([]);
+          setLightPoints([]);
+        } else {
+          setLightPoints(d.points);
+          setCameras([]);
         }
       })
       .catch(() => {
@@ -175,10 +203,10 @@ export default function AlprCamerasLayer() {
     },
   });
 
-  const totalInView = clustered ? clusterPoints.reduce((sum, p) => sum + p.count, 0) : cameras.length;
+  const totalInView = detailed ? cameras.length : lightPoints.length;
 
   const manufacturerBreakdown = useMemo(() => {
-    if (clustered || cameras.length === 0) return [];
+    if (!detailed || cameras.length === 0) return [];
     const counts = new Map<string, number>();
     for (const cam of cameras) {
       const key = cam.manufacturer || "Unidentified";
@@ -187,7 +215,7 @@ export default function AlprCamerasLayer() {
     return Array.from(counts.entries())
       .sort((a, b) => b[1] - a[1])
       .map(([name, count]) => ({ name, count, pct: Math.round((count / cameras.length) * 100) }));
-  }, [clustered, cameras]);
+  }, [detailed, cameras]);
 
   function goTo(lat: number, lng: number, zoom = 14) {
     map.flyTo([lat, lng], zoom, { duration: 1 });
@@ -217,7 +245,7 @@ export default function AlprCamerasLayer() {
             <span style={{ color: "#38bdf8", fontWeight: 700, fontSize: 18 }}>{totalInView.toLocaleString()}</span>
           </div>
 
-          {clustered ? (
+          {!detailed ? (
             <div style={{ marginTop: 8, color: "#94a3b8", fontSize: 11 }}>
               Zoom in for individual camera details and manufacturer breakdown.
             </div>
@@ -266,76 +294,60 @@ export default function AlprCamerasLayer() {
         </div>
       </div>
 
-      {clustered
-        ? clusterPoints.map((p) => (
-            <CircleMarker
-              key={`${p.lat},${p.lng}`}
-              center={[p.lat, p.lng]}
-              radius={clusterRadius(p.count)}
-              renderer={canvasRenderer}
-              pathOptions={{
-                color: "rgba(255,255,255,0.5)",
-                weight: 1,
-                fillColor: "#38bdf8",
-                fillOpacity: 0.65,
-              }}
-              eventHandlers={{
-                click: () => goTo(p.lat, p.lng, Math.min(map.getZoom() + 3, RAW_POINT_ZOOM + 1)),
-              }}
-            />
-          ))
-        : (
-          <MarkerClusterGroup chunkedLoading maxClusterRadius={40}>
-            {cameras.map((cam) => (
-              <Marker key={cam.id} position={[cam.lat, cam.lng]} icon={CAMERA_ICON}>
-                <Popup>
-                  <div style={{ minWidth: 210, fontSize: 13, color: "#0f172a" }}>
-                    <div style={{ fontWeight: 700, marginBottom: 6 }}>Automated License Plate Reader</div>
-                    <div style={{ display: "flex", flexDirection: "column", gap: 3, marginBottom: 8 }}>
-                      <div>
-                        <strong>ID:</strong> {cam.id}
-                      </div>
-                      {cam.operator && (
-                        <div>
-                          <strong>Operated by:</strong> {cam.operator}
-                        </div>
-                      )}
-                      {cam.manufacturer && (
-                        <div>
-                          <strong>Made by:</strong> {cam.manufacturer}
-                        </div>
-                      )}
-                      {cam.zone && (
-                        <div>
-                          <strong>Zone:</strong> {cam.zone}
-                        </div>
-                      )}
-                      {cam.direction && (
-                        <div>
-                          <strong>Facing:</strong> {cam.direction}
-                        </div>
-                      )}
-                      <div>
-                        <strong>Coords:</strong> {cam.lat.toFixed(5)}, {cam.lng.toFixed(5)}
-                      </div>
+      {!detailed ? (
+        <LightPointsLayer points={lightPoints} />
+      ) : (
+        <MarkerClusterGroup chunkedLoading maxClusterRadius={40}>
+          {cameras.map((cam) => (
+            <Marker key={cam.id} position={[cam.lat, cam.lng]} icon={CAMERA_ICON}>
+              <Popup>
+                <div style={{ minWidth: 210, fontSize: 13, color: "#0f172a" }}>
+                  <div style={{ fontWeight: 700, marginBottom: 6 }}>Automated License Plate Reader</div>
+                  <div style={{ display: "flex", flexDirection: "column", gap: 3, marginBottom: 8 }}>
+                    <div>
+                      <strong>ID:</strong> {cam.id}
                     </div>
-                    <p style={{ margin: "0 0 8px", lineHeight: 1.5, color: "#334155", fontSize: 11 }}>
-                      Crowdsourced location from OpenStreetMap / DeFlock. Not independently verified.
-                    </p>
-                    <a
-                      href={`https://www.openstreetmap.org/node/${cam.id}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      style={{ fontSize: 12, color: "#2563eb", fontWeight: 700 }}
-                    >
-                      View on OpenStreetMap →
-                    </a>
+                    {cam.operator && (
+                      <div>
+                        <strong>Operated by:</strong> {cam.operator}
+                      </div>
+                    )}
+                    {cam.manufacturer && (
+                      <div>
+                        <strong>Made by:</strong> {cam.manufacturer}
+                      </div>
+                    )}
+                    {cam.zone && (
+                      <div>
+                        <strong>Zone:</strong> {cam.zone}
+                      </div>
+                    )}
+                    {cam.direction && (
+                      <div>
+                        <strong>Facing:</strong> {cam.direction}
+                      </div>
+                    )}
+                    <div>
+                      <strong>Coords:</strong> {cam.lat.toFixed(5)}, {cam.lng.toFixed(5)}
+                    </div>
                   </div>
-                </Popup>
-              </Marker>
-            ))}
-          </MarkerClusterGroup>
-        )}
+                  <p style={{ margin: "0 0 8px", lineHeight: 1.5, color: "#334155", fontSize: 11 }}>
+                    Crowdsourced location from OpenStreetMap / DeFlock. Not independently verified.
+                  </p>
+                  <a
+                    href={`https://www.openstreetmap.org/node/${cam.id}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{ fontSize: 12, color: "#2563eb", fontWeight: 700 }}
+                  >
+                    View on OpenStreetMap →
+                  </a>
+                </div>
+              </Popup>
+            </Marker>
+          ))}
+        </MarkerClusterGroup>
+      )}
     </>
   );
 }

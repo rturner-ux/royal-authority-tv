@@ -6,16 +6,13 @@ import { supabase } from '@/lib/supabase/server'
 // richer per-camera fields, and not subject to Overpass's shared rate limits.
 export const dynamic = 'force-dynamic'
 
-// Below this zoom, returning 100k+ individual rows would be both a huge
-// payload and unrenderable as DOM markers. Above it, callers get raw,
-// individually-poppable camera points.
+// At or above this zoom, callers get full per-camera detail (operator,
+// manufacturer, zone, etc.) for interactive, individually-poppable markers.
+// Below it, callers get raw lat/lng only for every camera in view, rendered
+// as small fixed-size dots -- matching DeFlock's own point-cloud look
+// instead of synthetic count-sized cluster blobs.
 const RAW_POINT_ZOOM = 11
-const RAW_POINT_LIMIT = 8000
-
-function clusterPrecision(zoom: number): number {
-  const precision = 40 / Math.pow(2, zoom)
-  return Math.min(4, Math.max(0.02, precision))
-}
+const DETAIL_LIMIT = 8000
 
 export async function GET(req: NextRequest) {
   const south = parseFloat(req.nextUrl.searchParams.get('south') || '')
@@ -39,7 +36,7 @@ export async function GET(req: NextRequest) {
         .lte('lat', north)
         .gte('lng', west)
         .lte('lng', east)
-        .limit(RAW_POINT_LIMIT)
+        .limit(DETAIL_LIMIT)
 
       if (error) {
         console.error('ALPR cameras query failed:', error.message)
@@ -58,30 +55,25 @@ export async function GET(req: NextRequest) {
         osmTimestamp: row.osm_timestamp,
       }))
 
-      return NextResponse.json({ success: true, clustered: false, cameras })
+      return NextResponse.json({ success: true, detailed: true, cameras })
     }
 
-    const precision = clusterPrecision(zoom)
-    const { data, error } = await db.rpc('alpr_camera_clusters', {
+    const { data, error } = await db.rpc('alpr_camera_points', {
       p_south: south,
       p_west: west,
       p_north: north,
       p_east: east,
-      p_precision: precision,
     })
 
     if (error) {
-      console.error('ALPR cluster query failed:', error.message)
+      console.error('ALPR light points query failed:', error.message)
       return NextResponse.json({ error: 'Query failed' }, { status: 500 })
     }
 
-    const points = (data || []).map((row: { lat: number; lng: number; camera_count: number }) => ({
-      lat: row.lat,
-      lng: row.lng,
-      count: row.camera_count,
-    }))
-
-    return NextResponse.json({ success: true, clustered: true, points })
+    // [lat, lng] tuples, not {lat, lng} objects -- halves payload size at
+    // this row count by not repeating key names ~127k times.
+    const points = (data as [number, number][] | null) || []
+    return NextResponse.json({ success: true, detailed: false, points })
   } catch (err) {
     console.error('ALPR camera fetch error:', err)
     return NextResponse.json({ error: 'Could not query camera data' }, { status: 500 })
