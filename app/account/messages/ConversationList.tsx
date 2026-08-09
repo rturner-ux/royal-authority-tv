@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { getRole } from "@/lib/roles";
 import Avatar from "../../components/Avatar";
 import VerifiedBadge from "../../components/VerifiedBadge";
+import { useNewMessageSignal } from "../../components/MessageNotificationProvider";
 
 type Conversation = {
   friend: { user_id: string; callsign: string | null; role: string | null; avatar_url: string | null; is_verified: boolean };
@@ -28,13 +29,17 @@ function BackIcon() {
 
 export default function ConversationList() {
   const pathname = usePathname();
+  const newMessageSignal = useNewMessageSignal();
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [loading, setLoading] = useState(true);
   const [unreadOnly, setUnreadOnly] = useState(false);
 
   // Opening a thread marks its messages read server-side -- refetch on every
   // route change (not just mount) so its row's unread badge clears as soon
-  // as you leave the thread, instead of waiting for a full reload.
+  // as you leave the thread, instead of waiting for a full reload. Also
+  // refetch whenever MessageNotificationProvider's realtime subscription
+  // sees a new DM land, so a conversation you're sitting on this list page
+  // for (not inside) updates live instead of needing a manual refresh.
   useEffect(() => {
     fetch("/api/messages")
       .then((r) => r.json())
@@ -42,7 +47,7 @@ export default function ConversationList() {
         if (d.success) setConversations(d.conversations);
         setLoading(false);
       });
-  }, [pathname]);
+  }, [pathname, newMessageSignal]);
 
   const activeFriendId = pathname.startsWith("/account/messages/") ? pathname.split("/").pop() : null;
   const shown = unreadOnly ? conversations.filter((c) => c.unreadCount > 0) : conversations;

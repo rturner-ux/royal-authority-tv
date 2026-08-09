@@ -6,6 +6,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { getRole } from "@/lib/roles";
 import { supabaseBrowser } from "@/lib/supabase/browser";
+import { useUnreadMessageCount } from "./MessageNotificationProvider";
 import Wordmark from "./Wordmark";
 import Avatar from "./Avatar";
 
@@ -95,6 +96,7 @@ export default function Navbar({
   const [callsign, setCallsign] = useState<string | null>(null);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [membersOpen, setMembersOpen] = useState(false);
+  const unreadMessageCount = useUnreadMessageCount();
 
   useEffect(() => {
     setMounted(true);
@@ -184,9 +186,14 @@ export default function Navbar({
                           key={link.href}
                           href={link.href}
                           onClick={() => setMenuOpen(false)}
-                          className="block bg-[#C9A24A]/[0.06] px-4 py-3 text-sm text-[#E8D19A] transition hover:bg-[#C9A24A]/10"
+                          className="flex items-center justify-between bg-[#C9A24A]/[0.06] px-4 py-3 text-sm text-[#E8D19A] transition hover:bg-[#C9A24A]/10"
                         >
                           {link.label}
+                          {link.href === "/account/messages" && unreadMessageCount > 0 && (
+                            <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1 text-[0.65rem] font-bold text-white">
+                              {unreadMessageCount}
+                            </span>
+                          )}
                         </Link>
                       ))}
                     </>
@@ -276,6 +283,9 @@ export default function Navbar({
                 }`}
               >
                 Members
+                {unreadMessageCount > 0 && (
+                  <span className="h-2 w-2 rounded-full bg-red-500" aria-label={`${unreadMessageCount} unread messages`} />
+                )}
                 <ChevronIcon open={membersOpen} />
               </button>
 
@@ -291,13 +301,18 @@ export default function Navbar({
                         key={link.href}
                         href={link.href}
                         onClick={() => setMembersOpen(false)}
-                        className={`block px-4 py-3 text-sm transition ${
+                        className={`flex items-center justify-between px-4 py-3 text-sm transition ${
                           isLinkActive(link.href)
                             ? "bg-[#C9A24A]/10 text-[#E8D19A]"
                             : "text-slate-300 hover:bg-white/5 hover:text-[#E8D19A]"
                         }`}
                       >
                         {link.label}
+                        {link.href === "/account/messages" && unreadMessageCount > 0 && (
+                          <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1 text-[0.65rem] font-bold text-white">
+                            {unreadMessageCount}
+                          </span>
+                        )}
                       </Link>
                     ))}
                   </div>
