@@ -11,6 +11,7 @@
   "dependencies": {
     "@deck.gl/core": "^9.3.9",
     "@deck.gl/layers": "^9.3.9",
+    "@deck.gl/mapbox": "^9.3.9",
     "@mux/mux-player-react": "^3.13.2",
     "@supabase/ssr": "^0.12.3",
     "@supabase/supabase-js": "^2.45.4",
@@ -20,11 +21,13 @@
     "@xyflow/react": "^12.11.2",
     "framer-motion": "^12.38.0",
     "leaflet": "^1.9.4",
+    "maplibre-gl": "^6.2.0",
     "next": "16.2.4",
     "react": "19.2.4",
     "react-dom": "19.2.4",
     "react-leaflet": "^5.0.0",
     "react-leaflet-cluster": "^4.1.3",
+    "react-map-gl": "^8.1.2",
     "server-only": "^0.0.1",
     "shapefile": "^0.6.6",
     "square": "^45.0.1"
