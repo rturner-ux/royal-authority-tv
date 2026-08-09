@@ -18,7 +18,6 @@ import CaseIntroVideo from "../../components/CaseIntroVideo";
 import RecordLastCase from "../../components/RecordLastCase";
 import CaseEngagementPopup from "../../components/CaseEngagementPopup";
 import InvestigatorToolkit from "../../components/InvestigatorToolkit";
-import CasePartners from "../../components/CasePartners";
 import { getCaseBySlug, getCaseTrackingCount, getCaseConnections, incrementCaseViewCount, getCaseCommentCount } from "@/lib/cases";
 import { getCollection } from "@/lib/collections";
 import { getSubscriberStatus } from "@/lib/subscription";
@@ -503,11 +502,6 @@ export default async function CaseFileSlugPage({
         {/* INVESTIGATOR TOOLKIT */}
         <div className="mb-6">
           <InvestigatorToolkit slug={slug} isActive={isActive} hasRole={hasRole} initialRole={subscriberRole} />
-        </div>
-
-        {/* PARTNER UP */}
-        <div className="mb-6">
-          <CasePartners slug={slug} isActive={isActive} currentUserId={user?.id ?? null} />
         </div>
 
         {/* COURT & ARREST RECORDS */}

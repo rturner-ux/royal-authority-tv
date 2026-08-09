@@ -3,9 +3,11 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { getRole } from "@/lib/roles";
+import { supabaseBrowser } from "@/lib/supabase/browser";
 import Avatar from "../../components/Avatar";
 import VerifiedBadge from "../../components/VerifiedBadge";
 import { useOnlineUserIds } from "../../components/PresenceProvider";
+import PartnerUpButton from "./PartnerUpButton";
 
 type OtherUser = {
   user_id: string;
@@ -54,6 +56,7 @@ export default function FriendsClient() {
   const [outgoing, setOutgoing] = useState<Row[]>([]);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState<string | null>(null);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const onlineIds = useOnlineUserIds();
 
   function load() {
@@ -71,6 +74,9 @@ export default function FriendsClient() {
 
   useEffect(() => {
     load();
+    supabaseBrowser()
+      .auth.getUser()
+      .then(({ data }) => setCurrentUserId(data.user?.id ?? null));
   }, []);
 
   async function respond(id: string, action: "accept" | "decline") {
@@ -141,14 +147,19 @@ export default function FriendsClient() {
         ) : (
           <div className="space-y-2">
             {friends.map((r) => (
-              <Link
+              <div
                 key={r.id}
-                href={`/account/messages/${r.otherUser.user_id}`}
                 className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.03] p-4 transition hover:border-white/25"
               >
                 <Person otherUser={r.otherUser} online={onlineIds.has(r.otherUser.user_id)} />
-                <span className="flex-shrink-0 text-xs font-semibold text-[#E8D19A]">Message →</span>
-              </Link>
+                {currentUserId && <PartnerUpButton friend={r.otherUser} currentUserId={currentUserId} />}
+                <Link
+                  href={`/account/messages/${r.otherUser.user_id}`}
+                  className="flex-shrink-0 text-xs font-semibold text-[#E8D19A]"
+                >
+                  Message →
+                </Link>
+              </div>
             ))}
           </div>
         )}
