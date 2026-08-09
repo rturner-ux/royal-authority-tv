@@ -50,7 +50,9 @@ export async function GET(req: NextRequest) {
     })
 
     if (!res.ok) {
-      return NextResponse.json({ error: 'Overpass query failed' }, { status: 502 })
+      const detail = await res.text().catch(() => '')
+      console.error('Overpass query failed:', res.status, detail.slice(0, 500))
+      return NextResponse.json({ error: 'Overpass query failed', overpassStatus: res.status, detail: detail.slice(0, 300) }, { status: 502 })
     }
 
     const data = await res.json()
