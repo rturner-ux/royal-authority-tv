@@ -8,6 +8,14 @@ import { NextRequest, NextResponse } from 'next/server'
 // from the browser.
 const OVERPASS_URL = 'https://overpass-api.de/api/interpreter'
 
+// A real metro-area query against a dense tag like this can legitimately
+// take Overpass a while to compute -- Vercel's default function timeout
+// (10s) was cutting the request off well before Overpass ever responded,
+// surfacing as a 502 even though the exact same query succeeds when
+// called directly. Give it real headroom, capped just under the
+// in-query [timeout:25] passed to Overpass itself below.
+export const maxDuration = 30
+
 // Above this bbox area (deg^2), an Overpass query for a tag this dense
 // nationally would be slow and return more points than a map can usefully
 // render -- callers should zoom in instead. ~1.5deg^2 is roughly a large
