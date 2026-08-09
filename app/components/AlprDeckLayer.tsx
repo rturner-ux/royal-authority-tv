@@ -2,7 +2,6 @@
 
 import { useEffect, useRef } from "react";
 import { useMap } from "react-leaflet";
-import L from "leaflet";
 import { Deck } from "@deck.gl/core";
 import { ScatterplotLayer } from "@deck.gl/layers";
 
@@ -31,10 +30,7 @@ export default function AlprDeckLayer({ points }: { points: LightPoint[] }) {
     canvas.style.left = "0";
     canvas.style.pointerEvents = "none";
     canvas.style.zIndex = "400";
-    // Leaflet transforms its own panes from a 0,0 origin during zoom
-    // animations (see onZoomAnim below) -- match that here or the scale
-    // applied mid-animation lands off-center.
-    canvas.style.transformOrigin = "0 0";
+    canvas.style.transition = "opacity 120ms ease-out";
     container.appendChild(canvas);
 
     function currentViewState() {
@@ -65,39 +61,42 @@ export default function AlprDeckLayer({ points }: { points: LightPoint[] }) {
     });
     deckRef.current = deck;
 
+    // Plain panning stays tracked continuously via 'move', exactly as
+    // before -- this only affects zoom.
     function onMove() {
-      // The real WebGL redraw is now happening at the correct position/
-      // scale internally -- clear any leftover mid-animation CSS transform
-      // from onZoomAnim so it doesn't double up with deck's own redraw.
-      canvas.style.transform = "";
       deck.setProps({ viewState: currentViewState() });
     }
 
-    // Leaflet's default zoom uses a ~250ms CSS transition on its own panes;
-    // it fires no move/zoom events until that finishes, so without this the
-    // WebGL canvas sits frozen at its pre-zoom render for the whole
-    // animation and then visibly snaps into place. zoomanim fires
-    // synchronously at the start of the animation with the target
-    // center/zoom, letting us apply the same kind of CSS transform to our
-    // canvas that Leaflet applies to its own tile/marker panes, so the
-    // dots visually scale and slide in lockstep with the basemap instead
-    // of lagging behind it.
-    function onZoomAnim(e: L.ZoomAnimEvent) {
-      const scale = map.getZoomScale(e.zoom, map.getZoom());
-      const topLeftLatLng = map.containerPointToLatLng([0, 0]);
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const offset = (map as any)._latLngToNewLayerPoint(topLeftLatLng, e.zoom, e.center);
-      L.DomUtil.setTransform(canvas, offset, scale);
+    // Leaflet's zoom animation (CSS transition on its own panes, or a
+    // scroll-wheel's incremental steps) fires no move/zoom events until it
+    // settles, so there's no reliable per-frame hook to keep a WebGL
+    // canvas visually in lockstep with it -- an earlier attempt at that
+    // via the private zoomanim/_latLngToNewLayerPoint APIs produced an
+    // instant snap-then-freeze that looked worse than doing nothing.
+    // Hiding the canvas for the ~150-250ms a zoom is actually animating
+    // and fading it back in once it settles avoids ever showing a
+    // mismatched frame, at the cost of a brief clean fade instead of a
+    // continuous track. Scoped to zoomstart/zoomend specifically so plain
+    // panning is untouched.
+    function onZoomStart() {
+      canvas.style.opacity = "0";
+    }
+
+    function onZoomEnd() {
+      deck.setProps({ viewState: currentViewState() });
+      canvas.style.opacity = "1";
     }
 
     map.on("move", onMove);
-    map.on("zoomanim", onZoomAnim);
+    map.on("zoomstart", onZoomStart);
+    map.on("zoomend", onZoomEnd);
     map.on("resize", syncSize);
     syncSize();
 
     return () => {
       map.off("move", onMove);
-      map.off("zoomanim", onZoomAnim);
+      map.off("zoomstart", onZoomStart);
+      map.off("zoomend", onZoomEnd);
       map.off("resize", syncSize);
       deck.finalize();
       container.removeChild(canvas);

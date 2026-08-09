@@ -168,8 +168,12 @@ export default function AlprCamerasLayer() {
 
   useMapEvents({
     moveend() {
+      // Was 400ms -- on top of the zoom animation itself, that read as a
+      // second, separate lag before new cameras appeared for the new view.
+      // Short enough to still coalesce a rapid flick-pan's multiple
+      // moveend firings, tight enough not to feel like a delay.
       if (debounceRef.current) clearTimeout(debounceRef.current);
-      debounceRef.current = setTimeout(load, 400);
+      debounceRef.current = setTimeout(load, 80);
     },
   });
 
