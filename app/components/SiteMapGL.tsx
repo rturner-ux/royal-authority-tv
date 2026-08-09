@@ -1,8 +1,8 @@
 "use client";
 
 import "maplibre-gl/dist/maplibre-gl.css";
-import { useState } from "react";
-import { Map, NavigationControl } from "react-map-gl/maplibre";
+import { useRef, useState } from "react";
+import { Map, NavigationControl, type MapRef } from "react-map-gl/maplibre";
 import { resolveMapStyle, type MapStyleKey } from "@/lib/mapStyles";
 
 const DFW_CENTER = { longitude: -97.05, latitude: 32.85 };
@@ -38,11 +38,36 @@ function MapStyleToggle({ mapStyle, onToggle }: { mapStyle: MapStyleKey; onToggl
 export default function SiteMapGL({ isActive = false }: { isActive?: boolean }) {
   void isActive;
   const [mapStyle, setMapStyle] = useState<MapStyleKey>("satellite");
+  const mapRef = useRef<MapRef | null>(null);
+  const lastViewState = useRef({ ...DFW_CENTER, zoom: 9, pitch: 0, bearing: 0 });
+
+  function switchStyle() {
+    const map = mapRef.current?.getMap();
+    if (map) {
+      lastViewState.current = {
+        longitude: map.getCenter().lng,
+        latitude: map.getCenter().lat,
+        zoom: map.getZoom(),
+        pitch: map.getPitch(),
+        bearing: map.getBearing(),
+      };
+    }
+    setMapStyle((v) => (v === "satellite" ? "dark" : "satellite"));
+  }
 
   return (
     <div style={{ position: "relative", width: "100%", height: "100%" }}>
+      {/* key={mapStyle} forces a clean remount on style switch instead of
+          relying on MapLibre's default diffed setStyle() -- switching
+          between a raster-only style and a vector style with its own
+          sprite/glyph stack silently registered the new vector source but
+          never actually requested tiles for it under diffed updates,
+          confirmed via a network-request trace. Same forced-remount
+          pattern the old Leaflet TileLayer already used via `key`. */}
       <Map
-        initialViewState={{ ...DFW_CENTER, zoom: 9 }}
+        key={mapStyle}
+        ref={mapRef}
+        initialViewState={lastViewState.current}
         minZoom={4}
         mapStyle={resolveMapStyle(mapStyle)}
         style={{ width: "100%", height: "100%" }}
@@ -54,7 +79,7 @@ export default function SiteMapGL({ isActive = false }: { isActive?: boolean }) 
         className="hidden sm:flex"
         style={{ position: "absolute", top: 10, right: 10, zIndex: 1000, flexDirection: "column", gap: 8 }}
       >
-        <MapStyleToggle mapStyle={mapStyle} onToggle={() => setMapStyle((v) => (v === "satellite" ? "dark" : "satellite"))} />
+        <MapStyleToggle mapStyle={mapStyle} onToggle={switchStyle} />
       </div>
     </div>
   );
