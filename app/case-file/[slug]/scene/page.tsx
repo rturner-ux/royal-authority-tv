@@ -5,6 +5,12 @@ import CaseMapClient from "../../../components/CaseMapClient";
 import AshleeSceneReconstruction from "../../../components/AshleeSceneReconstruction";
 import NolanWellsGpsRouteClient from "../../../components/NolanWellsGpsRouteClient";
 import { getCaseBySlug } from "@/lib/cases";
+import { generateMetadata } from "../page";
+
+// Reuses the main case-file page's per-case metadata (title, description,
+// opengraph-image) -- without this, this route falls back to the
+// site-wide default image for any link/share generated from it.
+export { generateMetadata };
 
 export default async function SceneAnalysisPage({
   params,

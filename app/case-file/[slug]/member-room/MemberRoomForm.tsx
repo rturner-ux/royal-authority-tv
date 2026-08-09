@@ -14,7 +14,7 @@ type MemberRequest = {
   caseTitle: string | null;
 };
 
-export default function MemberRoomForm({ incidentId }: { incidentId: string }) {
+export default function MemberRoomForm() {
   const [form, setForm] = useState({ topic: "", message: "" });
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -56,7 +56,7 @@ export default function MemberRoomForm({ incidentId }: { incidentId: string }) {
     const res = await fetch("/api/member-questions", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ incidentId, ...form }),
+      body: JSON.stringify(form),
     });
 
     setSubmitting(false);

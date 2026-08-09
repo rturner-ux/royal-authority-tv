@@ -2,6 +2,12 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import Navbar from "../../../components/Navbar";
 import { getCaseBySlug } from "@/lib/cases";
+import { generateMetadata } from "../page";
+
+// Reuses the main case-file page's per-case metadata (title, description,
+// opengraph-image) -- without this, this route falls back to the
+// site-wide default image for any link/share generated from it.
+export { generateMetadata };
 
 export default async function CaseTranscriptPage({
   params,

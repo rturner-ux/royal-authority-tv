@@ -28,7 +28,7 @@ export async function GET() {
   }
 
   const userIds = [...new Set((questions ?? []).map((q) => q.user_id))]
-  const incidentIds = [...new Set((questions ?? []).map((q) => q.incident_id))]
+  const incidentIds = [...new Set((questions ?? []).map((q) => q.incident_id).filter(Boolean))]
 
   const [{ data: profiles }, { data: incidents }] = await Promise.all([
     userIds.length
@@ -69,14 +69,16 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Subscription required' }, { status: 403 })
   }
 
-  const { incidentId, topic, message } = await req.json()
-  if (!incidentId || !topic || !message) {
+  const { topic, message } = await req.json()
+  if (!topic || !message) {
     return NextResponse.json({ error: 'Missing fields' }, { status: 400 })
   }
 
+  // Deliberately not attaching an incident_id -- a case request is a
+  // general "please cover this" ask, not scoped to whatever case page the
+  // submitter happened to be on when they filed it.
   const { error } = await supabase().from('member_questions').insert({
     user_id: user.id,
-    incident_id: incidentId,
     topic,
     message,
   })

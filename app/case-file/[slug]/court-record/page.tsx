@@ -6,6 +6,12 @@ import DocumentLink from "../../../components/DocumentLink";
 import { getCaseBySlug } from "@/lib/cases";
 import { getSubscriberStatus } from "@/lib/subscription";
 import { COURT_RECORD_LABELS, COURT_RECORD_CLASSES } from "@/lib/labels";
+import { generateMetadata } from "../page";
+
+// Reuses the main case-file page's per-case metadata (title, description,
+// opengraph-image) -- without this, this route falls back to the
+// site-wide default image for any link/share generated from it.
+export { generateMetadata };
 
 function formatDate(value: string | null): string | null {
   if (!value) return null;

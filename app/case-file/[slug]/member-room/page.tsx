@@ -4,6 +4,12 @@ import Navbar from "../../../components/Navbar";
 import MemberRoomForm from "./MemberRoomForm";
 import { getSubscriberStatus } from "@/lib/subscription";
 import { supabase } from "@/lib/supabase/server";
+import { generateMetadata } from "../page";
+
+// Reuses the main case-file page's per-case metadata (title, description,
+// opengraph-image) -- without this, this route falls back to the
+// site-wide default image for any link/share generated from it.
+export { generateMetadata };
 
 export default async function MemberRoomPage({
   params,
@@ -116,7 +122,7 @@ export default async function MemberRoomPage({
           </div>
 
           {isActive && incident ? (
-            <MemberRoomForm incidentId={incident.id} />
+            <MemberRoomForm />
           ) : (
             <div className="rounded-[30px] border border-white/10 bg-black/30 p-6 backdrop-blur-sm">
               <div className="mb-5 flex items-center justify-between">

@@ -4,8 +4,16 @@ import Navbar from "../../../components/Navbar";
 import DiscussionSection from "./DiscussionSection";
 import { getCaseBySlug } from "@/lib/cases";
 import { getSubscriberStatus } from "@/lib/subscription";
+import { generateMetadata } from "../page";
 
 export const dynamic = "force-dynamic";
+
+// Reuses the main case-file page's per-case metadata (title, description,
+// opengraph-image) -- without this, this route had none of its own and
+// silently fell back to the site-wide default (hero-wallpaper.webp),
+// which is what Share buttons on this page were putting into every
+// Facebook/etc. share card instead of the actual case.
+export { generateMetadata };
 
 export default async function DiscussionPage({
   params,
