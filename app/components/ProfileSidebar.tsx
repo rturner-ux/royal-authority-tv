@@ -285,6 +285,17 @@ export default function ProfileSidebar() {
       </Link>
 
       <Link
+        href="/account"
+        className={`mt-6 flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold transition ${
+          pathname === "/account" ? "text-red-500" : "text-slate-300 hover:bg-white/5 hover:text-white"
+        }`}
+      >
+        <Avatar avatarUrl={avatarUrl} roleBadge={role?.badge ?? null} name={callsign || "?"} size={24} />
+        Profile
+        {isVerified && <VerifiedBadge className="h-3.5 w-3.5" />}
+      </Link>
+
+      <Link
         href="/account/search"
         className="mt-6 flex items-center gap-3 rounded-full bg-white/5 px-4 py-2.5 text-sm text-slate-400 transition hover:bg-white/10"
       >
@@ -381,16 +392,6 @@ export default function ProfileSidebar() {
       </nav>
 
       <div className="mt-auto flex flex-col gap-1 border-t border-white/10 pt-3">
-        <Link
-          href="/account"
-          className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold transition ${
-            pathname === "/account" ? "text-red-500" : "text-slate-300 hover:bg-white/5 hover:text-white"
-          }`}
-        >
-          <Avatar avatarUrl={avatarUrl} roleBadge={role?.badge ?? null} name={callsign || "?"} size={24} />
-          Profile
-          {isVerified && <VerifiedBadge className="h-3.5 w-3.5" />}
-        </Link>
         <button
           onClick={handleSignOut}
           className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-semibold text-slate-400 transition hover:bg-white/5 hover:text-white"
