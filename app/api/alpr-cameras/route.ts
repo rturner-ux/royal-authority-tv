@@ -42,7 +42,15 @@ export async function GET(req: NextRequest) {
   try {
     const res = await fetch(OVERPASS_URL, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        // Overpass's usage policy asks clients to identify themselves --
+        // without this, Apache in front of it was rejecting every request
+        // from Vercel's serverless environment with a 406, even though
+        // the identical query worked fine called directly (curl sends its
+        // own default User-Agent; Next.js's fetch sends none).
+        'User-Agent': 'RoyalAuthorityTV/1.0 (+https://royalauthorityofficial.com)',
+      },
       body: `data=${encodeURIComponent(query)}`,
       // Overpass is a shared community resource -- cache results for a
       // while so repeated pans over the same area don't hammer it.
@@ -52,7 +60,7 @@ export async function GET(req: NextRequest) {
     if (!res.ok) {
       const detail = await res.text().catch(() => '')
       console.error('Overpass query failed:', res.status, detail.slice(0, 500))
-      return NextResponse.json({ error: 'Overpass query failed', overpassStatus: res.status, detail: detail.slice(0, 300) }, { status: 502 })
+      return NextResponse.json({ error: 'Overpass query failed' }, { status: 502 })
     }
 
     const data = await res.json()
