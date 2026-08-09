@@ -10,6 +10,7 @@ import MapLegend from "./MapLegend";
 import IncidentMarkersGL from "./IncidentMarkersGL";
 import BoundariesLayerGL, { type BoundaryMode } from "./BoundariesLayerGL";
 import AlprCamerasLayerGL from "./AlprCamerasLayerGL";
+import AlprDeckLayerGL from "./AlprDeckLayerGL";
 
 const DFW_CENTER = { longitude: -97.05, latitude: 32.85 };
 
@@ -129,7 +130,7 @@ export default function SiteMapGL({ isActive = false }: { isActive?: boolean }) 
     setActiveBoundaryModes((prev) => (prev.includes(mode) ? prev.filter((m) => m !== mode) : [...prev, mode]));
   }
   const [showAlprCameras, setShowAlprCameras] = useState(false);
-  const [, setLightPoints] = useState<[number, number][]>([]);
+  const [lightPoints, setLightPoints] = useState<[number, number][]>([]);
 
   useEffect(() => {
     fetch("/api/incidents", { cache: "no-store" })
@@ -215,6 +216,7 @@ export default function SiteMapGL({ isActive = false }: { isActive?: boolean }) 
             onLightPointsChange={setLightPoints}
           />
         )}
+        {mapLoaded && showAlprCameras && <AlprDeckLayerGL points={lightPoints} />}
       </Map>
 
       {/* NavigationControl is top:10, ~87px tall (3 stacked buttons vs
