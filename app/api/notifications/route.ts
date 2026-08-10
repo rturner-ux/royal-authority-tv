@@ -21,7 +21,12 @@ export async function GET() {
     return NextResponse.json({ error: 'Could not load notifications' }, { status: 500 })
   }
 
-  return NextResponse.json({ success: true, notifications: data })
+  // An incident without a slug has no real /case-file page to send anyone
+  // to -- it's a raw, uncurated row (e.g. from ingestion), not something
+  // actually "published" yet, even if a notification row exists for it.
+  const notifications = (data ?? []).filter((n) => n.incident?.slug)
+
+  return NextResponse.json({ success: true, notifications })
 }
 
 export async function PATCH(req: NextRequest) {
