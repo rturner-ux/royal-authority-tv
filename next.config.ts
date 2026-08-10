@@ -15,7 +15,11 @@ const nextConfig: NextConfig = {
           { key: "Strict-Transport-Security", value: "max-age=63072000; includeSubDomains; preload" },
           {
             key: "Permissions-Policy",
-            value: "camera=(), microphone=(), geolocation=(), interest-cohort=()",
+            // geolocation=(self) allows the Investigation Map's "find my
+            // location" button to work on our own origin -- still denies it
+            // to any third-party iframe embed. camera/microphone stay
+            // disabled, unrelated to this feature.
+            value: "camera=(), microphone=(), geolocation=(self), interest-cohort=()",
           },
         ],
       },

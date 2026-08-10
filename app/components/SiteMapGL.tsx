@@ -2,11 +2,13 @@
 
 import "maplibre-gl/dist/maplibre-gl.css";
 import { useEffect, useRef, useState } from "react";
-import { Map, Marker, Popup, NavigationControl, type MapRef } from "react-map-gl/maplibre";
+import { Map, Marker, Popup, type MapRef } from "react-map-gl/maplibre";
 import { resolveMapStyle, type MapStyleKey } from "@/lib/mapStyles";
 import type { Incident, IncidentCategory, SundownTown } from "@/lib/types";
 import { CATEGORY_COLORS, SUNDOWN_CONFIDENCE_COLORS, SUNDOWN_CONFIDENCE_LABELS } from "@/lib/labels";
 import MapLegend from "./MapLegend";
+import CollapsibleEdgeTab from "./CollapsibleEdgeTab";
+import MapControlCluster from "./MapControlCluster";
 import IncidentMarkersGL from "./IncidentMarkersGL";
 import BoundariesLayerGL, { type BoundaryMode } from "./BoundariesLayerGL";
 import AlprCamerasLayerGL from "./AlprCamerasLayerGL";
@@ -14,29 +16,6 @@ import AlprDeckLayerGL from "./AlprDeckLayerGL";
 import TraffickingHotspotsLayerGL from "./TraffickingHotspotsLayerGL";
 
 const DFW_CENTER = { longitude: -97.05, latitude: 32.85 };
-
-function MapStyleToggle({ mapStyle, onToggle }: { mapStyle: MapStyleKey; onToggle: () => void }) {
-  return (
-    <div style={{ maxWidth: 260 }}>
-      <button
-        onClick={onToggle}
-        style={{
-          background: "#0f172a",
-          color: "#fff",
-          border: "1px solid rgba(201,162,74,0.5)",
-          borderRadius: 8,
-          padding: "8px 14px",
-          fontSize: 13,
-          fontWeight: 600,
-          cursor: "pointer",
-          width: "100%",
-        }}
-      >
-        {mapStyle === "satellite" ? "Switch to Dark Map" : "Switch to Satellite"}
-      </button>
-    </div>
-  );
-}
 
 function AlprCamerasToggle({ showAlprCameras, onToggle }: { showAlprCameras: boolean; onToggle: () => void }) {
   return (
@@ -356,7 +335,6 @@ export default function SiteMapGL({ isActive = false }: { isActive?: boolean }) 
   const [showHotspots, setShowHotspots] = useState(false);
   const [sundownTowns, setSundownTowns] = useState<SundownTown[]>([]);
   const [showSundownTowns, setShowSundownTowns] = useState(false);
-  const [mobileLayersOpen, setMobileLayersOpen] = useState(false);
 
   useEffect(() => {
     fetch("/api/incidents", { cache: "no-store" })
@@ -440,7 +418,6 @@ export default function SiteMapGL({ isActive = false }: { isActive?: boolean }) 
         style={{ width: "100%", height: "100%" }}
         onLoad={() => setMapLoaded(true)}
       >
-        <NavigationControl position="top-left" />
         {mapLoaded && mapRef.current && mapStyle === "dark" && (
           <BoundariesLayerGL map={mapRef.current} activeModes={activeBoundaryModes} />
         )}
@@ -458,44 +435,25 @@ export default function SiteMapGL({ isActive = false }: { isActive?: boolean }) 
         {mapLoaded && showSundownTowns && <SundownTownMarkers towns={sundownTowns} />}
       </Map>
 
-      {/* NavigationControl is top:10, ~87px tall (3 stacked buttons vs
-          Leaflet's 2) -- measured empirically via Playwright, not guessed. */}
-      <MapLegend hidden={hidden} onToggle={toggleCategory} topOffset={107} />
+      <MapLegend hidden={hidden} onToggle={toggleCategory} />
 
-      {/* Desktop: always-visible stack. On a narrow phone viewport these
-          full-width pills were wide enough to collide with the Filter
-          Cases button and cover a large share of the map underneath, so
-          below sm they're collapsed behind a single trigger instead --
-          same pattern Filter Cases itself already uses for the same
-          reason. */}
-      <div
-        className="hidden sm:flex"
-        style={{ position: "absolute", top: 10, right: 10, zIndex: 1000, flexDirection: "column", gap: 8 }}
+      <MapControlCluster map={mapRef.current} mapStyle={mapStyle} onToggleStyle={switchStyle} />
+
+      {/* Collapsed-by-default on every screen size now -- no separate
+          mobile/desktop rendering needed, unlike the old always-visible
+          desktop stack this replaced. */}
+      <CollapsibleEdgeTab
+        side="right"
+        badge={[showHotspots, showSundownTowns, showAlprCameras].filter(Boolean).length}
       >
-        {mapLoaded && mapRef.current && <ViewAllCasesButton map={mapRef.current} incidents={visibleIncidents} />}
-        <TraffickingHotspotsToggle isActive={isActive} showHotspots={showHotspots} onToggle={() => setShowHotspots((v) => !v)} />
-        <SundownTownsToggle showSundownTowns={showSundownTowns} onToggle={() => setShowSundownTowns((v) => !v)} />
-        <AlprCamerasToggle showAlprCameras={showAlprCameras} onToggle={() => setShowAlprCameras((v) => !v)} />
-        <MapStyleToggle mapStyle={mapStyle} onToggle={switchStyle} />
-      </div>
-
-      <div className="sm:hidden" style={{ position: "absolute", top: 10, right: 10, zIndex: 1000 }}>
-        <button
-          onClick={() => setMobileLayersOpen((v) => !v)}
-          className="flex items-center gap-2 rounded-xl border border-white/10 bg-[#0f172a]/95 px-3 py-2 text-xs font-black uppercase tracking-[0.15em] text-[#E8D19A] backdrop-blur-sm"
-        >
-          Map Layers {mobileLayersOpen ? "▾" : "▸"}
-        </button>
-        {mobileLayersOpen && (
-          <div style={{ marginTop: 8, display: "flex", flexDirection: "column", gap: 8, maxWidth: "70vw" }}>
-            {mapLoaded && mapRef.current && <ViewAllCasesButton map={mapRef.current} incidents={visibleIncidents} />}
-            <TraffickingHotspotsToggle isActive={isActive} showHotspots={showHotspots} onToggle={() => setShowHotspots((v) => !v)} />
-            <SundownTownsToggle showSundownTowns={showSundownTowns} onToggle={() => setShowSundownTowns((v) => !v)} />
-            <AlprCamerasToggle showAlprCameras={showAlprCameras} onToggle={() => setShowAlprCameras((v) => !v)} />
-            <MapStyleToggle mapStyle={mapStyle} onToggle={switchStyle} />
-          </div>
-        )}
-      </div>
+        <div className="mb-2 text-[10px] font-black uppercase tracking-[0.15em] text-[#E8D19A]">Map Layers</div>
+        <div className="flex flex-col gap-2">
+          {mapLoaded && mapRef.current && <ViewAllCasesButton map={mapRef.current} incidents={visibleIncidents} />}
+          <TraffickingHotspotsToggle isActive={isActive} showHotspots={showHotspots} onToggle={() => setShowHotspots((v) => !v)} />
+          <SundownTownsToggle showSundownTowns={showSundownTowns} onToggle={() => setShowSundownTowns((v) => !v)} />
+          <AlprCamerasToggle showAlprCameras={showAlprCameras} onToggle={() => setShowAlprCameras((v) => !v)} />
+        </div>
+      </CollapsibleEdgeTab>
     </div>
   );
 }
