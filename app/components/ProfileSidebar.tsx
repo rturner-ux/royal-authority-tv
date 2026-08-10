@@ -163,6 +163,14 @@ function AdminIcon() {
     </svg>
   );
 }
+function PhotoManagerIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="h-5 w-5 flex-shrink-0">
+      <path d="M4 8a2 2 0 0 1 2-2h1.2l1-1.6A2 2 0 0 1 9.9 3.4h4.2a2 2 0 0 1 1.7 1L16.8 6H18a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2Z" strokeLinejoin="round" />
+      <circle cx="12" cy="13" r="3.5" />
+    </svg>
+  );
+}
 function ModerateCommentsIcon() {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="h-5 w-5 flex-shrink-0">
@@ -363,6 +371,18 @@ export default function ProfileSidebar() {
           >
             <AdminIcon />
             Moderators
+          </Link>
+        )}
+
+        {isAdmin && (
+          <Link
+            href="/account/admin/photos"
+            className={`mt-2 flex items-center gap-3 rounded-xl border border-[#C9A24A]/20 bg-[#C9A24A]/[0.04] px-3 py-2.5 text-sm font-semibold transition ${
+              isActive("/account/admin/photos") ? "text-red-500" : "text-[#E8D19A] hover:bg-[#C9A24A]/10"
+            }`}
+          >
+            <PhotoManagerIcon />
+            Photo Manager
           </Link>
         )}
 
